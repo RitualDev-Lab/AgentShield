@@ -31,6 +31,24 @@ describe("AgentShield Command Sandbox", () => {
     assert.strictEqual(res.category, "credential_exfiltration");
   });
 
+  test("blocks advanced bypass commands targeting .env and credentials", () => {
+    const bypassAttempts = [
+      "grep . .env",
+      "awk '{print}' .env",
+      "dd if=.env",
+      "python -c \"print(open('.env').read())\"",
+      "while read l; do echo $l; done < .env",
+      "env | sort",
+      "cat backend/.env",
+      "head -n 20 .aws/credentials",
+    ];
+
+    for (const cmd of bypassAttempts) {
+      const res = sandbox.inspectCommand(cmd);
+      assert.strictEqual(res.isBlocked, true, `Expected command to be blocked: '${cmd}'`);
+    }
+  });
+
   test("allows legitimate build and developer commands", () => {
     const safeCommands = [
       "pnpm test",

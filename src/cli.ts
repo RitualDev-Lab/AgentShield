@@ -174,17 +174,29 @@ async function main() {
       process.exit(1);
     }
 
-    // Command is safe to execute
-    const { execSync } = await import("node:child_process");
-    try {
-      execSync(rawCmd, { stdio: "inherit" });
-    } catch (err: unknown) {
-      const exitCode =
-        err && typeof err === "object" && "status" in err && typeof err.status === "number"
-          ? err.status
-          : 1;
-      process.exit(exitCode);
-    }
+    // Command is safe to execute; spawn child process and scrub stdout/stderr in flight
+    const { spawn } = await import("node:child_process");
+    const child = spawn(rawCmd, {
+      shell: true,
+      stdio: ["inherit", "pipe", "pipe"],
+    });
+
+    child.stdout.on("data", (chunk: Buffer) => {
+      const text = chunk.toString("utf8");
+      const redacted = engine.scanAndRedact(text);
+      process.stdout.write(redacted.sanitizedText);
+    });
+
+    child.stderr.on("data", (chunk: Buffer) => {
+      const text = chunk.toString("utf8");
+      const redacted = engine.scanAndRedact(text);
+      process.stderr.write(redacted.sanitizedText);
+    });
+
+    child.on("close", (code) => {
+      process.exit(code ?? 0);
+    });
+    return;
   } else if (command === "ci") {
     const { CiGateRunner } = await import("./ci.js");
     const runner = new CiGateRunner(process.cwd());
