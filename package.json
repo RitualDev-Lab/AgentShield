@@ -1,6 +1,6 @@
 {
   "name": "agentshield",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Enterprise-grade Zero-Leak Secret Defense & Sandbox for Autonomous AI Coding Agents",
   "type": "module",
   "bin": {
