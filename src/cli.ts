@@ -66,7 +66,33 @@ async function main() {
 
     if (command === "scan") {
       if (isJson) {
-        console.log(JSON.stringify(result, null, 2));
+        const includeRaw = args.includes("--include-raw");
+        if (includeRaw) {
+          console.warn(
+            "⚠️ [SECURITY WARNING] Output includes plaintext unredacted credentials (--include-raw).",
+          );
+        }
+
+        const safeOutput = {
+          hasSecrets: result.hasSecrets,
+          totalFound: result.totalFound,
+          findings: result.findings.map((f) => ({
+            patternId: f.patternId,
+            patternName: f.patternName,
+            category: f.category,
+            severity: f.severity,
+            redacted: f.redacted,
+            line: f.line,
+            column: f.column,
+            entropy: f.entropy,
+            file: f.file,
+            ...(includeRaw ? { raw: f.raw } : {}),
+          })),
+          sanitizedText: result.sanitizedText,
+          ...(includeRaw ? { vaultMap: Object.fromEntries(result.vaultMap) } : {}),
+        };
+
+        console.log(JSON.stringify(safeOutput, null, 2));
       } else {
         printBanner();
         if (!result.hasSecrets) {

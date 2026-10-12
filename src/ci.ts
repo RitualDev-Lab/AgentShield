@@ -1,4 +1,4 @@
-import { execSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import { readFileSync, writeFileSync } from "node:fs";
 import { loadConfig, parseCustomPatterns } from "./config.js";
 import { AgentShieldEngine } from "./engine.js";
@@ -29,10 +29,18 @@ export class CiGateRunner {
    * Scans git diff for CI workflows (pull requests and pushes)
    */
   public auditPullRequest(baseRef = "origin/main"): CiAuditResult {
+    // Validate baseRef to avoid injection or unexpected flags
+    const sanitizedBase = baseRef.trim();
+    if (!/^[a-zA-Z0-9_\-\.\/]+$/.test(sanitizedBase)) {
+      throw new Error(`Invalid git base ref: '${sanitizedBase}'`);
+    }
+
     let diffFiles: string[] = [];
     try {
-      // Get list of changed files
-      const raw = execSync(`git diff --name-only ${baseRef}...HEAD`, { encoding: "utf8" }).trim();
+      // Get list of changed files safely via execFileSync
+      const raw = execFileSync("git", ["diff", "--name-only", `${sanitizedBase}...HEAD`], {
+        encoding: "utf8",
+      }).trim();
       diffFiles = raw
         .split("\n")
         .map((f) => f.trim())
@@ -40,7 +48,9 @@ export class CiGateRunner {
     } catch {
       try {
         // Fallback for single-commit pushes
-        const raw = execSync("git diff --name-only HEAD~1 HEAD", { encoding: "utf8" }).trim();
+        const raw = execFileSync("git", ["diff", "--name-only", "HEAD~1", "HEAD"], {
+          encoding: "utf8",
+        }).trim();
         diffFiles = raw
           .split("\n")
           .map((f) => f.trim())
@@ -56,7 +66,7 @@ export class CiGateRunner {
 
     for (const file of diffFiles) {
       try {
-        const diffContent = execSync(`git diff ${baseRef}...HEAD -- "${file}"`, {
+        const diffContent = execFileSync("git", ["diff", `${sanitizedBase}...HEAD`, "--", file], {
           encoding: "utf8",
         });
 

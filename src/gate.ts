@@ -1,6 +1,6 @@
-import { execSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { basename, join } from "node:path";
 import { AgentShieldEngine } from "./engine.js";
 
 export interface GitPreCommitResult {
@@ -39,7 +39,9 @@ export class GitPreCommitGate {
 
     let stagedFilesStr = "";
     try {
-      stagedFilesStr = execSync("git diff --cached --name-only", { encoding: "utf8" }).trim();
+      stagedFilesStr = execFileSync("git", ["diff", "--cached", "--name-only"], {
+        encoding: "utf8",
+      }).trim();
     } catch {
       return {
         passed: true,
@@ -64,8 +66,11 @@ export class GitPreCommitGate {
       .filter(Boolean);
 
     for (const file of stagedFiles) {
-      // 1. Check filename against critical credentials patterns
-      const isCriticalFile = CRITICAL_FILE_PATTERNS.some((p) => p.test(file));
+      // 1. Check filename against critical credentials patterns using basename so subdirectories are caught
+      const fileNameOnly = basename(file);
+      const isCriticalFile = CRITICAL_FILE_PATTERNS.some(
+        (p) => p.test(fileNameOnly) || p.test(file),
+      );
       if (isCriticalFile) {
         blockedFiles.push(file);
         findingsCount++;
@@ -75,9 +80,11 @@ export class GitPreCommitGate {
         continue;
       }
 
-      // 2. Scan content of staged diff
+      // 2. Scan content of staged diff safely via execFileSync
       try {
-        const diffContent = execSync(`git diff --cached -- "${file}"`, { encoding: "utf8" });
+        const diffContent = execFileSync("git", ["diff", "--cached", "--", file], {
+          encoding: "utf8",
+        });
         // Only inspect additions (lines starting with +)
         const addedLines = diffContent
           .split("\n")
@@ -117,24 +124,57 @@ export class GitPreCommitGate {
 
   /**
    * Installs the automatic pre-commit hook into the current git repository.
+   * Resolves common git directory across standard repos and git worktrees.
    */
   public installHook(repoRoot: string = process.cwd()): boolean {
-    const hooksDir = join(repoRoot, ".git", "hooks");
+    let hooksDir = join(repoRoot, ".git", "hooks");
+
+    // Support Git worktrees where .git is a file
+    try {
+      const gitDir = execFileSync("git", ["rev-parse", "--git-path", "hooks"], {
+        cwd: repoRoot,
+        encoding: "utf8",
+      }).trim();
+      if (gitDir && existsSync(gitDir)) {
+        hooksDir = gitDir;
+      }
+    } catch {
+      // Fallback to .git/hooks
+    }
+
     if (!existsSync(hooksDir)) {
       return false;
     }
 
     const preCommitPath = join(hooksDir, "pre-commit");
-    const hookScript = `#!/bin/sh
-# 🛡️ AgentShield Automatic Zero-Leak Pre-commit Gate
-npx agentshield hook check
-if [ $? -ne 0 ]; then
-  echo "\n🚨 [AgentShield] Commit aborted to prevent secret leakage. Run 'npx agentshield redact' or unstage credentials.\n"
-  exit 1
+    const marker = "# --- AgentShield Pre-Commit Gate ---";
+    const hookSnippet = `
+${marker}
+if command -v npx >/dev/null 2>&1; then
+  npx agentshield hook check
+  if [ $? -ne 0 ]; then
+    echo "\\n🚨 [AgentShield] Commit aborted to prevent secret leakage. Run 'npx agentshield redact' or unstage credentials.\\n"
+    exit 1
+  fi
 fi
+# --- End AgentShield Gate ---
 `;
 
-    writeFileSync(preCommitPath, hookScript, { encoding: "utf8", mode: 0o755 });
+    if (existsSync(preCommitPath)) {
+      const existing = readFileSync(preCommitPath, "utf8");
+      if (!existing.includes(marker)) {
+        writeFileSync(preCommitPath, `${existing.trim()}\n${hookSnippet}`, {
+          encoding: "utf8",
+          mode: 0o755,
+        });
+      }
+    } else {
+      writeFileSync(preCommitPath, `#!/bin/sh${hookSnippet}`, {
+        encoding: "utf8",
+        mode: 0o755,
+      });
+    }
+
     return true;
   }
 }

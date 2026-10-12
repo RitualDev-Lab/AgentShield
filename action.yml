@@ -18,7 +18,11 @@ runs:
     - name: Run AgentShield CI Security Audit
       shell: bash
       run: |
-        npx agentshield ci --base "${{ inputs.base_ref }}" --report .agentshield-report.md
+        if [ -f "${{ github.action_path }}/dist/cli.js" ]; then
+          node "${{ github.action_path }}/dist/cli.js" ci --base "${{ inputs.base_ref }}" --report .agentshield-report.md
+        else
+          npx @ritualdev-lab/agentshield@0.1.0 ci --base "${{ inputs.base_ref }}" --report .agentshield-report.md
+        fi
         EXIT_CODE=$?
         
         if [ -f .agentshield-report.md ]; then
