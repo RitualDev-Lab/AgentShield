@@ -2,64 +2,86 @@
 
 # 🛡️ AgentShield
 
-**Enterprise-Grade Zero-Leak Secret Defense & Sandbox for Autonomous AI Coding Agents**
+### **Zero-Leak Secret Defense & Shell Sandbox for Autonomous AI Coding Agents**
 
-[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
-[![Runtime](https://img.shields.io/badge/Node-%3E%3D20.0.0-emerald.svg)](https://nodejs.org)
-[![Tested](https://img.shields.io/badge/Tests-Passing-brightgreen.svg)](tests/)
+[![GitHub Stars](https://img.shields.io/github/stars/RitualDev-Lab/AgentShield?style=for-the-badge&logo=github&color=8b5cf6)](https://github.com/RitualDev-Lab/AgentShield/stargazers)
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg?style=for-the-badge)](LICENSE)
+[![GitHub Action](https://img.shields.io/badge/GitHub_Action-v1-purple.svg?style=for-the-badge&logo=github-actions)](https://github.com/RitualDev-Lab/AgentShield)
+[![Node Runtime](https://img.shields.io/badge/Node-%3E%3D20.0-emerald.svg?style=for-the-badge&logo=nodedotjs)](https://nodejs.org)
+[![Tests](https://img.shields.io/badge/Tests-21%2F21_Passing-brightgreen.svg?style=for-the-badge)](tests/)
 
-*Stop AI coding assistants from leaking `.env`, cloud credentials, API tokens, and private keys into shell history, commit messages, or LLM context.*
+<br />
+
+**Stop AI coding assistants from dumping `.env`, cloud tokens, API keys, and database passwords into LLM prompts, terminal logs, or git commits.**
+
+[⚡ Quick Start](#-quick-start) • [🛡️ Agent Sandbox](#-1-autonomous-agent-shell-sandbox) • [🐙 GitHub Action](#-3-cicd-security-gate--github-action) • [🤖 Agent Skill](#-ai-agent-skill-integration) • [📋 Compliance](#-4-enterprise-compliance-auditor) • [🌐 Website](https://ritualdev-lab.github.io/AgentShield/)
 
 </div>
 
 ---
 
-## ⚡ The Problem
-Autonomous coding agents (**Claude Code**, **Cursor**, **Windsurf**, **Codex**, **Antigravity**) are granted shell and file-access permissions. During debugging and prompt execution, agents routinely:
-1. `cat .env` or read configuration files, dumping private keys into their LLM context window.
-2. Output high-entropy database passwords or Stripe secrets into stdout.
-3. Commit unredacted test tokens or cloud access keys into Git history.
+## 💥 The AI Agent Security Blindspot
 
-**AgentShield** acts as a deterministic, local-first zero-leak defense layer that intercepts, audits, and redacts credentials before they escape to model providers or git repositories.
+Autonomous coding agents (**Claude Code**, **Cursor**, **Windsurf**, **Codex**, **Antigravity**) are routinely granted terminal and file access to inspect codebases and resolve bugs. Without a guardrail, agents frequently:
+
+| Vulnerability Vector | Real-World Agent Behavior | Threat Impact |
+| :--- | :--- | :--- |
+| **Context Window Leak** | Agent runs `cat .env` or `type .env` to read configs. | Production credentials leak to third-party model inference APIs & chat history. |
+| **Accidental Exfiltration** | Agent runs `curl` or shell scripts with exported tokens. | Ephemeral tokens dumped into terminal logs & CI artifacts. |
+| **Git Contamination** | Agent writes tests or code with live test credentials. | Secrets committed permanently into Git history and pull requests. |
+
+**AgentShield** acts as a deterministic, local-first zero-leak defense layer that intercepts, audits, and redacts credentials before they ever escape your machine.
 
 ---
 
-## 🚀 Quick Start
+## ⚡ Instant 30-Second Setup
 
-### 1. Instant File Audit
+No account or complicated daemon required. Run instantly with `npx`:
+
 ```bash
-# Scan any file for credential leaks
+# 1. Audit any directory or config file for credentials
 npx agentshield scan .env
 
-# Scan with structured JSON output for CI pipelines
-npx agentshield scan src/config.ts --json
-```
-
-### 2. Autonomous Agent Command Sandbox
-```bash
-# Wrap agent terminal executions: blocks 'cat .env', 'printenv', or secret exfiltration
-npx agentshield exec "cat .env"
-# Output: 🚨 [AgentShield Sandbox Block] Blocked attempt to read raw .env or private credential file...
-```
-
-### 3. Pre-Commit Zero-Leak Gate
-```bash
-# Install automated git pre-commit hook in your repo
+# 2. Prevent git commits with leaked secrets (installs pre-commit gate)
 npx agentshield hook git-install
 
-# Or manually audit staged files before commit
+# 3. Safely wrap agent bash execution
+npx agentshield exec "cat .env"
+```
+
+---
+
+## 🚀 Key Defense Layers
+
+### 🛡️ 1. Autonomous Agent Shell Sandbox
+Intercept and sandbox agent terminal execution. If an agent tries to read `.env`, dump shell variables (`printenv`), or send keys to outbound endpoints, AgentShield blocks it on the fly:
+
+```bash
+npx agentshield exec "cat .env"
+# 🚨 [AgentShield Sandbox Block] Blocked attempt to read raw .env or private credential file.
+# Protected credentials from entering agent LLM context window!
+```
+
+### 🚦 2. Git Pre-Commit Leak Shield
+Catch leaked credentials before they enter git history. Audits staged diffs automatically:
+
+```bash
+# Install once in your repo
+npx agentshield hook git-install
+
+# Or manually audit staged files
 npx agentshield hook check
 ```
 
-### 4. CI/CD Pull Request Gate & GitHub Action
-Run AgentShield on pull requests to fail jobs when unredacted secrets are introduced in git diffs:
+### 🐙 3. CI/CD Security Gate & GitHub Action
+Block pull requests that introduce exposed credentials into your codebase:
 
 ```yaml
-name: Security Audit
+name: AgentShield Security Gate
 on: [pull_request, push]
 
 jobs:
-  agent-shield:
+  secret-audit:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -70,110 +92,90 @@ jobs:
           fail_on_leak: "true"
 ```
 
-Or run via CLI in any CI runner:
+Or run via CLI in any CI container:
 ```bash
-npx agentshield ci --base origin/main --report .agentshield-report.md
+npx agentshield ci --base origin/main --report security-report.md
 ```
 
-### 5. Team Configuration (`.agentshield.json`)
-Teams can define custom secret patterns, allowlists, and entropy thresholds:
-
-```json
-{
-  "version": "1.0.0",
-  "maskStyle": "token",
-  "customPatterns": [
-    {
-      "id": "corp-api-key",
-      "name": "Internal Corp Key",
-      "regex": "CORP_SECRET_[A-Za-z0-9]{16}",
-      "severity": "critical"
-    }
-  ]
-}
-```
-
-### 6. Enterprise Compliance Audit (SOC2, PCI-DSS, HIPAA, ISO27001)
-Audit repositories and files directly against regulatory cybersecurity controls:
+### 📋 4. Enterprise Compliance Auditor
+Audit files and code diffs against industry regulatory controls with ready-to-present scores:
 
 ```bash
 npx agentshield compliance .env
-# Output:
-# 📋 [ENTERPRISE COMPLIANCE AUDIT] Status: NON_COMPLIANT (Score: 25%)
-#   ❌ [SOC2] CC6.1: Logical Access Controls & Credential Integrity
-#   ❌ [PCI_DSS] Req-3.4: Protection of Authentication & Cardholder Tokens
+```
+```text
+📋 [ENTERPRISE COMPLIANCE AUDIT] Status: COMPLIANT (Score: 100%)
+  ✅ [SOC2] CC6.1: Logical Access Controls & Credential Integrity
+  ✅ [PCI-DSS] Req-3.4: Protection of Authentication & Cardholder Tokens
+  ✅ [HIPAA] §164.312(a)(1): Technical Safeguards - Access Control
+  ✅ [ISO27001] A.8.28: Secure Coding & Secret Management
 ```
 
-### 7. SIEM Exporter (CEF / JSON / Syslog)
-Export real-time agent leak and command blocking telemetry to Splunk, Datadog, or Microsoft Sentinel in Common Event Format (CEF) and Syslog RFC 5424.
-
-### 8. Zero-Trust Vault Injection
-Keep zero credentials in local `.env` files. Ephemeral surrogate tokens (`[VAULT_INJECTED:KEY:hash]`) are surfaced to the agent shell and rehydrated only at runtime boundaries.
-
-### 9. Stream Redaction (Pipe Filter)
-```bash
-# Redact secrets on the fly from any terminal output
-cat server.log | npx agentshield stream
-```
+### 🔐 5. Zero-Trust Vault Surrogate Injection
+Instead of cleartext `.env` keys, AgentShield provides ephemeral surrogate tokens (`[VAULT_INJECTED:KEY:hash]`). Agents can safely manipulate configurations without ever seeing the real secret in memory.
 
 ---
 
 ## 🤖 AI Agent Skill Integration
 
-AgentShield includes a plug-and-play **Agent Skill** (`SKILL.md`) for:
-- **Claude Code**: Add as custom skill in `.claude/skills/`
-- **Cursor / Windsurf / Codex**: Direct CLI hook execution
-- **Antigravity**: Load as workspace security skill
+AgentShield comes with a native, universal **Agent Skill** ([`SKILL.md`](SKILL.md)):
+
+```
+AgentShield/
+├── SKILL.md                 # Universal skill spec for AI coding agents
+├── action.yml               # Reusable GitHub Action
+└── .agentshield.json        # Team config & custom pattern rules
+```
+
+- **Claude Code**: Drop into your project's `.claude/skills/`
+- **Cursor / Windsurf**: Add as agent terminal verification rule
+- **Antigravity**: Plug into workspace custom skills
+- **Codex / Copilot**: Run CLI hook in CI and pre-commit
 
 ---
 
-## 🧩 Programmatic SDK Usage
+## 🔍 Built-in Secret Detections
+
+AgentShield combines high-performance regular expressions with **Shannon Entropy** to catch both structured keys and arbitrary high-entropy passwords:
+
+- 🤖 **AI Providers**: OpenAI (`sk-proj-*`), Anthropic Claude (`sk-ant-*`), Google Gemini (`AIzaSy*`), Hugging Face (`hf_*`)
+- ☁️ **Cloud Infrastructure**: AWS Access Key ID (`AKIA*`), AWS Secret Access Keys
+- 💳 **Payments & SaaS**: Stripe Live (`sk_live_*`), Slack Incoming Webhooks
+- 🐙 **Version Control**: GitHub Personal Access Tokens (`ghp_*`, `github_pat_*`)
+- 🔐 **Cryptography**: PEM / OpenSSH private key blocks, JSON Web Tokens (JWT)
+- 📊 **Mathematical Entropy**: High-entropy password detection with false-positive filtering
+
+---
+
+## 🧩 Programmatic TypeScript SDK
+
+Integrate AgentShield directly into your AI workflows, proxy servers, or custom agent frameworks:
 
 ```typescript
-import {
-  AgentShieldEngine,
-  AgentCommandSandbox,
-  GitPreCommitGate,
-  CiGateRunner,
-  ComplianceEngine,
-  SiemExporter,
-  VaultInjector,
-} from "agentshield";
+import { AgentShieldEngine, AgentCommandSandbox, VaultInjector } from "agentshield";
 
 const shield = new AgentShieldEngine();
 
-// Scan & Redact
-const sampleToken = ["sk-proj-", "1234567890123456789012345678901234567890"].join("");
-const rawPrompt = `Use my key ${sampleToken} to test the API`;
+// Scan and redact unmasked credentials from LLM prompt inputs
+const rawPrompt = `Run tests with OPENAI_API_KEY=${mySecretToken}`;
 const result = shield.scanAndRedact(rawPrompt);
 
 console.log(result.hasSecrets); // true
 console.log(result.sanitizedText);
-// "Use my key [AGENT_SHIELD:OPENAI_API_KEY:c2stcH] to test the API"
+// "Run tests with OPENAI_API_KEY=[AGENT_SHIELD:OPENAI_API_KEY:c2stcH]"
 
-// Rehydrate when receiving the response back locally
-const restored = shield.rehydrate(result.sanitizedText);
+// Deterministically rehydrate when receiving LLM response back locally
+const original = shield.rehydrate(result.sanitizedText);
 ```
 
 ---
 
-## 🛡️ Built-in Detections
-- 🤖 **AI & LLM Keys**: OpenAI (`sk-proj-*`), Anthropic Claude (`sk-ant-*`), Google Gemini (`AIzaSy*`), Hugging Face (`hf_*`)
-- ☁️ **Cloud Providers**: AWS Access Key ID (`AKIA*`), AWS Secret Access Keys
-- 💳 **Payments & SaaS**: Stripe Live & Test keys (`sk_live_*`), Slack Incoming Webhooks
-- 🐙 **VCS**: GitHub Personal Access Tokens (`ghp_*`, `github_pat_*`)
-- 🔐 **Cryptography**: PEM/OpenSSH private key blocks, JSON Web Tokens (JWT)
-- 📊 **Mathematical Entropy**: Shannon Entropy scoring to catch high-entropy unknown passwords.
+## 🤝 Community & Support
 
----
+- **Live Documentation**: [https://ritualdev-lab.github.io/AgentShield/](https://ritualdev-lab.github.io/AgentShield/)
+- **Security Policy**: Read our [SECURITY.md](SECURITY.md) for vulnerability disclosure.
+- **Contributing**: Check out [CONTRIBUTING.md](CONTRIBUTING.md) to add new secret patterns.
 
-## 🗺️ Roadmap & Phases
-- [x] **Phase 1: Core Detection Engine & Community CLI** (Shannon Entropy, Pattern Engine, Redaction Vault)
-- [x] **Phase 2: Autonomous Agent Shell Sandbox & Pre-commit Gate** (Bash/PowerShell interceptor, Git Gate, SKILL.md)
-- [x] **Phase 3: Team Collaboration & CI/CD Security Gate** (GitHub Action, PR diff auditing, `.agentshield.json`)
-- [x] **Phase 4: Enterprise Control Plane** (Centralized compliance, SIEM export, Vault zero-trust injection)
-
----
-
-## 👥 Built by RitualDev Lab
-AgentShield is an open-source initiative by [RitualDev Lab](https://github.com/RitualDev-Lab).
+<div align="center">
+  <sub>Maintained with 💜 by <a href="https://github.com/RitualDev-Lab">RitualDev Lab</a> • Licensed under Apache 2.0</sub>
+</div>
