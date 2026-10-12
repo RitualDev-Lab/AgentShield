@@ -20,3 +20,4 @@ export * from "./ledger.js";
 export * from "./kernel.js";
 export * from "./taint.js";
 export * from "./canary.js";
+export * from "./control-plane.js";
