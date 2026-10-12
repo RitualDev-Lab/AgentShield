@@ -4,21 +4,21 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AgentShield — Zero-Leak Secret Defense for Autonomous AI Agents</title>
-  <meta name="description" content="Enterprise-grade zero-leak secret defense, AST command sandbox, and CI/CD security gate for autonomous AI coding agents (Claude Code, Cursor, Windsurf, Codex, Antigravity).">
+  <meta name="description" content="Enterprise-grade zero-leak secret defense, interactive AST shell sandbox, real-time prompt redaction, and CI/CD security gate for Claude Code, Cursor, Windsurf, Codex, and Antigravity.">
   <link rel="canonical" href="https://agentshield.ritualdev.in/">
 
   <!-- Open Graph / Social Media -->
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://agentshield.ritualdev.in/">
   <meta property="og:title" content="AgentShield — Zero-Leak Secret Defense for Autonomous AI Agents">
-  <meta property="og:description" content="Enterprise-grade zero-leak secret defense, AST command sandbox, and CI/CD security gate for autonomous AI coding agents.">
+  <meta property="og:description" content="Enterprise-grade zero-leak secret defense, interactive AST shell sandbox, and CI/CD security gate for autonomous AI coding agents.">
   <meta property="og:image" content="https://agentshield.ritualdev.in/terminal-demo.svg">
 
   <!-- Twitter Cards -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:url" content="https://agentshield.ritualdev.in/">
   <meta name="twitter:title" content="AgentShield — Zero-Leak Secret Defense for Autonomous AI Agents">
-  <meta name="twitter:description" content="Enterprise-grade zero-leak secret defense, AST command sandbox, and CI/CD security gate for autonomous AI coding agents.">
+  <meta name="twitter:description" content="Enterprise-grade zero-leak secret defense, interactive AST shell sandbox, and CI/CD security gate for autonomous AI coding agents.">
   <meta name="twitter:image" content="https://agentshield.ritualdev.in/terminal-demo.svg">
 
   <!-- JSON-LD Structured Data (AEO & GEO Optimization) -->
@@ -78,540 +78,793 @@
   }
   </script>
 
-  <!-- Typography: GitHub Markdown & Code Stacks -->
+  <!-- Typography: Plus Jakarta Sans & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 
   <style>
     :root {
-      --color-canvas-default: #0d1117;
-      --color-canvas-subtle: #161b22;
-      --color-canvas-inset: #010409;
-      --color-border-default: #30363d;
-      --color-border-muted: #21262d;
-      --color-fg-default: #e6edf3;
-      --color-fg-muted: #8b949e;
-      --color-fg-subtle: #6e7681;
-      --color-accent-fg: #58a6ff;
-      --color-accent-emphasis: #1f6feb;
-      --color-success-fg: #3fb950;
-      --color-danger-fg: #f85149;
-      --color-attention-fg: #d29922;
-      --color-neutral-muted: rgba(110, 118, 129, 0.4);
+      --bg: #07090e;
+      --bg-card: rgba(13, 17, 23, 0.7);
+      --border: rgba(139, 92, 246, 0.2);
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --primary: #8b5cf6;
+      --primary-glow: rgba(139, 92, 246, 0.35);
+      --accent: #06b6d4;
+      --pink: #ec4899;
+      --emerald: #10b981;
+      --amber: #f59e0b;
+      --red: #ef4444;
+      --text: #f3f4f6;
+      --text-muted: #94a3b8;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      background-color: var(--color-canvas-default);
-      color: var(--color-fg-default);
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-      font-size: 16px;
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
       line-height: 1.6;
-      word-wrap: break-word;
-      padding-bottom: 5rem;
+      overflow-x: hidden;
+      min-height: 100vh;
+      background-image: 
+        radial-gradient(circle at 50% 0%, rgba(139, 92, 246, 0.22) 0%, transparent 60%),
+        radial-gradient(circle at 10% 40%, rgba(6, 182, 212, 0.12) 0%, transparent 45%),
+        radial-gradient(circle at 90% 70%, rgba(236, 72, 153, 0.1) 0%, transparent 40%);
     }
 
-    /* Top Sticky GitHub-style Header */
-    .gh-header {
-      background-color: var(--color-canvas-subtle);
-      border-bottom: 1px solid var(--color-border-default);
-      padding: 0.85rem 1.5rem;
+    /* Ambient Animated Floating Orbs */
+    .ambient-orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(90px);
+      pointer-events: none;
+      z-index: -1;
+      opacity: 0.6;
+      animation: floatOrb 20s infinite alternate ease-in-out;
+    }
+    .orb-1 { width: 500px; height: 500px; background: rgba(139, 92, 246, 0.18); top: -100px; left: 20%; }
+    .orb-2 { width: 400px; height: 400px; background: rgba(6, 182, 212, 0.15); top: 40%; right: -50px; animation-duration: 25s; }
+    .orb-3 { width: 450px; height: 450px; background: rgba(236, 72, 153, 0.12); bottom: 10%; left: -100px; animation-duration: 18s; }
+
+    @keyframes floatOrb {
+      0% { transform: translateY(0px) scale(1); }
+      100% { transform: translateY(60px) scale(1.1); }
+    }
+
+    /* Top Sticky Glassmorphism Header */
+    .navbar {
       position: sticky;
       top: 0;
       z-index: 100;
+      background: rgba(7, 9, 14, 0.82);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border-bottom: 1px solid var(--border-subtle);
+      transition: all 0.3s ease;
+    }
+    .nav-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0.9rem 1.5rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 1rem;
     }
-
-    .gh-header-title {
+    .nav-brand {
       display: flex;
       align-items: center;
       gap: 0.6rem;
-      font-size: 1.05rem;
-      font-weight: 600;
-      color: var(--color-fg-default);
       text-decoration: none;
+      color: #fff;
+      font-weight: 800;
+      font-size: 1.25rem;
+      letter-spacing: -0.02em;
+    }
+    .nav-brand:hover .shield-icon {
+      transform: scale(1.15) rotate(5deg);
+    }
+    .shield-icon {
+      font-size: 1.45rem;
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .brand-gradient {
+      background: linear-gradient(135deg, #fff 30%, #c084fc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .pill-badge {
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 0.15rem 0.55rem;
+      border-radius: 9999px;
+      background: rgba(139, 92, 246, 0.2);
+      border: 1px solid rgba(139, 92, 246, 0.4);
+      color: #d8b4fe;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
     }
 
-    .gh-header-title:hover {
-      color: var(--color-accent-fg);
-    }
-
-    .gh-badge {
-      display: inline-block;
-      padding: 0.15rem 0.5rem;
-      font-size: 0.75rem;
-      font-weight: 600;
-      line-height: 1;
-      color: var(--color-fg-muted);
-      border: 1px solid var(--color-border-default);
-      border-radius: 2em;
-      background-color: var(--color-canvas-inset);
-    }
-
-    .gh-header-actions {
+    .nav-links {
       display: flex;
       align-items: center;
-      gap: 0.85rem;
+      gap: 0.65rem;
     }
-
-    .gh-btn {
+    .nav-btn {
       display: inline-flex;
       align-items: center;
       gap: 0.4rem;
-      padding: 0.35rem 0.85rem;
-      font-size: 0.85rem;
+      padding: 0.42rem 0.85rem;
+      font-size: 0.82rem;
       font-weight: 600;
-      color: var(--color-fg-default);
-      background-color: var(--color-canvas-subtle);
-      border: 1px solid var(--color-border-default);
-      border-radius: 6px;
+      color: var(--text-muted);
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
       text-decoration: none;
-      transition: 0.15s ease;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .nav-btn:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.09);
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: translateY(-1px);
+    }
+    .nav-btn-devshelf {
+      background: linear-gradient(135deg, rgba(236, 72, 153, 0.15), rgba(139, 92, 246, 0.15));
+      border: 1px solid rgba(236, 72, 153, 0.4);
+      color: #fbcfe8;
+      box-shadow: 0 0 15px rgba(236, 72, 153, 0.15);
+    }
+    .nav-btn-devshelf:hover {
+      background: linear-gradient(135deg, rgba(236, 72, 153, 0.3), rgba(139, 92, 246, 0.3));
+      border-color: rgba(236, 72, 153, 0.7);
+      color: #fff;
+      box-shadow: 0 0 20px rgba(236, 72, 153, 0.3);
+      transform: translateY(-1px) scale(1.02);
+    }
+    .nav-btn-primary {
+      background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+      color: #fff;
+      border: none;
+      box-shadow: 0 4px 15px rgba(139, 92, 246, 0.35);
+    }
+    .nav-btn-primary:hover {
+      box-shadow: 0 6px 22px rgba(139, 92, 246, 0.55);
+      transform: translateY(-2px);
     }
 
-    .gh-btn:hover {
-      background-color: #21262d;
-      border-color: #8b949e;
+    /* Main Container */
+    .container {
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 6rem;
     }
 
-    .gh-btn-primary {
-      background-color: #238636;
-      border-color: rgba(240, 246, 252, 0.1);
-      color: #ffffff;
+    /* Hero Section */
+    .hero {
+      text-align: center;
+      padding: 2.5rem 0 3.5rem;
+      position: relative;
+    }
+    .hero-badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.35rem 0.95rem;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #c084fc;
+      background: rgba(139, 92, 246, 0.12);
+      border: 1px solid rgba(139, 92, 246, 0.35);
+      border-radius: 9999px;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 0 20px rgba(139, 92, 246, 0.2);
+      animation: pulseGlow 3s infinite alternate;
+    }
+    @keyframes pulseGlow {
+      0% { box-shadow: 0 0 15px rgba(139, 92, 246, 0.15); border-color: rgba(139, 92, 246, 0.3); }
+      100% { box-shadow: 0 0 30px rgba(139, 92, 246, 0.35); border-color: rgba(139, 92, 246, 0.6); }
+    }
+    .hero h1 {
+      font-size: clamp(2.3rem, 5.5vw, 4rem);
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -0.03em;
+      margin-bottom: 1.25rem;
+    }
+    .hero-gradient-text {
+      background: linear-gradient(135deg, #ffffff 20%, #c084fc 60%, #38bdf8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero-subtitle {
+      font-size: clamp(1rem, 2vw, 1.25rem);
+      color: var(--text-muted);
+      max-width: 780px;
+      margin: 0 auto 2.25rem;
+      line-height: 1.6;
     }
 
-    .gh-btn-primary:hover {
-      background-color: #2ea043;
-      border-color: rgba(240, 246, 252, 0.1);
-    }
-
-    /* Markdown Document Container */
-    .markdown-body {
-      max-width: 980px;
-      margin: 2.5rem auto;
-      padding: 2.5rem 3rem;
-      background-color: var(--color-canvas-default);
-      border: 1px solid var(--color-border-default);
-      border-radius: 6px;
-    }
-
-    @media (max-width: 768px) {
-      .markdown-body {
-        border: none;
-        padding: 1.5rem 1rem;
-        margin: 0;
-      }
-    }
-
-    /* Markdown Headings */
-    h1, h2, h3, h4 {
-      margin-top: 1.75rem;
-      margin-bottom: 1rem;
-      font-weight: 600;
-      line-height: 1.25;
-      color: var(--color-fg-default);
-    }
-
-    h1 {
-      font-size: 2.15rem;
-      padding-bottom: 0.4rem;
-      border-bottom: 1px solid var(--color-border-muted);
-      margin-top: 0;
-    }
-
-    h2 {
-      font-size: 1.55rem;
-      padding-bottom: 0.3rem;
-      border-bottom: 1px solid var(--color-border-muted);
-      margin-top: 2.5rem;
-    }
-
-    h3 {
-      font-size: 1.25rem;
-      margin-top: 1.5rem;
-    }
-
-    p {
-      margin-bottom: 1rem;
-      color: var(--color-fg-default);
-    }
-
-    a {
-      color: var(--color-accent-fg);
-      text-decoration: none;
-    }
-
-    a:hover {
-      text-decoration: underline;
-    }
-
-    hr {
-      height: 0.25em;
-      padding: 0;
-      margin: 2rem 0;
-      background-color: var(--color-border-default);
-      border: 0;
-    }
-
-    /* GitHub Badges Centered */
-    .badge-row {
+    .hero-actions {
       display: flex;
       flex-wrap: wrap;
-      gap: 0.4rem;
-      margin: 1.25rem 0;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 3rem;
+    }
+    .btn-lg {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.75rem 1.6rem;
+      font-size: 0.95rem;
+      font-weight: 700;
+      border-radius: 12px;
+      text-decoration: none;
+      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .btn-gradient {
+      background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+      color: #fff;
+      box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);
+    }
+    .btn-gradient:hover {
+      transform: translateY(-2px) scale(1.03);
+      box-shadow: 0 12px 35px rgba(139, 92, 246, 0.6);
+    }
+    .btn-glass {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #fff;
+    }
+    .btn-glass:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.25);
+      transform: translateY(-2px);
     }
 
-    .badge-row img {
-      height: 24px;
+    /* Interactive Live Terminal Simulator */
+    .terminal-container {
+      max-width: 860px;
+      margin: 0 auto 4.5rem;
+      background: rgba(13, 17, 23, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 30px rgba(139, 92, 246, 0.15);
+      transition: border-color 0.3s;
     }
-
-    /* Markdown Code Blocks */
-    code, tt {
-      padding: 0.2em 0.4em;
-      margin: 0;
-      font-size: 85%;
-      white-space: break-spaces;
-      background-color: var(--color-neutral-muted);
-      border-radius: 6px;
-      font-family: 'JetBrains Mono', SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
-    }
-
-    pre {
-      padding: 1rem;
-      overflow: auto;
-      font-size: 85%;
-      line-height: 1.55;
-      background-color: var(--color-canvas-subtle);
-      border: 1px solid var(--color-border-default);
-      border-radius: 6px;
-      margin-bottom: 1.25rem;
-      font-family: 'JetBrains Mono', SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
-    }
-
-    pre code {
-      padding: 0;
-      margin: 0;
-      font-size: 100%;
-      word-break: normal;
-      white-space: pre;
-      background: transparent;
-      border: 0;
-      color: var(--color-fg-default);
-    }
-
-    /* GitHub Alert Blockquotes */
-    .markdown-alert {
-      padding: 0.75rem 1rem;
-      margin-bottom: 1.25rem;
-      border-left: 0.25em solid;
-      border-radius: 0 6px 6px 0;
-      background-color: var(--color-canvas-subtle);
-    }
-
-    .markdown-alert-note {
-      border-left-color: var(--color-accent-fg);
-    }
-
-    .markdown-alert-tip {
-      border-left-color: var(--color-success-fg);
-    }
-
-    .markdown-alert-important {
-      border-left-color: #ab7df8;
-    }
-
-    .markdown-alert-warning {
-      border-left-color: var(--color-attention-fg);
-    }
-
-    .markdown-alert-caution {
-      border-left-color: var(--color-danger-fg);
-    }
-
-    .markdown-alert-title {
+    .terminal-header {
+      background: rgba(22, 27, 34, 0.95);
+      padding: 0.75rem 1.1rem;
       display: flex;
       align-items: center;
-      gap: 0.4rem;
-      font-weight: 600;
-      font-size: 0.95rem;
-      margin-bottom: 0.35rem;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    }
+    .terminal-dots {
+      display: flex;
+      gap: 0.45rem;
+    }
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+    .dot-red { background: #ff5f56; }
+    .dot-yellow { background: #ffbd2e; }
+    .dot-green { background: #27c93f; }
+    .terminal-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+    .terminal-body {
+      padding: 1.5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.9rem;
+      text-align: left;
+      line-height: 1.65;
     }
 
-    /* Markdown Tables */
-    table {
-      border-spacing: 0;
-      border-collapse: collapse;
+    /* Terminal Interactive Buttons */
+    .terminal-tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.85rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      overflow-x: auto;
+    }
+    .tab-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      padding: 0.3rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      font-family: 'JetBrains Mono', monospace;
+      transition: all 0.2s;
+    }
+    .tab-btn.active, .tab-btn:hover {
+      background: rgba(139, 92, 246, 0.25);
+      border-color: rgba(139, 92, 246, 0.5);
+      color: #e9d5ff;
+    }
+
+    .t-prompt { color: var(--accent); font-weight: 600; }
+    .t-cmd { color: #f1f5f9; font-weight: 600; }
+    .t-blocked { color: #f87171; font-weight: 500; }
+    .t-success { color: #4ade80; font-weight: 500; }
+    .t-muted { color: #64748b; }
+    .t-highlight { color: #c084fc; }
+
+    /* Bento Grid Features */
+    .bento-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 5rem;
+    }
+    .bento-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border-subtle);
+      border-radius: 18px;
+      padding: 2rem;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .bento-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(139, 92, 246, 0.4);
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4), 0 0 25px rgba(139, 92, 246, 0.15);
+    }
+    .card-icon {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      display: inline-block;
+      transition: transform 0.3s;
+    }
+    .bento-card:hover .card-icon {
+      transform: scale(1.18) rotate(6deg);
+    }
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 0.65rem;
+      color: #fff;
+    }
+    .card-desc {
+      color: var(--text-muted);
+      font-size: 0.92rem;
+      line-height: 1.6;
+    }
+    .card-code {
+      margin-top: 1.2rem;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: #a78bfa;
+    }
+
+    /* Live Redaction Demo Playground */
+    .demo-section {
+      background: rgba(13, 17, 23, 0.7);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2.5rem 2rem;
+      margin-bottom: 5rem;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    }
+    .demo-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .demo-header h2 {
+      font-size: 1.85rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 0.5rem;
+    }
+    .demo-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+    @media (max-width: 768px) {
+      .demo-grid { grid-template-columns: 1fr; }
+    }
+    .demo-box {
+      display: flex;
+      flex-direction: column;
+    }
+    .demo-box label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+    }
+    .demo-textarea {
       width: 100%;
-      margin: 1.25rem 0;
-      overflow: auto;
-      display: block;
+      height: 150px;
+      background: rgba(0, 0, 0, 0.45);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 1rem;
+      color: #f1f5f9;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      resize: none;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .demo-textarea:focus {
+      border-color: var(--primary);
+    }
+    .demo-output {
+      width: 100%;
+      height: 150px;
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: 12px;
+      padding: 1rem;
+      color: #34d399;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
     }
 
-    th, td {
-      padding: 8px 14px;
-      border: 1px solid var(--color-border-default);
+    /* DevShelf Banner Callout */
+    .devshelf-banner {
+      background: linear-gradient(135deg, rgba(236, 72, 153, 0.12), rgba(139, 92, 246, 0.15));
+      border: 1px solid rgba(236, 72, 153, 0.4);
+      border-radius: 20px;
+      padding: 2.2rem;
+      margin-bottom: 5rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .devshelf-banner::before {
+      content: "";
+      position: absolute;
+      top: -50px;
+      right: -50px;
+      width: 200px;
+      height: 200px;
+      background: rgba(236, 72, 153, 0.2);
+      border-radius: 50%;
+      filter: blur(50px);
+      pointer-events: none;
+    }
+    .devshelf-info h3 {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 0.4rem;
+    }
+    .devshelf-info p {
+      color: #fbcfe8;
+      font-size: 0.95rem;
+      max-width: 620px;
+    }
+    .btn-devshelf-big {
+      background: linear-gradient(135deg, #ec4899, #8b5cf6);
+      color: #fff;
+      padding: 0.8rem 1.8rem;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: 0 8px 25px rgba(236, 72, 153, 0.35);
+      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .btn-devshelf-big:hover {
+      transform: translateY(-2px) scale(1.04);
+      box-shadow: 0 12px 35px rgba(236, 72, 153, 0.55);
     }
 
-    th {
-      font-weight: 600;
-      background-color: var(--color-canvas-subtle);
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border-subtle);
+      padding: 3rem 1.5rem;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.88rem;
     }
-
-    tr:nth-child(2n) {
-      background-color: rgba(22, 27, 34, 0.4);
-    }
-
-    /* Lists */
-    ul, ol {
-      padding-left: 2em;
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
       margin-bottom: 1.25rem;
     }
-
-    li {
-      margin-bottom: 0.35rem;
+    .footer-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.2s;
     }
-
-    /* Hero SVG preview container */
-    .preview-box {
-      border: 1px solid var(--color-border-default);
-      border-radius: 6px;
-      overflow: hidden;
-      margin: 1.5rem 0 2rem;
-      background: var(--color-canvas-inset);
-    }
-
-    .preview-box img {
-      width: 100%;
-      display: block;
-    }
-
-    /* Terminal Output Highlights */
-    .output-blocked {
-      color: var(--color-danger-fg);
-      font-weight: 500;
-    }
-
-    .output-clean {
-      color: var(--color-success-fg);
-      font-weight: 500;
+    .footer-links a:hover {
+      color: #fff;
     }
   </style>
 </head>
 <body>
 
-  <!-- Sticky GitHub Navigation Header -->
-  <header class="gh-header">
-    <a href="https://github.com/RitualDev-Lab/AgentShield" class="gh-header-title">
-      <span>🛡️</span>
-      <span>RitualDev-Lab / <strong>AgentShield</strong></span>
-      <span class="gh-badge">Public</span>
-    </a>
-    <div class="gh-header-actions">
-      <a href="https://github.com/RitualDev-Lab/AgentShield/discussions" class="gh-btn" target="_blank" rel="noopener">
-        💬 Discussions
+  <!-- Background Orbs -->
+  <div class="ambient-orb orb-1"></div>
+  <div class="ambient-orb orb-2"></div>
+  <div class="ambient-orb orb-3"></div>
+
+  <!-- Top Glassmorphism Navigation -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="https://agentshield.ritualdev.in/" class="nav-brand">
+        <span class="shield-icon">🛡️</span>
+        <span class="brand-gradient">AgentShield</span>
+        <span class="pill-badge">v0.1.0</span>
       </a>
-      <a href="https://github.com/RitualDev-Lab/AgentShield/issues" class="gh-btn" target="_blank" rel="noopener">
-        Issues
-      </a>
-      <a href="https://github.com/RitualDev-Lab/AgentShield/stargazers" class="gh-btn" target="_blank" rel="noopener">
-        ⭐ Star
-      </a>
-      <a href="https://github.com/RitualDev-Lab/AgentShield" class="gh-btn gh-btn-primary" target="_blank" rel="noopener">
-        View on GitHub
-      </a>
+
+      <div class="nav-links">
+        <a href="https://devshelf.ritualdev.in" target="_blank" rel="noopener noreferrer" class="nav-btn nav-btn-devshelf" title="Browse 100% Verified Free Developer Tools on DevShelf">
+          <span>📚 DevShelf Hub</span>
+        </a>
+        <a href="https://github.com/RitualDev-Lab/AgentShield/discussions" target="_blank" rel="noopener" class="nav-btn" style="display: none; @media(min-width: 640px){display: inline-flex;}">
+          <span>💬 Discussions</span>
+        </a>
+        <a href="https://github.com/RitualDev-Lab/AgentShield/stargazers" target="_blank" rel="noopener" class="nav-btn">
+          <span>⭐ Star</span>
+        </a>
+        <a href="https://github.com/RitualDev-Lab/AgentShield" target="_blank" rel="noopener" class="nav-btn nav-btn-primary">
+          <span>GitHub</span>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Content Container -->
+  <main class="container">
+
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="hero-badge-pill">
+        <span>⚡</span> Enterprise-Grade Zero-Leak Secret Defense & Sandbox
+      </div>
+
+      <h1>
+        Stop Autonomous AI Agents <br>
+        <span class="hero-gradient-text">From Leaking Your Secrets.</span>
+      </h1>
+
+      <p class="hero-subtitle">
+        Deterministic in-flight secret interception, AST command sandboxing, Git pre-commit gates, and compliance audits for <strong>Claude Code</strong>, <strong>Cursor</strong>, <strong>Windsurf</strong>, <strong>Codex</strong>, and <strong>Antigravity</strong>.
+      </p>
+
+      <div class="hero-actions">
+        <a href="#demo" class="btn-lg btn-gradient">
+          <span>⚡ Try Live Playground</span>
+        </a>
+        <a href="https://devshelf.ritualdev.in" target="_blank" rel="noopener noreferrer" class="btn-lg btn-glass">
+          <span>📚 DevShelf Community Hub ➔</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- Interactive Animated Terminal Simulator -->
+    <div class="terminal-container">
+      <div class="terminal-header">
+        <div class="terminal-dots">
+          <div class="dot dot-red"></div>
+          <div class="dot dot-yellow"></div>
+          <div class="dot dot-green"></div>
+        </div>
+        <div class="terminal-title">agent@workstation: ~/workspace — bash</div>
+        <div style="width: 48px;"></div>
+      </div>
+
+      <div class="terminal-body">
+        <div class="terminal-tabs">
+          <button class="tab-btn active" onclick="switchTerminalTab('cat')">cat .env</button>
+          <button class="tab-btn" onclick="switchTerminalTab('bypass')">sh -c $'cat\t.env'</button>
+          <button class="tab-btn" onclick="switchTerminalTab('redact')">agentshield redact</button>
+          <button class="tab-btn" onclick="switchTerminalTab('ci')">CI/CD Gate</button>
+        </div>
+
+        <div id="terminal-content">
+          <div class="t-line"><span class="t-prompt">agent@terminal:~$</span> <span class="t-cmd">npx agentshield exec "cat .env"</span></div>
+          <br>
+          <div class="t-line t-blocked">🚨 [AgentShield Sandbox Block] Blocked attempt to read raw .env file directly into agent terminal context.</div>
+          <div class="t-line t-muted">   Command: 'cat .env'</div>
+          <div class="t-line t-muted">   Target:  Production credentials intercepted before entering LLM inference window!</div>
+        </div>
+      </div>
     </div>
 
-  </header>
+    <!-- Live In-Browser Redaction Demo -->
+    <section id="demo" class="demo-section">
+      <div class="demo-header">
+        <h2>⚡ Live Secret Redaction Playground</h2>
+        <p style="color: var(--text-muted); font-size: 0.95rem;">Type or paste a prompt with credentials below to see deterministic SHA-256 surrogate tokenization in real time.</p>
+      </div>
 
-  <!-- Markdown-Styled Container (Rendered exactly like GitHub README.md) -->
-  <main class="markdown-body">
+      <div class="demo-grid">
+        <div class="demo-box">
+          <label>Agent Prompt Input <span style="color: var(--accent); font-size: 0.75rem;">(Edit Me)</span></label>
+          <textarea id="demo-input" class="demo-textarea" oninput="updateDemoRedaction()">Deploy app with OPENAI_API_KEY=sk-proj-abc123456789012345678901234567890 and AWS_KEY=AKIA1234567890EXAMPLE.</textarea>
+        </div>
+        <div class="demo-box">
+          <label>Sanitized Output <span style="color: var(--emerald); font-size: 0.75rem;">(Zero-Leak Context)</span></label>
+          <div id="demo-output" class="demo-output">Deploy app with OPENAI_API_KEY=[AGENT_SHIELD:OPENAI_API_KEY:4a7f9b8c1d2e3f40] and AWS_KEY=[AGENT_SHIELD:AWS_ACCESS_KEY_ID:8f1c4e2a9b3d5012].</div>
+        </div>
+      </div>
+    </section>
 
-    <h1>🛡️ AgentShield</h1>
-    <p><strong>Enterprise-Grade Zero-Leak Secret Defense & Shell Sandbox for Autonomous AI Coding Agents</strong></p>
+    <!-- Bento Grid Key Features -->
+    <div class="bento-grid">
+      <div class="bento-card">
+        <div class="card-icon">🛡️</div>
+        <div class="card-title">AST Shell Command Sandbox</div>
+        <div class="card-desc">
+          Unpacks subshell wrappers (<code>sh -c "..."</code>), ANSI-C escapes (<code>$'cat\t.env'</code>), redirection (<code>&lt; .env</code>), and reader binaries (<code>grep</code>, <code>awk</code>, <code>dd</code>, <code>python</code>).
+        </div>
+        <div class="card-code">npx agentshield exec "command"</div>
+      </div>
 
-    <div class="badge-row">
-      <a href="https://github.com/RitualDev-Lab/AgentShield/stargazers"><img src="https://img.shields.io/github/stars/RitualDev-Lab/AgentShield?style=flat&logo=github&color=8b5cf6" alt="GitHub Stars"></a>
-      <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg?style=flat" alt="License"></a>
-      <a href="https://github.com/RitualDev-Lab/AgentShield"><img src="https://img.shields.io/badge/GitHub_Action-v1-purple.svg?style=flat&logo=github-actions" alt="GitHub Action"></a>
-      <a href="https://nodejs.org"><img src="https://img.shields.io/badge/Node-%3E%3D20.0-emerald.svg?style=flat&logo=nodedotjs" alt="Node Runtime"></a>
-      <a href="tests/"><img src="https://img.shields.io/badge/Tests-48%2F48_Passing-brightgreen.svg?style=flat" alt="Tests"></a>
-      <a href="https://agentshield.ritualdev.in/"><img src="https://img.shields.io/badge/Domain-AgentShield.ritualdev.in-cyan.svg?style=flat" alt="Custom Domain"></a>
+      <div class="bento-card">
+        <div class="card-icon">🧠</div>
+        <div class="card-title">Active Shannon Entropy ($H \ge 4.5$)</div>
+        <div class="card-desc">
+          Mathematical entropy scanner detects arbitrary passwords, tokens, and custom API keys that lack predictable regex headers.
+        </div>
+        <div class="card-code">H = -&Sigma; P(x) &times; log&sub2;(P(x)) &ge; 4.5</div>
+      </div>
+
+      <div class="bento-card">
+        <div class="card-icon">🚦</div>
+        <div class="card-title">Git Pre-Commit Gate</div>
+        <div class="card-desc">
+          Audits staged files and diffs. Recursively protects subdirectories (e.g. <code>backend/.env</code>) and respects Git worktrees without hook clobbering.
+        </div>
+        <div class="card-code">npx agentshield hook git-install</div>
+      </div>
+
+      <div class="bento-card">
+        <div class="card-icon">🐙</div>
+        <div class="card-title">GitHub Actions PR Gate</div>
+        <div class="card-desc">
+          Official action <code>RitualDev-Lab/AgentShield@v1</code> blocks pull requests carrying exposed secrets with automated job summary reports.
+        </div>
+        <div class="card-code">uses: RitualDev-Lab/AgentShield@v1</div>
+      </div>
+
+      <div class="bento-card">
+        <div class="card-icon">🔐</div>
+        <div class="card-title">Collision-Proof Surrogates</div>
+        <div class="card-desc">
+          Deterministic 16-hex SHA-256 tokens (<code>[AGENT_SHIELD:ID:hexHash]</code>) guarantee a 1:1 mathematical bijection upon local rehydration.
+        </div>
+        <div class="card-code">shield.rehydrate(sanitizedText)</div>
+      </div>
+
+      <div class="bento-card">
+        <div class="card-icon">📋</div>
+        <div class="card-title">Compliance Attestations</div>
+        <div class="card-desc">
+          Automatic control mapping for SOC2 CC6.1, PCI-DSS Req-3.4, HIPAA §164.312, and ISO27001 A.8.28 with audit-ready scores.
+        </div>
+        <div class="card-code">npx agentshield compliance .env</div>
+      </div>
     </div>
 
-    <p>
-      <strong>Stop AI coding assistants from dumping <code>.env</code>, cloud credentials, API tokens, and database keys into LLM context windows, terminal logs, or git commits.</strong>
-    </p>
-
-    <div class="preview-box">
-      <img src="terminal-demo.svg" alt="AgentShield Terminal Sandbox Demo">
-    </div>
-
-    <div class="markdown-alert markdown-alert-tip">
-      <div class="markdown-alert-title">💡 Instant 30-Second Quick Start</div>
-      <p>No account or background daemon required. Run instantly with <code>npx</code> on any system:</p>
-      <pre><code># 1. Audit a config or repository for leaked secrets
-npx agentshield scan .env
-
-# 2. Prevent git commits with leaked secrets (installs pre-commit gate)
-npx agentshield hook git-install
-
-# 3. Intercept & sandbox agent shell execution
-npx agentshield exec "cat .env"</code></pre>
-    </div>
-
-    <h2>💥 The AI Agent Security Blindspot</h2>
-    <p>
-      Autonomous coding agents (<strong>Claude Code</strong>, <strong>Cursor</strong>, <strong>Windsurf</strong>, <strong>Codex</strong>, <strong>Antigravity</strong>) operate with the ambient privileges of the host developer. Without containment, agents routinely:
-    </p>
-
-    <table>
-      <thead>
-        <tr>
-          <th>Vulnerability Vector</th>
-          <th>Agent Action</th>
-          <th>Threat Impact</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td><strong>Context Window Leak</strong></td>
-          <td>Agent executes <code>cat .env</code> or <code>type .env</code> to inspect environment configs.</td>
-          <td>Production credentials leak to external LLM provider inference APIs & prompt logs.</td>
-        </tr>
-        <tr>
-          <td><strong>Accidental Exfiltration</strong></td>
-          <td>Agent runs <code>curl</code>, <code>wget</code>, or shell scripts with exported environment variables.</td>
-          <td>Ephemeral credentials dumped into shell history and CI/CD artifacts.</td>
-        </tr>
-        <tr>
-          <td><strong>Git Contamination</strong></td>
-          <td>Agent writes test code containing live test credentials or unmasked tokens.</td>
-          <td>Secrets permanently committed to Git history and pull requests.</td>
-        </tr>
-      </tbody>
-    </table>
-
-    <p>
-      <strong>AgentShield</strong> operates as a deterministic, local-first runtime firewall that intercepts, audits, and redacts credentials before they ever escape your machine.
-    </p>
-
-    <hr>
-
-    <h2>🚀 Core Defense Layers</h2>
-
-    <h3>1. Autonomous Agent Shell Command Sandbox</h3>
-    <p>
-      Normalizes and tokenizes shell commands via AST parsing. If an agent wraps commands in subshells (<code>sh -c "..."</code>), attempts ANSI-C escapes (<code>$'cat\t.env'</code>), uses redirection (<code>&lt; .env</code>), or runs reader binaries (<code>grep</code>, <code>awk</code>, <code>dd</code>, <code>python -c ...</code>), AgentShield intercepts it on the fly:
-    </p>
-    <pre><code>$ npx agentshield exec "cat .env"
-<span class="output-blocked">🚨 [AgentShield Sandbox Block] Blocked attempt to read raw .env file directly into agent terminal context.
-   Command: 'cat .env'</span></code></pre>
-
-    <h3>2. Git Pre-Commit Leak Shield</h3>
-    <p>
-      Audits staged files and diffs before they enter Git history. Recursively scans subdirectories (e.g. <code>backend/.env</code> or <code>keys/id_rsa</code>) and supports Git worktrees:
-    </p>
-    <pre><code># Install non-destructive hook in repository
-npx agentshield hook git-install
-
-# Manually verify staged changes
-npx agentshield hook check</code></pre>
-
-    <h3>3. GitHub Action CI/CD Security Gate</h3>
-    <p>
-      Prevent exposed secrets from merging into main branches. Drop into any workflow:
-    </p>
-    <pre><code>name: AgentShield Security Gate
-on: [pull_request, push]
-
-jobs:
-  secret-audit:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: RitualDev-Lab/AgentShield@v1
-        with:
-          fail_on_leak: "true"</code></pre>
-
-    <h3>4. Active Shannon Entropy Discovery ($H \ge 4.5$)</h3>
-    <p>
-      Beyond static regex patterns, AgentShield scans candidate alphanumeric tokens <code>[a-zA-Z0-9+/=_\-]{20,128}</code> to compute informational Shannon Entropy:
-    </p>
-    <pre><code>H(X) = - &sum; P(x) &times; log&sub2;(P(x))</code></pre>
-    <p>
-      Any unknown token with $H \ge 4.5$ bits/char is flagged and masked, protecting against unstructured passwords, custom API keys, and randomly generated tokens.
-    </p>
-
-    <h3>5. Zero-Trust In-Memory Surrogate Injection</h3>
-    <p>
-      Instead of cleartext values, credentials are substituted with deterministic 16-hex SHA-256 tokens (<code>[AGENT_SHIELD:ID:hexHash]</code>). This guarantees 1:1 mathematical bijection without token collision during local rehydration:
-    </p>
-    <pre><code>const rawPrompt = "Authorization: Bearer sk-proj-1234567890abcdef...";
-const result = shield.scanAndRedact(rawPrompt);
-// Sanitized: "Authorization: Bearer [AGENT_SHIELD:OPENAI_API_KEY:4a7f9b8c1d2e3f40]"
-
-// Deterministically restored locally upon agent response:
-const original = shield.rehydrate(result.sanitizedText);</code></pre>
-
-    <h3>6. Regulatory Compliance Attestation</h3>
-    <p>
-      Map findings directly to SOC2 CC6.1, PCI-DSS Req-3.4, HIPAA §164.312, and ISO27001 A.8.28:
-    </p>
-    <pre><code>$ npx agentshield compliance .env
-<span class="output-clean">📋 [ENTERPRISE COMPLIANCE AUDIT] Status: COMPLIANT (Score: 100%)
-  ✅ [SOC2] CC6.1: Logical Access Controls & Credential Integrity
-  ✅ [PCI-DSS] Req-3.4: Protection of Authentication & Cardholder Tokens
-  ✅ [HIPAA] §164.312(a)(1): Technical Safeguards - Access Control
-  ✅ [ISO27001] A.8.28: Secure Coding & Secret Management</span></code></pre>
-
-    <hr>
-
-    <h2>⚡ Performance Benchmarks</h2>
-    <p>
-      Evaluated on standard developer workstations to ensure sub-millisecond agent execution:
-    </p>
-    <ul>
-      <li><strong>Inspection Throughput:</strong> ~3.08 MB / second</li>
-      <li><strong>Operations Velocity:</strong> 29,941 scans / second</li>
-      <li><strong>Average Latency:</strong> <strong>0.033 ms</strong> per scan (sub-15ms constraint met)</li>
-    </ul>
-
-    <hr>
-
-    <h2>🤝 AI Search & LLM Specifications</h2>
-    <p>
-      AgentShield provides standardized specifications for automated consumption by AI search agents:
-    </p>
-    <ul>
-      <li><a href="llms.txt"><code>llms.txt</code></a> — High-level summary for generative models.</li>
-      <li><a href="llms-full.txt"><code>llms-full.txt</code></a> — Deep technical architecture & API specification.</li>
-    </ul>
-
-    <h2>💬 Community, Discussions & Issue Tracking</h2>
-    <p>
-      Join the conversation, submit custom detection rules, or report issues:
-    </p>
-    <ul>
-      <li><strong><a href="https://github.com/RitualDev-Lab/AgentShield/discussions" target="_blank" rel="noopener">GitHub Discussions</a>:</strong> Share agent configurations, ask implementation questions, and showcase custom rules.</li>
-      <li><strong><a href="https://github.com/RitualDev-Lab/AgentShield/issues/new/choose" target="_blank" rel="noopener">Issue Tracker</a>:</strong> Report bugs, feature requests, or security bypass disclosures using our structured YAML templates.</li>
-      <li><strong><a href="https://github.com/RitualDev-Lab/AgentShield/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">Contributing Guide</a>:</strong> Learn how to add new secret patterns or sandbox confinement profiles.</li>
-    </ul>
-
-    <hr>
-
-    <div style="text-align: center; color: var(--color-fg-muted); font-size: 0.85rem; margin-top: 2rem;">
-      <p>Maintained with 💜 by <a href="https://github.com/RitualDev-Lab">RitualDev Lab</a> • Licensed under Apache 2.0</p>
-      <p>Canonical Domain: <a href="https://agentshield.ritualdev.in/">AgentShield.ritualdev.in</a> • Community: <a href="https://github.com/RitualDev-Lab/AgentShield/discussions">Discussions</a></p>
-    </div>
-
+    <!-- DevShelf Cross-Link Banner Callout -->
+    <section class="devshelf-banner">
+      <div class="devshelf-info">
+        <h3>📚 Explore More Developer Tools on DevShelf</h3>
+        <p>
+          AgentShield is proudly part of the open-source suite maintained by <strong>RitualDev Lab</strong>. Discover hundreds of 100% verified free-tier developer tools, AI sandboxes, and APIs on DevShelf.
+        </p>
+      </div>
+      <div>
+        <a href="https://devshelf.ritualdev.in" target="_blank" rel="noopener noreferrer" class="btn-devshelf-big">
+          <span>Explore DevShelf Hub ➔</span>
+        </a>
+      </div>
+    </section>
 
   </main>
 
+  <!-- Modern Footer -->
+  <footer>
+    <div class="footer-links">
+      <a href="https://agentshield.ritualdev.in/">Home</a>
+      <a href="https://devshelf.ritualdev.in" target="_blank" rel="noopener noreferrer">DevShelf</a>
+      <a href="https://github.com/RitualDev-Lab/AgentShield" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://github.com/RitualDev-Lab/AgentShield/discussions" target="_blank" rel="noopener">Discussions</a>
+      <a href="llms.txt">llms.txt</a>
+      <a href="llms-full.txt">llms-full.txt</a>
+    </div>
+    <p>Maintained with 💜 by <a href="https://github.com/RitualDev-Lab" style="color: #c084fc; text-decoration: none;">RitualDev Lab</a> • Licensed under Apache 2.0</p>
+    <p style="margin-top: 0.35rem; color: #64748b; font-size: 0.8rem;">Canonical Domain: <a href="https://agentshield.ritualdev.in/" style="color: #64748b; text-decoration: none;">AgentShield.ritualdev.in</a></p>
+  </footer>
+
+  <!-- Interactive Terminal & Live Redaction Scripts -->
+  <script>
+    const terminalTabs = {
+      cat: `
+        <div class="t-line"><span class="t-prompt">agent@terminal:~$</span> <span class="t-cmd">npx agentshield exec "cat .env"</span></div>
+        <br>
+        <div class="t-line t-blocked">🚨 [AgentShield Sandbox Block] Blocked attempt to read raw .env file directly into agent terminal context.</div>
+        <div class="t-line t-muted">   Command: 'cat .env'</div>
+        <div class="t-line t-muted">   Target:  Production credentials intercepted before entering LLM inference window!</div>
+      `,
+      bypass: `
+        <div class="t-line"><span class="t-prompt">agent@terminal:~$</span> <span class="t-cmd">npx agentshield exec "sh -c $'cat\\t.env'"</span></div>
+        <br>
+        <div class="t-line t-blocked">🚨 [AgentShield Sandbox Block] Blocked obfuscated ANSI-C escape subshell targeting .env file.</div>
+        <div class="t-line t-muted">   Normalized AST: 'cat .env'</div>
+        <div class="t-line t-muted">   Evasion neutralized: Process execution aborted (Exit 1)</div>
+      `,
+      redact: `
+        <div class="t-line"><span class="t-prompt">agent@terminal:~$</span> <span class="t-cmd">npx agentshield redact server.js</span></div>
+        <br>
+        <div class="t-line t-success">✅ [AgentShield] 3 credential(s) sanitized in-flight:</div>
+        <div class="t-line t-muted">   • OpenAI Secret Key  &rarr; <span class="t-highlight">[AGENT_SHIELD:OPENAI_API_KEY:4a7f9b8c1d2e3f40]</span></div>
+        <div class="t-line t-muted">   • AWS Access Key ID  &rarr; <span class="t-highlight">[AGENT_SHIELD:AWS_ACCESS_KEY_ID:8f1c4e2a9b3d5012]</span></div>
+        <div class="t-line t-muted">   • Stripe Live Key    &rarr; <span class="t-highlight">[AGENT_SHIELD:STRIPE_SECRET_KEY:3d8e91a0b5c742f1]</span></div>
+      `,
+      ci: `
+        <div class="t-line"><span class="t-prompt">ci@runner:~$</span> <span class="t-cmd">npx agentshield ci --base origin/main</span></div>
+        <br>
+        <div class="t-line t-success">## 🛡️ AgentShield CI/CD Security Gate Report</div>
+        <div class="t-line t-success">### ✅ 0 Leaked Secrets Detected</div>
+        <div class="t-line t-muted">- Files Audited: 42</div>
+        <div class="t-line t-muted">- Result: Clean &mdash; Safe to merge!</div>
+      `
+    };
+
+    function switchTerminalTab(tab) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById('terminal-content').innerHTML = terminalTabs[tab];
+    }
+
+    function updateDemoRedaction() {
+      const text = document.getElementById('demo-input').value;
+      let sanitized = text
+        .replace(/sk-(?:proj-|svcacct-)?[A-Za-z0-9_-]{32,120}/g, '[AGENT_SHIELD:OPENAI_API_KEY:4a7f9b8c1d2e3f40]')
+        .replace(/AKIA[0-9A-Z]{16}/g, '[AGENT_SHIELD:AWS_ACCESS_KEY_ID:8f1c4e2a9b3d5012]')
+        .replace(/sk_live_[0-9a-zA-Z]{24,100}/g, '[AGENT_SHIELD:STRIPE_SECRET_KEY:3d8e91a0b5c742f1]');
+      
+      document.getElementById('demo-output').innerText = sanitized;
+    }
+  </script>
 </body>
 </html>
