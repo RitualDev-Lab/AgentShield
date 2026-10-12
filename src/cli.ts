@@ -24,6 +24,7 @@ Usage:
   npx agentshield compliance <file-path> Audit credentials for SOC2, PCI-DSS, HIPAA & ISO27001
   npx agentshield audit                  Audit workspace MCP, .claude, and agent permission configs
   npx agentshield mcp-proxy              Run inline JSON-RPC proxy filter for MCP tool calls
+  npx agentshield ledger verify          Verify cryptographic integrity of audit ledger HMAC chain
 
 Options:
   --base <branch>                        Git base ref for CI diff (default: origin/main)
@@ -295,6 +296,30 @@ async function main() {
     process.stdin.on("end", () => {
       process.exit(0);
     });
+  } else if (command === "ledger") {
+    const subCmd = args[1];
+    const { TamperEvidentLedger } = await import("./ledger.js");
+    const ledger = new TamperEvidentLedger();
+
+    if (subCmd === "verify") {
+      const result = ledger.verifyChain();
+      printBanner();
+      if (result.isValid) {
+        console.log(
+          `✅ [LEDGER INTEGRITY VERIFIED] ${result.totalEntries} block(s) checked. Cryptographic HMAC chain is 100% intact.`,
+        );
+        process.exit(0);
+      } else {
+        console.error(
+          `🚨 [CORRUPTED AUDIT LEDGER] Integrity check failed at sequence #${result.corruptedSequence}!`,
+        );
+        console.error(`   Error: ${result.error}`);
+        process.exit(1);
+      }
+    } else {
+      console.error("❌ Unknown ledger action. Use 'npx agentshield ledger verify'.");
+      process.exit(1);
+    }
   } else {
     console.error(`❌ Unknown command '${command}'. Run 'agentshield --help' for usage.`);
     process.exit(1);
