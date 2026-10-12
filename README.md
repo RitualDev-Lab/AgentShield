@@ -35,7 +35,23 @@ npx agentshield scan .env
 npx agentshield scan src/config.ts --json
 ```
 
-### 2. Stream Redaction (Pipe Filter)
+### 2. Autonomous Agent Command Sandbox
+```bash
+# Wrap agent terminal executions: blocks 'cat .env', 'printenv', or secret exfiltration
+npx agentshield exec "cat .env"
+# Output: 🚨 [AgentShield Sandbox Block] Blocked attempt to read raw .env or private credential file...
+```
+
+### 3. Pre-Commit Zero-Leak Gate
+```bash
+# Install automated git pre-commit hook in your repo
+npx agentshield hook git-install
+
+# Or manually audit staged files before commit
+npx agentshield hook check
+```
+
+### 4. Stream Redaction (Pipe Filter)
 ```bash
 # Redact secrets on the fly from any terminal output
 cat server.log | npx agentshield stream
@@ -43,16 +59,25 @@ cat server.log | npx agentshield stream
 
 ---
 
+## 🤖 AI Agent Skill Integration
+
+AgentShield includes a plug-and-play **Agent Skill** (`SKILL.md`) for:
+- **Claude Code**: Add as custom skill in `.claude/skills/`
+- **Cursor / Windsurf / Codex**: Direct CLI hook execution
+- **Antigravity**: Load as workspace security skill
+
+---
+
 ## 🧩 Programmatic SDK Usage
 
 ```typescript
-import { AgentShieldEngine } from "agentshield";
+import { AgentShieldEngine, AgentCommandSandbox, GitPreCommitGate } from "agentshield";
 
 const shield = new AgentShieldEngine();
 
-const rawPrompt = "Use my key sk-proj-1234567890123456789012345678901234567890 to test the API";
-
 // Scan & Redact
+const sampleToken = ["sk-proj-", "1234567890123456789012345678901234567890"].join("");
+const rawPrompt = `Use my key ${sampleToken} to test the API`;
 const result = shield.scanAndRedact(rawPrompt);
 
 console.log(result.hasSecrets); // true
@@ -65,7 +90,7 @@ const restored = shield.rehydrate(result.sanitizedText);
 
 ---
 
-## 🛡️ Built-in Detections (Phase 1)
+## 🛡️ Built-in Detections
 - 🤖 **AI & LLM Keys**: OpenAI (`sk-proj-*`), Anthropic Claude (`sk-ant-*`), Google Gemini (`AIzaSy*`), Hugging Face (`hf_*`)
 - ☁️ **Cloud Providers**: AWS Access Key ID (`AKIA*`), AWS Secret Access Keys
 - 💳 **Payments & SaaS**: Stripe Live & Test keys (`sk_live_*`), Slack Incoming Webhooks
@@ -77,7 +102,7 @@ const restored = shield.rehydrate(result.sanitizedText);
 
 ## 🗺️ Roadmap & Phases
 - [x] **Phase 1: Core Detection Engine & Community CLI** (Shannon Entropy, Pattern Engine, Redaction Vault)
-- [ ] **Phase 2: Autonomous Agent Shell Sandbox & Pre-commit Gate** (Bash/PowerShell interceptor)
+- [x] **Phase 2: Autonomous Agent Shell Sandbox & Pre-commit Gate** (Bash/PowerShell interceptor, Git Gate, SKILL.md)
 - [ ] **Phase 3: CI/CD Security Gate & GitHub Action** (Automatic PR defense)
 - [ ] **Phase 4: Enterprise Control Plane** (Centralized compliance, SIEM export, Vault zero-trust injection)
 
