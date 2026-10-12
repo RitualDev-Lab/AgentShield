@@ -10,7 +10,8 @@
   <link rel="canonical" href="https://agentshield.ritualdev.in/">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="alternate icon" href="favicon.ico">
-
+  <link rel="alternate" type="text/plain" href="llms.txt" title="AgentShield LLMs.txt Context for AI Agents">
+  <link rel="alternate" type="text/plain" href="llms-full.txt" title="AgentShield Full LLMs Context">
 
   <!-- Open Graph / Social Media -->
   <meta property="og:type" content="website">
@@ -37,7 +38,7 @@
         "url": "https://agentshield.ritualdev.in/",
         "operatingSystem": "macOS, Linux, Windows",
         "applicationCategory": "SecurityApplication",
-        "softwareVersion": "0.1.0",
+        "softwareVersion": "0.1.1",
         "description": "Zero-leak secret defense layer, AST shell sandbox, and Git pre-commit security gate tailored specifically for autonomous AI coding agents.",
         "offers": {
           "@type": "Offer",
@@ -76,6 +77,31 @@
               "@type": "Answer",
               "text": "AgentShield supports Claude Code, Cursor, Windsurf, OpenAI Codex, Google Antigravity, and all tools implementing the Model Context Protocol (MCP)."
             }
+          }
+        ]
+      },
+      {
+        "@type": "HowTo",
+        "name": "How to Protect AI Coding Agents from Leaking Secrets",
+        "description": "Step-by-step guide to installing AgentShield to prevent Claude Code, Cursor, Windsurf, and Antigravity from leaking secrets.",
+        "step": [
+          {
+            "@type": "HowToStep",
+            "name": "Scan Configuration and Environment Files",
+            "text": "Run npx agentshield scan .env to uncover hardcoded credentials and high-entropy API tokens.",
+            "url": "https://agentshield.ritualdev.in/#quickstart"
+          },
+          {
+            "@type": "HowToStep",
+            "name": "Install Git Pre-Commit Hook",
+            "text": "Run npx agentshield hook git-install to install local hooks that block accidental credential commits.",
+            "url": "https://agentshield.ritualdev.in/#quickstart"
+          },
+          {
+            "@type": "HowToStep",
+            "name": "Run Agent in Micro-Sandbox",
+            "text": "Wrap agent bash execution using npx agentshield exec <command> to intercept risky commands like cat .env in real time.",
+            "url": "https://agentshield.ritualdev.in/#playground"
           }
         ]
       }

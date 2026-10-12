@@ -5,6 +5,7 @@ AgentShield is an open-source, local-first runtime security layer designed to pr
 
 Website: https://agentshield.ritualdev.in/
 Repository: https://github.com/RitualDev-Lab/AgentShield
+Ecosystem Directory: https://devshelf.ritualdev.in/
 
 License: Apache-2.0
 
