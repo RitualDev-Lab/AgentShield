@@ -1,23 +1,15 @@
-## 🛡️ Pull Request Overview
+# Pull Request
 
-### Description
-Provide a concise summary of your changes.
+## Description
+<!-- Provide a brief summary of the changes in this pull request and the threat vector addressed. -->
 
-### Type of Change
-- [ ] 🚀 New feature (secret pattern, sandbox rule, CI action enhancement)
-- [ ] 🐛 Bug fix (false positive reduction, regex tuning)
-- [ ] 📚 Documentation update
-- [ ] 🧪 Tests / Benchmarks
-- [ ] 🏢 Enterprise compliance / SIEM integration
+## Changes Checklist
+- [ ] Added or updated unit tests in `tests/` covering new behaviors
+- [ ] Ran `pnpm test` (All tests passing)
+- [ ] Ran `pnpm run lint` (Biome 0 errors)
+- [ ] Ran `pnpm run build` (Clean ESM & DTS generation)
+- [ ] Verified that NO live credentials, personal tokens, or real secrets are contained in this diff
 
----
-
-### Verification & Testing
-- [ ] `pnpm test` passes with 100% success rate.
-- [ ] `pnpm run lint` and `pnpm run format` pass with 0 Biome errors.
-- [ ] **NO HARDCODED REAL OR SYNTHETIC CREDENTIALS** are included in diffs (dynamic concatenation used for test fixtures).
-
----
-
-### Related Issues
-Fixes # (issue number)
+## Related Issues
+<!-- Link related issues, e.g. Fixes #123 -->
+Fixes #
