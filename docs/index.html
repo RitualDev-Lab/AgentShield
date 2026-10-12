@@ -597,6 +597,145 @@
       box-shadow: 0 12px 35px rgba(236, 72, 153, 0.55);
     }
 
+    /* Run Guide Interactive Documentation Section */
+    .guide-section {
+      background: rgba(13, 17, 23, 0.75);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(6, 182, 212, 0.3);
+      border-radius: 20px;
+      padding: 3rem 2rem;
+      margin-bottom: 5rem;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 30px rgba(6, 182, 212, 0.1);
+    }
+    .guide-header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+    .guide-header h2 {
+      font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 0.5rem;
+    }
+    .guide-header p {
+      color: var(--text-muted);
+      font-size: 1rem;
+      max-width: 680px;
+      margin: 0 auto;
+    }
+    .guide-nav-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      justify-content: center;
+      margin-bottom: 2rem;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 1.25rem;
+    }
+    .guide-tab-btn {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      padding: 0.6rem 1.15rem;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      transition: all 0.2s;
+    }
+    .guide-tab-btn:hover {
+      background: rgba(6, 182, 212, 0.15);
+      border-color: rgba(6, 182, 212, 0.4);
+      color: #38bdf8;
+      transform: translateY(-1px);
+    }
+    .guide-tab-btn.active {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.25), rgba(139, 92, 246, 0.25));
+      border-color: #06b6d4;
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(6, 182, 212, 0.2);
+    }
+    .guide-panel {
+      display: none;
+      animation: fadeIn 0.3s ease-out;
+    }
+    .guide-panel.active {
+      display: block;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .guide-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1rem;
+    }
+    .guide-card {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 1.5rem;
+      transition: all 0.25s;
+    }
+    .guide-card:hover {
+      border-color: rgba(139, 92, 246, 0.4);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    }
+    .guide-card h4 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .guide-card p {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+      line-height: 1.5;
+    }
+    .code-block {
+      background: #090d16;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 1rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      color: #e2e8f0;
+      overflow-x: auto;
+      position: relative;
+    }
+    .code-block .keyword { color: #c084fc; font-weight: 600; }
+    .code-block .cmd { color: #38bdf8; font-weight: 600; }
+    .code-block .arg { color: #fcd34d; }
+    .code-block .comment { color: #64748b; font-style: italic; }
+    .code-block .success { color: #4ade80; }
+    .code-block .block { color: #f87171; }
+    .copy-btn {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #cbd5e1;
+      padding: 0.25rem 0.6rem;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .copy-btn:hover {
+      background: rgba(6, 182, 212, 0.3);
+      color: #fff;
+    }
+
     /* Footer */
     footer {
       border-top: 1px solid var(--border-subtle);
@@ -639,6 +778,9 @@
       </a>
 
       <div class="nav-links">
+        <a href="#guide" class="nav-btn" style="border-color: rgba(6, 182, 212, 0.4); color: #38bdf8;">
+          <span>📖 Run Guide</span>
+        </a>
         <a href="https://devshelf.ritualdev.in" target="_blank" rel="noopener noreferrer" class="nav-btn nav-btn-devshelf" title="Browse 100% Verified Free Developer Tools on DevShelf">
           <span>📚 DevShelf Hub</span>
         </a>
@@ -676,6 +818,9 @@
       <div class="hero-actions">
         <a href="#demo" class="btn-lg btn-gradient">
           <span>⚡ Try Live Playground</span>
+        </a>
+        <a href="#guide" class="btn-lg btn-glass" style="border-color: rgba(6, 182, 212, 0.4); color: #e0f2fe;">
+          <span>📖 Full Run Guide</span>
         </a>
         <a href="https://devshelf.ritualdev.in" target="_blank" rel="noopener noreferrer" class="btn-lg btn-glass">
           <span>📚 DevShelf Community Hub ➔</span>
@@ -789,6 +934,303 @@
       </div>
     </div>
 
+    <!-- Complete Run & Integration Guide Section -->
+    <section id="guide" class="guide-section">
+      <div class="guide-header">
+        <div class="hero-badge-pill" style="margin-bottom: 0.8rem;">
+          <span>📖</span> Comprehensive Documentation
+        </div>
+        <h2>Complete Run & Integration Guide</h2>
+        <p>Everything you need to run, configure, and integrate AgentShield across your local workstation, Git hooks, CI/CD pipelines, and autonomous AI agents.</p>
+      </div>
+
+      <!-- Guide Navigation Tabs -->
+      <div class="guide-nav-tabs">
+        <button class="guide-tab-btn active" onclick="switchGuideTab('quickstart')">
+          <span>⚡</span> Quickstart
+        </button>
+        <button class="guide-tab-btn" onclick="switchGuideTab('cli')">
+          <span>💻</span> CLI Commands
+        </button>
+        <button class="guide-tab-btn" onclick="switchGuideTab('sandbox')">
+          <span>🛡️</span> Shell Sandbox
+        </button>
+        <button class="guide-tab-btn" onclick="switchGuideTab('gitci')">
+          <span>🚦</span> Git Hook & CI/CD
+        </button>
+        <button class="guide-tab-btn" onclick="switchGuideTab('agents')">
+          <span>🤖</span> AI Agent Setup
+        </button>
+        <button class="guide-tab-btn" onclick="switchGuideTab('sdk')">
+          <span>🧩</span> Node.js SDK
+        </button>
+      </div>
+
+      <!-- Tab 1: Quickstart -->
+      <div id="guide-quickstart" class="guide-panel active">
+        <div class="guide-grid">
+          <div class="guide-card">
+            <h4><span>🚀</span> 1. Zero-Install Execution (npx)</h4>
+            <p>Run AgentShield directly without modifying your global environment or installing dependencies.</p>
+            <div class="code-block">
+              <span class="comment"># Audit any file or .env config</span><br>
+              <span class="cmd">npx</span> agentshield scan <span class="arg">.env</span><br><br>
+              <span class="comment"># Redact exposed secrets to stdout</span><br>
+              <span class="cmd">npx</span> agentshield redact <span class="arg">server.js</span><br><br>
+              <span class="comment"># Test shell interception</span><br>
+              <span class="cmd">npx</span> agentshield exec <span class="arg">"cat .env"</span>
+              <button class="copy-btn" onclick="copySnippet('npx agentshield scan .env')">Copy</button>
+            </div>
+          </div>
+
+          <div class="guide-card">
+            <h4><span>📦</span> 2. Local Project Installation</h4>
+            <p>Install AgentShield as a development dependency for your engineering team.</p>
+            <div class="code-block">
+              <span class="comment"># npm</span><br>
+              <span class="cmd">npm</span> install -D <span class="keyword">agentshield</span><br><br>
+              <span class="comment"># pnpm</span><br>
+              <span class="cmd">pnpm</span> add -D <span class="keyword">agentshield</span><br><br>
+              <span class="comment"># yarn</span><br>
+              <span class="cmd">yarn</span> add -D <span class="keyword">agentshield</span>
+              <button class="copy-btn" onclick="copySnippet('npm install -D agentshield')">Copy</button>
+            </div>
+          </div>
+
+          <div class="guide-card">
+            <h4><span>🌍</span> 3. Global CLI Installation</h4>
+            <p>Have <code>agentshield</code> and shorthand <code>ashield</code> globally available across all directories.</p>
+            <div class="code-block">
+              <span class="comment"># Install globally</span><br>
+              <span class="cmd">npm</span> install -g <span class="keyword">agentshield</span><br><br>
+              <span class="comment"># Verify installation</span><br>
+              <span class="cmd">agentshield</span> <span class="arg">--help</span><br>
+              <span class="cmd">ashield</span> <span class="arg">--help</span>
+              <button class="copy-btn" onclick="copySnippet('npm install -g agentshield')">Copy</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 2: CLI Commands -->
+      <div id="guide-cli" class="guide-panel">
+        <div class="guide-grid">
+          <div class="guide-card">
+            <h4><span>🔍</span> Secret Scanner</h4>
+            <p>Deep scan targeting regular expression headers and Shannon entropy ($H \ge 4.5$).</p>
+            <div class="code-block">
+              <span class="cmd">npx</span> agentshield scan <span class="arg">.env</span><br>
+              <span class="cmd">npx</span> agentshield scan <span class="arg">config.json</span> <span class="keyword">--json</span>
+              <button class="copy-btn" onclick="copySnippet('npx agentshield scan .env')">Copy</button>
+            </div>
+          </div>
+
+          <div class="guide-card">
+            <h4><span>✂️</span> In-Flight Redactor</h4>
+            <p>Substitute leaked credentials with deterministic SHA-256 surrogate tokens.</p>
+            <div class="code-block">
+              <span class="cmd">npx</span> agentshield redact <span class="arg">app.ts</span><br>
+              <span class="cmd">npx</span> agentshield redact <span class="arg">app.ts</span> <span class="keyword">--style</span> <span class="arg">hash</span>
+              <button class="copy-btn" onclick="copySnippet('npx agentshield redact app.ts')">Copy</button>
+            </div>
+          </div>
+
+          <div class="guide-card">
+            <h4><span>🌊</span> Real-Time Stream Pipe</h4>
+            <p>Stream logs or process outputs through redactor filter.</p>
+            <div class="code-block">
+              <span class="cmd">env</span> | <span class="cmd">npx</span> agentshield stream<br>
+              <span class="cmd">cat</span> build.log | <span class="cmd">npx</span> agentshield stream
+              <button class="copy-btn" onclick="copySnippet('env | npx agentshield stream')">Copy</button>
+            </div>
+          </div>
+
+          <div class="guide-card">
+            <h4><span>📋</span> Regulatory Compliance</h4>
+            <p>Score credentials against SOC2 CC6.1, PCI-DSS 3.4, HIPAA §164.312, and ISO27001.</p>
+            <div class="code-block">
+              <span class="cmd">npx</span> agentshield compliance <span class="arg">.env</span>
+              <button class="copy-btn" onclick="copySnippet('npx agentshield compliance .env')">Copy</button>
+            </div>
+          </div>
+
+          <div class="guide-card">
+            <h4><span>🔒</span> MCP Protocol Proxy</h4>
+            <p>Filter JSON-RPC tool calls for agents using Model Context Protocol.</p>
+            <div class="code-block">
+              <span class="cmd">npx</span> agentshield mcp-proxy
+              <button class="copy-btn" onclick="copySnippet('npx agentshield mcp-proxy')">Copy</button>
+            </div>
+          </div>
+
+          <div class="guide-card">
+            <h4><span>📜</span> Cryptographic Ledger</h4>
+            <p>Verify tamper-evident HMAC audit log for incident forensics.</p>
+            <div class="code-block">
+              <span class="cmd">npx</span> agentshield ledger verify
+              <button class="copy-btn" onclick="copySnippet('npx agentshield ledger verify')">Copy</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 3: Shell Sandbox -->
+      <div id="guide-sandbox" class="guide-panel">
+        <div class="guide-grid">
+          <div class="guide-card">
+            <h4><span>🛑</span> Direct File Read Interception</h4>
+            <p>Neutralizes attempts by autonomous agents to read production keys into context.</p>
+            <div class="code-block">
+              <span class="cmd">npx</span> agentshield exec <span class="arg">"cat .env"</span><br><br>
+              <span class="block">🚨 [AgentShield Sandbox Block]</span><br>
+              <span class="comment">Blocked attempt to read raw .env file!</span>
+            </div>
+          </div>
+
+          <div class="guide-card">
+            <h4><span>🎭</span> ANSI-C & Tab Obfuscation Defense</h4>
+            <p>De-obfuscates escape strings and command substitution tricks before evaluation.</p>
+            <div class="code-block">
+              <span class="cmd">npx</span> agentshield exec <span class="arg">"sh -c $'cat\\t.env'"</span><br><br>
+              <span class="block">🚨 [AgentShield Sandbox Block]</span><br>
+              <span class="comment">De-obfuscated AST: 'cat .env' &rarr; Blocked!</span>
+            </div>
+          </div>
+
+          <div class="guide-card">
+            <h4><span>✅</span> Transparent Developer Passthrough</h4>
+            <p>Safe commands execute cleanly without overhead or interference.</p>
+            <div class="code-block">
+              <span class="cmd">npx</span> agentshield exec <span class="arg">"npm test"</span><br>
+              <span class="cmd">npx</span> agentshield exec <span class="arg">"git status"</span><br><br>
+              <span class="success">✅ Allowed &amp; executed transparently</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 4: Git Hook & CI/CD -->
+      <div id="guide-gitci" class="guide-panel">
+        <div class="guide-grid">
+          <div class="guide-card">
+            <h4><span>🚦</span> Automatic Pre-Commit Hook</h4>
+            <p>One command protects your entire team from accidentally committing secrets.</p>
+            <div class="code-block">
+              <span class="comment"># Install in .git/hooks/pre-commit</span><br>
+              <span class="cmd">npx</span> agentshield hook git-install<br><br>
+              <span class="comment"># Manually audit staged files</span><br>
+              <span class="cmd">npx</span> agentshield hook check
+              <button class="copy-btn" onclick="copySnippet('npx agentshield hook git-install')">Copy</button>
+            </div>
+          </div>
+
+          <div class="guide-card">
+            <h4><span>🐙</span> Official GitHub Action</h4>
+            <p>Add <code>.github/workflows/agentshield.yml</code> to guard all PRs automatically.</p>
+            <div class="code-block">
+              <span class="keyword">name:</span> AgentShield Security Gate<br>
+              <span class="keyword">on:</span> [pull_request, push]<br>
+              <span class="keyword">jobs:</span><br>
+              &nbsp;&nbsp;<span class="keyword">gate:</span><br>
+              &nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">runs-on:</span> ubuntu-latest<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">steps:</span><br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="keyword">uses:</span> actions/checkout@v4<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">with:</span> { fetch-depth: 0 }<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="keyword">uses:</span> <span class="cmd">RitualDev-Lab/AgentShield@v1</span><br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">with:</span> { fail_on_leak: "true" }
+              <button class="copy-btn" onclick="copySnippet('uses: RitualDev-Lab/AgentShield@v1')">Copy</button>
+            </div>
+          </div>
+
+          <div class="guide-card">
+            <h4><span>📊</span> CI Command Line Gate</h4>
+            <p>Run within GitLab CI, CircleCI, Jenkins, or Docker build runners.</p>
+            <div class="code-block">
+              <span class="comment"># Diff against base branch &amp; export SARIF</span><br>
+              <span class="cmd">npx</span> agentshield ci <span class="keyword">--base</span> <span class="arg">origin/main</span> \<br>
+              &nbsp;&nbsp;<span class="keyword">--report</span> <span class="arg">report.md</span> \<br>
+              &nbsp;&nbsp;<span class="keyword">--sarif</span> <span class="arg">results.sarif</span>
+              <button class="copy-btn" onclick="copySnippet('npx agentshield ci --base origin/main')">Copy</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 5: AI Agent Setup -->
+      <div id="guide-agents" class="guide-panel">
+        <div class="guide-grid">
+          <div class="guide-card">
+            <h4><span>🟣</span> Claude Code Setup</h4>
+            <p>Instruct Claude Code to route shell commands through AgentShield sandbox.</p>
+            <div class="code-block">
+              <span class="comment"># In Claude Code session:</span><br>
+              "Prepend all bash commands with:<br>
+              <span class="cmd">npx agentshield exec \"&lt;cmd&gt;\"</span>"<br><br>
+              <span class="comment"># Or place in .claude/skills/agentshield/</span><br>
+              <span class="cmd">cp</span> SKILL.md .claude/skills/agentshield/
+            </div>
+          </div>
+
+          <div class="guide-card">
+            <h4><span>🔵</span> Cursor &amp; Windsurf Setup</h4>
+            <p>Add to your project's <code>.cursorrules</code> or <code>.windsurfrules</code>.</p>
+            <div class="code-block">
+              <span class="comment"># Add rule to .cursorrules:</span><br>
+              "Always run <span class="cmd">npx agentshield exec</span><br>
+              before inspecting configs or shell state.<br>
+              Verify staged diff with:<br>
+              <span class="cmd">npx agentshield hook check</span>"
+            </div>
+          </div>
+
+          <div class="guide-card">
+            <h4><span>⚡</span> Google Antigravity &amp; Codex</h4>
+            <p>Native agent skill execution with automatic activation.</p>
+            <div class="code-block">
+              <span class="comment"># AgentShield includes native SKILL.md</span><br>
+              <span class="cmd">cat</span> SKILL.md<br><br>
+              <span class="comment"># Automatically invokes local CLI gates</span><br>
+              <span class="success">✓ Zero setup required</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 6: Node.js SDK -->
+      <div id="guide-sdk" class="guide-panel">
+        <div class="guide-grid">
+          <div class="guide-card" style="grid-column: 1 / -1;">
+            <h4><span>🧩</span> Programmatic TypeScript / Node.js API</h4>
+            <p>Embed AgentShield redaction and sandboxing directly into custom agent frameworks, Express proxies, or LLM middleware.</p>
+            <div class="code-block">
+              <span class="keyword">import</span> { AgentShieldEngine, AgentCommandSandbox } <span class="keyword">from</span> <span class="arg">"agentshield"</span>;<br><br>
+              <span class="comment">// 1. Initialize Engine</span><br>
+              <span class="keyword">const</span> shield = <span class="keyword">new</span> AgentShieldEngine();<br><br>
+              <span class="comment">// 2. Sanitize LLM prompt input</span><br>
+              <span class="keyword">const</span> input = <span class="arg">"Connect using postgres://admin:secret123@db:5432/main"</span>;<br>
+              <span class="keyword">const</span> result = shield.scanAndRedact(input);<br>
+              console.log(result.sanitizedText);<br>
+              <span class="comment">// &rarr; "Connect using postgres://admin:[AGENT_SHIELD:GENERIC_PASSWORD:8f2a1b]@db:5432/main"</span><br><br>
+              <span class="comment">// 3. Rehydrate locally upon LLM completion</span><br>
+              <span class="keyword">const</span> original = shield.rehydrate(result.sanitizedText);<br><br>
+              <span class="comment">// 4. Test Shell Sandbox</span><br>
+              <span class="keyword">const</span> sandbox = <span class="keyword">new</span> AgentCommandSandbox();<br>
+              <span class="keyword">const</span> check = sandbox.inspect(<span class="arg">"cat .env"</span>);<br>
+              console.log(check.allowed); <span class="comment">// false</span>
+              <button class="copy-btn" onclick="copySnippet('import { AgentShieldEngine } from \'agentshield\';')">Copy</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Link to full markdown guide -->
+      <div style="text-align: center; margin-top: 2.5rem;">
+        <a href="https://github.com/RitualDev-Lab/AgentShield/blob/main/GUIDE.md" target="_blank" rel="noopener noreferrer" class="btn-lg btn-glass" style="border-color: rgba(6, 182, 212, 0.4); color: #38bdf8; display: inline-flex; align-items: center; gap: 0.5rem;">
+          <span>📖 View Complete Markdown Guide on GitHub (GUIDE.md) ➔</span>
+        </a>
+      </div>
+    </section>
+
     <!-- DevShelf Cross-Link Banner Callout -->
     <section class="devshelf-banner">
       <div class="devshelf-info">
@@ -810,6 +1252,8 @@
   <footer>
     <div class="footer-links">
       <a href="https://agentshield.ritualdev.in/">Home</a>
+      <a href="#guide">Run Guide</a>
+      <a href="https://github.com/RitualDev-Lab/AgentShield/blob/main/GUIDE.md" target="_blank" rel="noopener noreferrer">GUIDE.md</a>
       <a href="https://devshelf.ritualdev.in" target="_blank" rel="noopener noreferrer">DevShelf</a>
       <a href="https://github.com/RitualDev-Lab/AgentShield" target="_blank" rel="noopener">GitHub</a>
       <a href="https://github.com/RitualDev-Lab/AgentShield/discussions" target="_blank" rel="noopener">Discussions</a>
@@ -869,6 +1313,33 @@
         .replace(/sk_live_[0-9a-zA-Z]{24,100}/g, '[AGENT_SHIELD:STRIPE_SECRET_KEY:3d8e91a0b5c742f1]');
       
       document.getElementById('demo-output').innerText = sanitized;
+    }
+
+    function switchGuideTab(tabId) {
+      document.querySelectorAll('.guide-tab-btn').forEach(btn => btn.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+      document.querySelectorAll('.guide-panel').forEach(panel => panel.classList.remove('active'));
+      const activePanel = document.getElementById('guide-' + tabId);
+      if (activePanel) {
+        activePanel.classList.add('active');
+      }
+    }
+
+    function copySnippet(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = event.target;
+        const prev = btn.innerText;
+        btn.innerText = 'Copied!';
+        btn.style.background = 'rgba(16, 185, 129, 0.4)';
+        btn.style.color = '#fff';
+        setTimeout(() => {
+          btn.innerText = prev;
+          btn.style.background = '';
+          btn.style.color = '';
+        }, 1800);
+      }).catch(err => {
+        console.error('Copy failed', err);
+      });
     }
   </script>
 </body>
