@@ -1,0 +1,49 @@
+name: Bug Report
+description: Create a report to help us reproduce and fix an issue
+title: "[BUG]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report an issue with AgentShield!
+  - type: input
+    id: version
+    attributes:
+      label: AgentShield Version
+      description: What version of AgentShield are you running? (Run `npx agentshield --help`)
+      placeholder: "e.g. 0.1.0"
+    validations:
+      required: true
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Operating System / Agent Tool
+      description: Where is the agent executing?
+      options:
+        - Claude Code
+        - Cursor
+        - Windsurf
+        - GitHub Copilot / Codex
+        - Antigravity
+        - CLI (macOS / Linux / Windows)
+        - GitHub Actions CI
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: Describe what you did and what happened. (Never paste real secrets!)
+      placeholder: |
+        1. Run `npx agentshield exec "..."`
+        2. Notice that ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: A concise description of what you expected to happen.
+    validations:
+      required: true

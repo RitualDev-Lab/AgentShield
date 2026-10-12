@@ -1,0 +1,31 @@
+name: Feature Request / Pattern Submission
+description: Suggest a new secret detection pattern, framework, or sandbox capability
+title: "[FEATURE]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Suggest an improvement or propose support for a new token pattern or compliance standard.
+  - type: input
+    id: feature-title
+    attributes:
+      label: Proposed Feature / Pattern Name
+      description: Name of the proposed credential type, LLM provider, or capability.
+      placeholder: "e.g. Detect Pinecone API Keys, Add Azure Key Vault Sync"
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / Use Case
+      description: What is the current limitation or risk for autonomous AI agents?
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution / Regex Pattern
+      description: How should this work? If submitting a secret pattern, include synthetic non-real sample structure.
+    validations:
+      required: true
