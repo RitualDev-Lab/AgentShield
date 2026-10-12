@@ -1,0 +1,62 @@
+{
+  "name": "vscode-agentshield",
+  "displayName": "AgentShield — AI Agent Secret Shield",
+  "description": "Zero-leak secret defense, status bar alert, and environment guard for Cursor, VS Code, and AI Coding Agents.",
+  "version": "0.1.0",
+  "publisher": "RitualDev-Lab",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Security",
+    "Linters",
+    "Other"
+  ],
+  "keywords": [
+    "agent",
+    "secret",
+    "security",
+    "cursor",
+    "zero-leak",
+    "redaction",
+    "env-shield"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "agentshield.scanWorkspace",
+        "title": "AgentShield: Scan Current Workspace for Secrets",
+        "category": "AgentShield"
+      },
+      {
+        "command": "agentshield.redactActiveFile",
+        "title": "AgentShield: Redact Exposed Secrets in Active File",
+        "category": "AgentShield"
+      },
+      {
+        "command": "agentshield.auditCompliance",
+        "title": "AgentShield: Audit Compliance (SOC2 / PCI-DSS / HIPAA)",
+        "category": "AgentShield"
+      }
+    ],
+    "configuration": {
+      "title": "AgentShield",
+      "properties": {
+        "agentshield.enableStatusBar": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show AgentShield status and real-time shielded secret count in the status bar."
+        },
+        "agentshield.autoScanOnSave": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically audit files for leaked credentials when saved."
+        }
+      }
+    }
+  }
+}

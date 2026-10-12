@@ -6,6 +6,7 @@ on:
 
 jobs:
   publish-gpr:
+    name: Publish to GitHub Packages
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -36,7 +37,6 @@ jobs:
 
       - name: Publish to GitHub Packages
         run: |
-          # Temporarily namespace for GitHub Packages registry requirement
           node -e '
             const pkg = JSON.parse(require("fs").readFileSync("package.json", "utf8"));
             pkg.name = "@ritualdev-lab/agentshield";
@@ -45,3 +45,35 @@ jobs:
           npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  publish-npm:
+    name: Publish to npm Registry
+    runs-on: ubuntu-latest
+    if: false # Enable once NPM_TOKEN secret is added in repository settings
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build AgentShield
+        run: pnpm run build
+
+      - name: Publish to npm
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

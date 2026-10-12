@@ -16,6 +16,12 @@
 
 [⚡ Quick Start](#-quick-start) • [🛡️ Agent Sandbox](#-1-autonomous-agent-shell-sandbox) • [🐙 GitHub Action](#-3-cicd-security-gate--github-action) • [🤖 Agent Skill](#-ai-agent-skill-integration) • [📋 Compliance](#-4-enterprise-compliance-auditor) • [🌐 Website](https://ritualdev-lab.github.io/AgentShield/)
 
+<br/><br/>
+
+<p align="center">
+  <img src="docs/terminal-demo.svg" alt="AgentShield Terminal Sandbox Demo" width="820" />
+</p>
+
 </div>
 
 ---
