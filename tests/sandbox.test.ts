@@ -41,6 +41,9 @@ describe("AgentShield Command Sandbox", () => {
       "env | sort",
       "cat backend/.env",
       "head -n 20 .aws/credentials",
+      "sh -c 'cat .env'",
+      'bash -c "grep . .env"',
+      "sh -c $'cat\\t.env'",
     ];
 
     for (const cmd of bypassAttempts) {

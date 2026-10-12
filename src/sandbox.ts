@@ -6,7 +6,7 @@ export interface CommandInspectionResult {
 }
 
 /**
- * File basenames or target extensions that contain high-risk secrets.
+ * File basenames or target patterns that contain high-risk secrets.
  */
 const SENSITIVE_TARGET_FILES =
   /(?:^|[\s'"\/\\=])(?:\.env(?:\.[a-zA-Z0-9_\-]+)?|id_rsa|id_ed25519|id_ecdsa|\.aws[\/\\](?:credentials|config)|\.npmrc|\.netrc|\.gnupg[\/\\][a-zA-Z0-9_\-]+)(?:$|['"\s|;&><])/i;
@@ -16,6 +16,49 @@ const SENSITIVE_TARGET_FILES =
  */
 const FILE_READER_BINARIES =
   /\b(cat|more|less|tail|head|type|Get-Content|gc|grep|egrep|awk|sed|dd|xargs|nl|fold|paste|tac|strings)\b/i;
+
+/**
+ * Normalizes shell command strings by stripping common evasion wrappers
+ * (such as `sh -c "..."`, `bash -c '...'`, `$'\t'` escapes, and redundant quotes).
+ */
+export function normalizeShellCommand(cmd: string): string[] {
+  let normalized = cmd.trim();
+
+  // 1. Resolve bash ANSI-C quoting: $'\x20' or $'\t'
+  normalized = normalized.replace(/\$'([^']*)'/g, (_, content: string) => {
+    return content
+      .replace(/\\t/g, " ")
+      .replace(/\\n/g, " ")
+      .replace(/\\r/g, " ")
+      .replace(/\\x([0-9a-fA-F]{2})/g, (__, hex: string) =>
+        String.fromCharCode(Number.parseInt(hex, 16)),
+      );
+  });
+
+  // 2. Unpack subshell wrappers: sh -c "...", bash -c '...'
+  const subshellMatch = normalized.match(
+    /(?:^|[|;&]\s*)(?:sh|bash|zsh)\s+-c\s+(['"])(.*?)\1(?:\s*(?:[|;&]|$))/i,
+  );
+  if (subshellMatch?.[2]) {
+    return [normalized, subshellMatch[2]];
+  }
+
+  return [normalized];
+}
+
+/**
+ * Tokenizes a shell command line respecting quotes and pipes.
+ */
+export function tokenizeCommand(cmd: string): string[] {
+  const tokens: string[] = [];
+  const regex = /[^\s"']+|"([^"]*)"|'([^']*)'/g;
+  let match = regex.exec(cmd);
+  while (match !== null) {
+    tokens.push(match[1] ?? match[2] ?? match[0]);
+    match = regex.exec(cmd);
+  }
+  return tokens;
+}
 
 /**
  * Commands that dump raw environment secrets or read private credential stores directly.
@@ -67,15 +110,19 @@ export class AgentCommandSandbox {
    * Inspects a command before execution by an AI coding agent.
    */
   public inspectCommand(command: string): CommandInspectionResult {
-    const trimmed = command.trim();
+    const candidates = normalizeShellCommand(command);
 
-    for (const pattern of DANGEROUS_COMMAND_PATTERNS) {
-      if (pattern.test(trimmed)) {
-        return {
-          isBlocked: true,
-          reason: pattern.reason,
-          category: pattern.category,
-        };
+    for (const cmdVariant of candidates) {
+      const trimmed = cmdVariant.trim();
+
+      for (const pattern of DANGEROUS_COMMAND_PATTERNS) {
+        if (pattern.test(trimmed)) {
+          return {
+            isBlocked: true,
+            reason: pattern.reason,
+            category: pattern.category,
+          };
+        }
       }
     }
 
