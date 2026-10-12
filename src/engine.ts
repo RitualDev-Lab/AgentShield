@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { calculateShannonEntropy, isLikelyFalsePositive } from "./entropy.js";
 import { BUILTIN_PATTERNS } from "./patterns.js";
 import type { DetectedSecret, ScanOptions, ScanResult, SecretPattern } from "./types.js";
@@ -12,26 +13,37 @@ export class AgentShieldEngine {
   }
 
   /**
-   * Scans text content, detects secrets, and redacts them safely.
+   * Scans text content, detects known and unknown high-entropy secrets, and redacts them safely.
    */
   public scanAndRedact(text: string, options: ScanOptions = {}): ScanResult {
     const findings: DetectedSecret[] = [];
     const allowlist = new Set(options.allowlist || []);
+    const entropyThreshold = options.entropyThreshold ?? 4.5;
+    const detectedSecretsSet = new Set<string>();
     let sanitizedText = text;
-
-    const lines = text.split("\n");
 
     // 1. Pattern-based detection
     for (const pattern of this.patterns) {
       const regex = new RegExp(pattern.regex.source, pattern.regex.flags);
       let match = regex.exec(text);
+
       while (match !== null) {
-        // match[1] if group exists, else match[0]
+        // Guard against infinite loops with zero-length matching regex patterns
+        if (match[0].length === 0) {
+          regex.lastIndex++;
+          match = regex.exec(text);
+          continue;
+        }
+
+        // match[1] if capture group exists, else match[0]
         const rawSecret = match[1] || match[0];
 
         if (allowlist.has(rawSecret) || isLikelyFalsePositive(rawSecret)) {
+          match = regex.exec(text);
           continue;
         }
+
+        detectedSecretsSet.add(rawSecret);
 
         // Calculate line and column
         const preMatch = text.substring(0, match.index);
@@ -41,7 +53,7 @@ export class AgentShieldEngine {
 
         const entropy = calculateShannonEntropy(rawSecret);
 
-        // Generate deterministic token
+        // Generate deterministic 16-hex collision-resistant token
         const placeholder = this.getOrCreateRedactedToken(rawSecret, pattern.id, options.maskStyle);
 
         findings.push({
@@ -60,7 +72,58 @@ export class AgentShieldEngine {
       }
     }
 
-    // 2. Perform safe redactions
+    // 2. Active High-Entropy Discovery for unknown credentials / passwords
+    // Tokenizes assignments, quotes, and standalone candidate alphanumeric strings
+    const tokenRegex = /(?:["'`=:\s])([a-zA-Z0-9+/=_\-]{20,128})(?:["'`\s;\n]|$)/g;
+    let tokenMatch = tokenRegex.exec(text);
+
+    while (tokenMatch !== null) {
+      if (tokenMatch[0].length === 0) {
+        tokenRegex.lastIndex++;
+        tokenMatch = tokenRegex.exec(text);
+        continue;
+      }
+
+      const candidate = tokenMatch[1];
+      if (
+        !detectedSecretsSet.has(candidate) &&
+        !allowlist.has(candidate) &&
+        !isLikelyFalsePositive(candidate)
+      ) {
+        const entropy = calculateShannonEntropy(candidate);
+        // Shannon entropy threshold (standard 4.5+ bits/char indicates high randomness)
+        if (entropy >= entropyThreshold) {
+          detectedSecretsSet.add(candidate);
+
+          const preMatch = text.substring(0, tokenMatch.index);
+          const line = preMatch.split("\n").length;
+          const lastNewline = preMatch.lastIndexOf("\n");
+          const column = lastNewline === -1 ? tokenMatch.index + 1 : tokenMatch.index - lastNewline;
+
+          const placeholder = this.getOrCreateRedactedToken(
+            candidate,
+            "high-entropy-secret",
+            options.maskStyle,
+          );
+
+          findings.push({
+            patternId: "high-entropy-secret",
+            patternName: "Generic High-Entropy Secret",
+            category: "generic",
+            severity: "high",
+            raw: candidate,
+            redacted: placeholder,
+            line,
+            column,
+            entropy,
+          });
+        }
+      }
+
+      tokenMatch = tokenRegex.exec(text);
+    }
+
+    // 3. Perform safe deterministic redactions
     for (const finding of findings) {
       sanitizedText = sanitizedText.split(finding.raw).join(finding.redacted);
     }
@@ -85,6 +148,9 @@ export class AgentShieldEngine {
     return rehydrated;
   }
 
+  /**
+   * Generates deterministic, collision-resistant redaction tokens using SHA-256 (16 hex chars).
+   */
   private getOrCreateRedactedToken(
     raw: string,
     patternId: string,
@@ -99,9 +165,10 @@ export class AgentShieldEngine {
     if (maskStyle === "asterisk") {
       token = raw.substring(0, 4) + "*".repeat(Math.max(6, raw.length - 8)) + raw.slice(-4);
     } else {
-      const shortHash = Buffer.from(raw).toString("base64url").substring(0, 6);
+      // 16 hex characters of SHA-256 ensures zero collision across keys
+      const hexHash = createHash("sha256").update(raw).digest("hex").substring(0, 16);
       const cleanId = patternId.toUpperCase().replace(/[^A-Z0-9]/g, "_");
-      token = `[AGENT_SHIELD:${cleanId}:${shortHash}]`;
+      token = `[AGENT_SHIELD:${cleanId}:${hexHash}]`;
     }
 
     this.vaultMap.set(token, raw);

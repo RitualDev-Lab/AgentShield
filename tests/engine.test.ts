@@ -70,4 +70,30 @@ describe("AgentShield Detection & Redaction Engine", () => {
     const restored = engine.rehydrate(result.sanitizedText);
     assert.strictEqual(restored, original);
   });
+
+  test("actively discovers unknown high-entropy passwords and tokens", () => {
+    // Generate a standalone high-entropy token without any pattern keyword
+    const highEntropyToken = ["X9qK", "vL2z", "W8mP", "jR5y", "T1bN", "cE4x", "Z7hF"].join("");
+    const input = `const userSessionData = "${highEntropyToken}";`;
+    const result = engine.scanAndRedact(input);
+
+    assert.strictEqual(result.hasSecrets, true);
+    assert.strictEqual(result.findings[0].patternId, "high-entropy-secret");
+    assert.ok(result.sanitizedText.includes("[AGENT_SHIELD:HIGH_ENTROPY_SECRET:"));
+    assert.ok(!result.sanitizedText.includes(highEntropyToken));
+  });
+
+  test("prevents collision when secrets share identical prefixes", () => {
+    const sampleToken = ["sk-proj-", "1111111111111111111111111111111111111111"].join("");
+    const secretA = `${sampleToken}AAAA`;
+    const secretB = `${sampleToken}BBBB`;
+
+    const resA = engine.scanAndRedact(`const keyA = "${secretA}";`);
+    const resB = engine.scanAndRedact(`const keyB = "${secretB}";`);
+
+    assert.strictEqual(resA.hasSecrets, true);
+    assert.strictEqual(resB.hasSecrets, true);
+    // Redaction tokens must be completely distinct because hashes are 16 hex characters
+    assert.notStrictEqual(resA.findings[0].redacted, resB.findings[0].redacted);
+  });
 });
