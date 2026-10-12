@@ -30,9 +30,9 @@ export class CiGateRunner {
    * Scans git diff for CI workflows (pull requests and pushes)
    */
   public auditPullRequest(baseRef = "origin/main"): CiAuditResult {
-    // Validate baseRef to avoid injection or unexpected flags
+    // Validate baseRef to avoid injection or unexpected flags (allow branches, tags, HEAD~N, HEAD^N)
     const sanitizedBase = baseRef.trim();
-    if (!/^[a-zA-Z0-9_\-\.\/]+$/.test(sanitizedBase)) {
+    if (!/^[a-zA-Z0-9_\-\.\/~^]+$/.test(sanitizedBase)) {
       throw new Error(`Invalid git base ref: '${sanitizedBase}'`);
     }
 

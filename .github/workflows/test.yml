@@ -36,3 +36,7 @@ jobs:
 
       - name: Build Bundles
         run: pnpm run build
+
+      - name: Dogfood AgentShield CI Security Gate
+        run: npx tsx src/cli.ts ci --base HEAD~1
+

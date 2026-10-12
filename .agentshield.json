@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json.schemastore.org/package.json",
+  "version": "1.0.0",
+  "maskStyle": "token",
+  "entropyThreshold": 4.5,
+  "allowlist": ["sk-live-00000000000000000000000000000000"],
+  "ci": {
+    "failOnSeverity": "high",
+    "ignoreFiles": ["package-lock.json", "pnpm-lock.yaml"]
+  },
+  "customPatterns": [
+    {
+      "id": "internal-corp-token",
+      "name": "Internal Corp Secret",
+      "regex": "CORP_SEC_[a-zA-Z0-9]{16,32}",
+      "severity": "critical",
+      "category": "generic"
+    }
+  ]
+}
