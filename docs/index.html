@@ -5,23 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AgentShield — Zero-Leak Secret Defense for Autonomous AI Agents</title>
   <meta name="description" content="Enterprise-grade zero-leak secret defense, AST command sandbox, and CI/CD security gate for autonomous AI coding agents (Claude Code, Cursor, Windsurf, Codex, Antigravity).">
-  <link rel="canonical" href="https://ritualdev-lab.github.io/AgentShield/">
-  
-  <!-- Open Graph / Facebook -->
+  <link rel="canonical" href="https://agentshield.ritualdev.in/">
+
+  <!-- Open Graph / Social Media -->
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://ritualdev-lab.github.io/AgentShield/">
+  <meta property="og:url" content="https://agentshield.ritualdev.in/">
   <meta property="og:title" content="AgentShield — Zero-Leak Secret Defense for Autonomous AI Agents">
-  <meta property="og:description" content="Enterprise-grade zero-leak secret defense, AST command sandbox, and CI/CD security gate for AI coding agents.">
-  <meta property="og:image" content="https://ritualdev-lab.github.io/AgentShield/terminal-demo.svg">
+  <meta property="og:description" content="Enterprise-grade zero-leak secret defense, AST command sandbox, and CI/CD security gate for autonomous AI coding agents.">
+  <meta property="og:image" content="https://agentshield.ritualdev.in/terminal-demo.svg">
 
-  <!-- Twitter Card -->
+  <!-- Twitter Cards -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:url" content="https://ritualdev-lab.github.io/AgentShield/">
+  <meta name="twitter:url" content="https://agentshield.ritualdev.in/">
   <meta name="twitter:title" content="AgentShield — Zero-Leak Secret Defense for Autonomous AI Agents">
-  <meta name="twitter:description" content="Enterprise-grade zero-leak secret defense, AST command sandbox, and CI/CD security gate for AI coding agents.">
-  <meta name="twitter:image" content="https://ritualdev-lab.github.io/AgentShield/terminal-demo.svg">
+  <meta name="twitter:description" content="Enterprise-grade zero-leak secret defense, AST command sandbox, and CI/CD security gate for autonomous AI coding agents.">
+  <meta name="twitter:image" content="https://agentshield.ritualdev.in/terminal-demo.svg">
 
-  <!-- JSON-LD Structured Data for AEO / GEO -->
+  <!-- JSON-LD Structured Data (AEO & GEO Optimization) -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -29,8 +29,10 @@
       {
         "@type": "SoftwareApplication",
         "name": "AgentShield",
-        "operatingSystem": "Cross-platform (macOS, Linux, Windows)",
+        "url": "https://agentshield.ritualdev.in/",
+        "operatingSystem": "macOS, Linux, Windows",
         "applicationCategory": "SecurityApplication",
+        "softwareVersion": "0.1.0",
         "description": "Zero-leak secret defense layer, AST shell sandbox, and Git pre-commit security gate tailored specifically for autonomous AI coding agents.",
         "offers": {
           "@type": "Offer",
@@ -48,18 +50,26 @@
         "mainEntity": [
           {
             "@type": "Question",
-            "name": "How does AgentShield prevent AI coding agents from leaking secrets?",
+            "name": "How does AgentShield prevent AI coding assistants from leaking credentials?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "AgentShield inspects shell execution via AST normalization, blocking commands like cat .env, env dumps, and input redirections before they reach the terminal. Any detected credentials are substituted in real-time with deterministic SHA-256 surrogate tokens."
+              "text": "AgentShield intercepts agent shell commands via AST normalization (blocking cat .env, printenv, awk, dd, and curl with tokens) and substitutes exposed secrets in prompt streams with deterministic SHA-256 surrogate tokens."
             }
           },
           {
             "@type": "Question",
-            "name": "Does AgentShield send source code or secrets to the cloud?",
+            "name": "Is AgentShield cloud-based or local-first?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "No. AgentShield is completely local-first and air-gapped with zero telemetry, keeping all source code and credential evaluation on the developer machine."
+              "text": "AgentShield is strictly local-first and air-gapped with zero external telemetry, keeping all code, credentials, and logs securely on the developer's workstation."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Which AI coding agents are supported by AgentShield?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "AgentShield supports Claude Code, Cursor, Windsurf, OpenAI Codex, Google Antigravity, and all tools implementing the Model Context Protocol (MCP)."
             }
           }
         ]
@@ -68,334 +78,522 @@
   }
   </script>
 
+  <!-- Typography: GitHub Markdown & Code Stacks -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 
   <style>
     :root {
-      --bg: #0b0c10;
-      --card-bg: rgba(22, 27, 34, 0.7);
-      --card-border: rgba(139, 92, 246, 0.2);
-      --primary: #8b5cf6;
-      --primary-glow: rgba(139, 92, 246, 0.35);
-      --accent: #06b6d4;
-      --text: #f3f4f6;
-      --muted: #9ca3af;
-      --success: #10b981;
-      --danger: #ef4444;
+      --color-canvas-default: #0d1117;
+      --color-canvas-subtle: #161b22;
+      --color-canvas-inset: #010409;
+      --color-border-default: #30363d;
+      --color-border-muted: #21262d;
+      --color-fg-default: #e6edf3;
+      --color-fg-muted: #8b949e;
+      --color-fg-subtle: #6e7681;
+      --color-accent-fg: #58a6ff;
+      --color-accent-emphasis: #1f6feb;
+      --color-success-fg: #3fb950;
+      --color-danger-fg: #f85149;
+      --color-attention-fg: #d29922;
+      --color-neutral-muted: rgba(110, 118, 129, 0.4);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
-      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
-      background-color: var(--bg);
-      color: var(--text);
+      background-color: var(--color-canvas-default);
+      color: var(--color-fg-default);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      font-size: 16px;
       line-height: 1.6;
-      background-image: 
-        radial-gradient(circle at 50% 0%, rgba(139, 92, 246, 0.18) 0%, transparent 60%),
-        radial-gradient(circle at 10% 50%, rgba(6, 182, 212, 0.08) 0%, transparent 40%);
-      min-height: 100vh;
+      word-wrap: break-word;
+      padding-bottom: 5rem;
     }
 
-    nav {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 1.5rem 2rem;
+    /* Top Sticky GitHub-style Header */
+    .gh-header {
+      background-color: var(--color-canvas-subtle);
+      border-bottom: 1px solid var(--color-border-default);
+      padding: 0.85rem 1.5rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
 
-    .brand {
+    .gh-header-title {
       display: flex;
       align-items: center;
-      gap: 0.75rem;
-      font-weight: 800;
-      font-size: 1.35rem;
-      letter-spacing: -0.02em;
-      color: #fff;
-      text-decoration: none;
-    }
-
-    .brand-badge {
-      background: linear-gradient(135deg, var(--primary), var(--accent));
-      color: #fff;
-      font-size: 0.75rem;
-      padding: 0.2rem 0.5rem;
-      border-radius: 9999px;
-      font-weight: 700;
-    }
-
-    .nav-links {
-      display: flex;
-      gap: 1.5rem;
-      align-items: center;
-    }
-
-    .nav-links a {
-      color: var(--muted);
-      text-decoration: none;
-      font-size: 0.95rem;
-      font-weight: 500;
-      transition: color 0.2s;
-    }
-
-    .nav-links a:hover { color: #fff; }
-
-    .btn-github {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      padding: 0.5rem 1rem;
-      border-radius: 8px;
-      color: #fff;
-      text-decoration: none;
-      font-size: 0.9rem;
+      gap: 0.6rem;
+      font-size: 1.05rem;
       font-weight: 600;
-      transition: all 0.2s;
+      color: var(--color-fg-default);
+      text-decoration: none;
     }
 
-    .btn-github:hover {
-      background: rgba(255, 255, 255, 0.15);
-      border-color: rgba(255, 255, 255, 0.3);
-      transform: translateY(-1px);
+    .gh-header-title:hover {
+      color: var(--color-accent-fg);
     }
 
-    .hero {
-      max-width: 900px;
-      margin: 4rem auto 3rem;
-      text-align: center;
-      padding: 0 1.5rem;
+    .gh-badge {
+      display: inline-block;
+      padding: 0.15rem 0.5rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      line-height: 1;
+      color: var(--color-fg-muted);
+      border: 1px solid var(--color-border-default);
+      border-radius: 2em;
+      background-color: var(--color-canvas-inset);
     }
 
-    .hero-badge {
+    .gh-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+    }
+
+    .gh-btn {
       display: inline-flex;
       align-items: center;
-      gap: 0.5rem;
-      background: rgba(139, 92, 246, 0.1);
-      border: 1px solid rgba(139, 92, 246, 0.3);
-      padding: 0.4rem 1rem;
-      border-radius: 9999px;
+      gap: 0.4rem;
+      padding: 0.35rem 0.85rem;
       font-size: 0.85rem;
-      color: #c4b5fd;
-      margin-bottom: 1.5rem;
+      font-weight: 600;
+      color: var(--color-fg-default);
+      background-color: var(--color-canvas-subtle);
+      border: 1px solid var(--color-border-default);
+      border-radius: 6px;
+      text-decoration: none;
+      transition: 0.15s ease;
+    }
+
+    .gh-btn:hover {
+      background-color: #21262d;
+      border-color: #8b949e;
+    }
+
+    .gh-btn-primary {
+      background-color: #238636;
+      border-color: rgba(240, 246, 252, 0.1);
+      color: #ffffff;
+    }
+
+    .gh-btn-primary:hover {
+      background-color: #2ea043;
+      border-color: rgba(240, 246, 252, 0.1);
+    }
+
+    /* Markdown Document Container */
+    .markdown-body {
+      max-width: 980px;
+      margin: 2.5rem auto;
+      padding: 2.5rem 3rem;
+      background-color: var(--color-canvas-default);
+      border: 1px solid var(--color-border-default);
+      border-radius: 6px;
+    }
+
+    @media (max-width: 768px) {
+      .markdown-body {
+        border: none;
+        padding: 1.5rem 1rem;
+        margin: 0;
+      }
+    }
+
+    /* Markdown Headings */
+    h1, h2, h3, h4 {
+      margin-top: 1.75rem;
+      margin-bottom: 1rem;
+      font-weight: 600;
+      line-height: 1.25;
+      color: var(--color-fg-default);
     }
 
     h1 {
-      font-size: 3.5rem;
-      font-weight: 800;
-      letter-spacing: -0.03em;
-      line-height: 1.15;
-      margin-bottom: 1.5rem;
-      background: linear-gradient(180deg, #ffffff 40%, #9ca3af 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      font-size: 2.15rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 1px solid var(--color-border-muted);
+      margin-top: 0;
     }
 
-    .subtitle {
+    h2 {
+      font-size: 1.55rem;
+      padding-bottom: 0.3rem;
+      border-bottom: 1px solid var(--color-border-muted);
+      margin-top: 2.5rem;
+    }
+
+    h3 {
       font-size: 1.25rem;
-      color: var(--muted);
-      max-width: 720px;
-      margin: 0 auto 2.5rem;
+      margin-top: 1.5rem;
     }
 
-    .terminal-box {
-      background: #0f141c;
-      border: 1px solid var(--card-border);
-      border-radius: 12px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), 0 0 40px var(--primary-glow);
-      max-width: 720px;
-      margin: 0 auto 5rem;
-      text-align: left;
-      overflow: hidden;
+    p {
+      margin-bottom: 1rem;
+      color: var(--color-fg-default);
     }
 
-    .terminal-header {
-      background: #161b22;
+    a {
+      color: var(--color-accent-fg);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    hr {
+      height: 0.25em;
+      padding: 0;
+      margin: 2rem 0;
+      background-color: var(--color-border-default);
+      border: 0;
+    }
+
+    /* GitHub Badges Centered */
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin: 1.25rem 0;
+    }
+
+    .badge-row img {
+      height: 24px;
+    }
+
+    /* Markdown Code Blocks */
+    code, tt {
+      padding: 0.2em 0.4em;
+      margin: 0;
+      font-size: 85%;
+      white-space: break-spaces;
+      background-color: var(--color-neutral-muted);
+      border-radius: 6px;
+      font-family: 'JetBrains Mono', SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+    }
+
+    pre {
+      padding: 1rem;
+      overflow: auto;
+      font-size: 85%;
+      line-height: 1.55;
+      background-color: var(--color-canvas-subtle);
+      border: 1px solid var(--color-border-default);
+      border-radius: 6px;
+      margin-bottom: 1.25rem;
+      font-family: 'JetBrains Mono', SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+    }
+
+    pre code {
+      padding: 0;
+      margin: 0;
+      font-size: 100%;
+      word-break: normal;
+      white-space: pre;
+      background: transparent;
+      border: 0;
+      color: var(--color-fg-default);
+    }
+
+    /* GitHub Alert Blockquotes */
+    .markdown-alert {
       padding: 0.75rem 1rem;
+      margin-bottom: 1.25rem;
+      border-left: 0.25em solid;
+      border-radius: 0 6px 6px 0;
+      background-color: var(--color-canvas-subtle);
+    }
+
+    .markdown-alert-note {
+      border-left-color: var(--color-accent-fg);
+    }
+
+    .markdown-alert-tip {
+      border-left-color: var(--color-success-fg);
+    }
+
+    .markdown-alert-important {
+      border-left-color: #ab7df8;
+    }
+
+    .markdown-alert-warning {
+      border-left-color: var(--color-attention-fg);
+    }
+
+    .markdown-alert-caution {
+      border-left-color: var(--color-danger-fg);
+    }
+
+    .markdown-alert-title {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
-    .dot-red { background: #ef4444; }
-    .dot-yellow { background: #f59e0b; }
-    .dot-green { background: #10b981; }
-
-    .terminal-title {
-      color: var(--muted);
-      font-size: 0.8rem;
-      font-family: 'JetBrains Mono', monospace;
-      margin-left: 0.5rem;
-    }
-
-    .terminal-body {
-      padding: 1.5rem;
-      font-family: 'JetBrains Mono', monospace;
+      gap: 0.4rem;
+      font-weight: 600;
       font-size: 0.95rem;
-      line-height: 1.7;
+      margin-bottom: 0.35rem;
     }
 
-    .cmd-line { color: #a78bfa; margin-bottom: 0.75rem; }
-    .cmd-prompt { color: var(--accent); }
-    .cmd-out-blocked { color: #f87171; }
-    .cmd-out-success { color: #34d399; }
-    .cmd-out-redact { color: #fbbf24; }
-
-    .features-grid {
-      max-width: 1100px;
-      margin: 0 auto 6rem;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 1.5rem;
-      padding: 0 1.5rem;
+    /* Markdown Tables */
+    table {
+      border-spacing: 0;
+      border-collapse: collapse;
+      width: 100%;
+      margin: 1.25rem 0;
+      overflow: auto;
+      display: block;
     }
 
-    .card {
-      background: var(--card-bg);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 12px;
-      padding: 2rem;
-      backdrop-filter: blur(12px);
-      transition: transform 0.2s, border-color 0.2s;
+    th, td {
+      padding: 8px 14px;
+      border: 1px solid var(--color-border-default);
     }
 
-    .card:hover {
-      transform: translateY(-3px);
-      border-color: var(--primary);
+    th {
+      font-weight: 600;
+      background-color: var(--color-canvas-subtle);
     }
 
-    .card-icon {
-      font-size: 2rem;
-      margin-bottom: 1rem;
-      display: inline-block;
+    tr:nth-child(2n) {
+      background-color: rgba(22, 27, 34, 0.4);
     }
 
-    .card h3 {
-      font-size: 1.25rem;
-      font-weight: 700;
-      margin-bottom: 0.75rem;
-      color: #fff;
+    /* Lists */
+    ul, ol {
+      padding-left: 2em;
+      margin-bottom: 1.25rem;
     }
 
-    .card p {
-      color: var(--muted);
-      font-size: 0.95rem;
+    li {
+      margin-bottom: 0.35rem;
     }
 
-    footer {
-      border-top: 1px solid rgba(255, 255, 255, 0.08);
-      padding: 3rem 1.5rem;
-      text-align: center;
-      color: var(--muted);
-      font-size: 0.9rem;
+    /* Hero SVG preview container */
+    .preview-box {
+      border: 1px solid var(--color-border-default);
+      border-radius: 6px;
+      overflow: hidden;
+      margin: 1.5rem 0 2rem;
+      background: var(--color-canvas-inset);
     }
 
-    footer a { color: #c4b5fd; text-decoration: none; }
-    footer a:hover { text-decoration: underline; }
+    .preview-box img {
+      width: 100%;
+      display: block;
+    }
+
+    /* Terminal Output Highlights */
+    .output-blocked {
+      color: var(--color-danger-fg);
+      font-weight: 500;
+    }
+
+    .output-clean {
+      color: var(--color-success-fg);
+      font-weight: 500;
+    }
   </style>
 </head>
 <body>
-  <nav>
-    <a href="#" class="brand">
-      🛡️ AgentShield
-      <span class="brand-badge">v0.1.0</span>
+
+  <!-- Sticky GitHub Navigation Header -->
+  <header class="gh-header">
+    <a href="https://github.com/RitualDev-Lab/AgentShield" class="gh-header-title">
+      <span>🛡️</span>
+      <span>RitualDev-Lab / <strong>AgentShield</strong></span>
+      <span class="gh-badge">Public</span>
     </a>
-    <div class="nav-links">
-      <a href="https://github.com/RitualDev-Lab/AgentShield#readme">Documentation</a>
-      <a href="https://github.com/RitualDev-Lab/AgentShield/actions">Marketplace Action</a>
-      <a href="https://github.com/RitualDev-Lab/AgentShield" class="btn-github">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-        GitHub
+    <div class="gh-header-actions">
+      <a href="https://github.com/RitualDev-Lab/AgentShield/stargazers" class="gh-btn" target="_blank" rel="noopener">
+        ⭐ Star
+      </a>
+      <a href="https://github.com/RitualDev-Lab/AgentShield" class="gh-btn gh-btn-primary" target="_blank" rel="noopener">
+        View on GitHub
       </a>
     </div>
-  </nav>
+  </header>
 
-  <section class="hero">
-    <div class="hero-badge">
-      ⚡ Enterprise-Grade Zero-Leak Defense Layer
-    </div>
-    <h1>Stop Autonomous AI Agents from Leaking Secrets.</h1>
-    <p class="subtitle">
-      Deterministic secret interception, real-time command sandboxing, git pre-commit gates, and compliance audits for Claude Code, Cursor, Windsurf, Codex, and Antigravity.
-    </p>
+  <!-- Markdown-Styled Container (Rendered exactly like GitHub README.md) -->
+  <main class="markdown-body">
 
-    <div class="terminal-box">
-      <div class="terminal-header">
-        <span class="dot dot-red"></span>
-        <span class="dot dot-yellow"></span>
-        <span class="dot dot-green"></span>
-        <span class="terminal-title">bash — agentshield sandbox</span>
-      </div>
-      <div class="terminal-body">
-        <div class="cmd-line">
-          <span class="cmd-prompt">agent@terminal:~$</span> npx agentshield exec "cat .env"
-        </div>
-        <div class="cmd-out-blocked">
-          🚨 [AgentShield Sandbox Block] Blocked attempt to read raw .env file.<br>
-          Protected from dumping private credentials into agent LLM context window!
-        </div>
-        <br>
-        <div class="cmd-line">
-          <span class="cmd-prompt">agent@terminal:~$</span> npx agentshield compliance .env
-        </div>
-        <div class="cmd-out-success">
-          📋 [ENTERPRISE COMPLIANCE AUDIT] Status: COMPLIANT (Score: 100%)<br>
-          &nbsp;&nbsp;✅ [SOC2] CC6.1: Logical Access Controls Passed<br>
-          &nbsp;&nbsp;✅ [PCI-DSS] Req-3.4: Cardholder Data Unreadable Passed<br>
-          &nbsp;&nbsp;✅ [ISO27001] A.8.28: Secure Coding Standards Passed
-        </div>
-      </div>
-    </div>
-  </section>
+    <h1>🛡️ AgentShield</h1>
+    <p><strong>Enterprise-Grade Zero-Leak Secret Defense & Shell Sandbox for Autonomous AI Coding Agents</strong></p>
 
-  <section class="features-grid">
-    <div class="card">
-      <div class="card-icon">🔍</div>
-      <h3>Shannon Entropy & Pattern Engine</h3>
-      <p>High-precision detection for AI keys (OpenAI, Anthropic, Gemini), Cloud tokens (AWS), SaaS (Stripe, Slack), and high-entropy passwords.</p>
+    <div class="badge-row">
+      <a href="https://github.com/RitualDev-Lab/AgentShield/stargazers"><img src="https://img.shields.io/github/stars/RitualDev-Lab/AgentShield?style=flat&logo=github&color=8b5cf6" alt="GitHub Stars"></a>
+      <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg?style=flat" alt="License"></a>
+      <a href="https://github.com/RitualDev-Lab/AgentShield"><img src="https://img.shields.io/badge/GitHub_Action-v1-purple.svg?style=flat&logo=github-actions" alt="GitHub Action"></a>
+      <a href="https://nodejs.org"><img src="https://img.shields.io/badge/Node-%3E%3D20.0-emerald.svg?style=flat&logo=nodedotjs" alt="Node Runtime"></a>
+      <a href="tests/"><img src="https://img.shields.io/badge/Tests-48%2F48_Passing-brightgreen.svg?style=flat" alt="Tests"></a>
+      <a href="https://agentshield.ritualdev.in/"><img src="https://img.shields.io/badge/Domain-AgentShield.ritualdev.in-cyan.svg?style=flat" alt="Custom Domain"></a>
     </div>
 
-    <div class="card">
-      <div class="card-icon">🛡️</div>
-      <h3>Agent Shell Command Sandbox</h3>
-      <p>Intercepts agent terminal execution. Prevents <code>cat .env</code>, environment dumps (<code>printenv</code>), and token exfiltration via <code>curl</code>.</p>
-    </div>
-
-    <div class="card">
-      <div class="card-icon">🚦</div>
-      <h3>Git Pre-Commit Gate</h3>
-      <p>Installs with a single command (<code>npx agentshield hook git-install</code>) to audit staged git diffs and stop credentials before they touch git history.</p>
-    </div>
-
-    <div class="card">
-      <div class="card-icon">🐙</div>
-      <h3>GitHub Action PR Gate</h3>
-      <p>Drop-in composite action (<code>RitualDev-Lab/AgentShield@v1</code>) auditing incoming pull request diffs and generating step summary reports.</p>
-    </div>
-
-    <div class="card">
-      <div class="card-icon">📡</div>
-      <h3>SIEM Telemetry Exporter</h3>
-      <p>Integrates with Splunk, Datadog, and Microsoft Sentinel in Common Event Format (CEF) and Syslog RFC 5424.</p>
-    </div>
-
-    <div class="card">
-      <div class="card-icon">🔐</div>
-      <h3>Zero-Trust Vault Injection</h3>
-      <p>Replaces plaintext environment secrets with surrogate tokens. The real token never enters the autonomous agent's memory.</p>
-    </div>
-  </section>
-
-  <footer>
     <p>
-      Maintained with 💜 by <a href="https://github.com/RitualDev-Lab">RitualDev Lab</a>. Open Source under Apache 2.0 License.
+      <strong>Stop AI coding assistants from dumping <code>.env</code>, cloud credentials, API tokens, and database keys into LLM context windows, terminal logs, or git commits.</strong>
     </p>
-  </footer>
+
+    <div class="preview-box">
+      <img src="terminal-demo.svg" alt="AgentShield Terminal Sandbox Demo">
+    </div>
+
+    <div class="markdown-alert markdown-alert-tip">
+      <div class="markdown-alert-title">💡 Instant 30-Second Quick Start</div>
+      <p>No account or background daemon required. Run instantly with <code>npx</code> on any system:</p>
+      <pre><code># 1. Audit a config or repository for leaked secrets
+npx agentshield scan .env
+
+# 2. Prevent git commits with leaked secrets (installs pre-commit gate)
+npx agentshield hook git-install
+
+# 3. Intercept & sandbox agent shell execution
+npx agentshield exec "cat .env"</code></pre>
+    </div>
+
+    <h2>💥 The AI Agent Security Blindspot</h2>
+    <p>
+      Autonomous coding agents (<strong>Claude Code</strong>, <strong>Cursor</strong>, <strong>Windsurf</strong>, <strong>Codex</strong>, <strong>Antigravity</strong>) operate with the ambient privileges of the host developer. Without containment, agents routinely:
+    </p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Vulnerability Vector</th>
+          <th>Agent Action</th>
+          <th>Threat Impact</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Context Window Leak</strong></td>
+          <td>Agent executes <code>cat .env</code> or <code>type .env</code> to inspect environment configs.</td>
+          <td>Production credentials leak to external LLM provider inference APIs & prompt logs.</td>
+        </tr>
+        <tr>
+          <td><strong>Accidental Exfiltration</strong></td>
+          <td>Agent runs <code>curl</code>, <code>wget</code>, or shell scripts with exported environment variables.</td>
+          <td>Ephemeral credentials dumped into shell history and CI/CD artifacts.</td>
+        </tr>
+        <tr>
+          <td><strong>Git Contamination</strong></td>
+          <td>Agent writes test code containing live test credentials or unmasked tokens.</td>
+          <td>Secrets permanently committed to Git history and pull requests.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p>
+      <strong>AgentShield</strong> operates as a deterministic, local-first runtime firewall that intercepts, audits, and redacts credentials before they ever escape your machine.
+    </p>
+
+    <hr>
+
+    <h2>🚀 Core Defense Layers</h2>
+
+    <h3>1. Autonomous Agent Shell Command Sandbox</h3>
+    <p>
+      Normalizes and tokenizes shell commands via AST parsing. If an agent wraps commands in subshells (<code>sh -c "..."</code>), attempts ANSI-C escapes (<code>$'cat\t.env'</code>), uses redirection (<code>&lt; .env</code>), or runs reader binaries (<code>grep</code>, <code>awk</code>, <code>dd</code>, <code>python -c ...</code>), AgentShield intercepts it on the fly:
+    </p>
+    <pre><code>$ npx agentshield exec "cat .env"
+<span class="output-blocked">🚨 [AgentShield Sandbox Block] Blocked attempt to read raw .env file directly into agent terminal context.
+   Command: 'cat .env'</span></code></pre>
+
+    <h3>2. Git Pre-Commit Leak Shield</h3>
+    <p>
+      Audits staged files and diffs before they enter Git history. Recursively scans subdirectories (e.g. <code>backend/.env</code> or <code>keys/id_rsa</code>) and supports Git worktrees:
+    </p>
+    <pre><code># Install non-destructive hook in repository
+npx agentshield hook git-install
+
+# Manually verify staged changes
+npx agentshield hook check</code></pre>
+
+    <h3>3. GitHub Action CI/CD Security Gate</h3>
+    <p>
+      Prevent exposed secrets from merging into main branches. Drop into any workflow:
+    </p>
+    <pre><code>name: AgentShield Security Gate
+on: [pull_request, push]
+
+jobs:
+  secret-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: RitualDev-Lab/AgentShield@v1
+        with:
+          fail_on_leak: "true"</code></pre>
+
+    <h3>4. Active Shannon Entropy Discovery ($H \ge 4.5$)</h3>
+    <p>
+      Beyond static regex patterns, AgentShield scans candidate alphanumeric tokens <code>[a-zA-Z0-9+/=_\-]{20,128}</code> to compute informational Shannon Entropy:
+    </p>
+    <pre><code>H(X) = - &sum; P(x) &times; log&sub2;(P(x))</code></pre>
+    <p>
+      Any unknown token with $H \ge 4.5$ bits/char is flagged and masked, protecting against unstructured passwords, custom API keys, and randomly generated tokens.
+    </p>
+
+    <h3>5. Zero-Trust In-Memory Surrogate Injection</h3>
+    <p>
+      Instead of cleartext values, credentials are substituted with deterministic 16-hex SHA-256 tokens (<code>[AGENT_SHIELD:ID:hexHash]</code>). This guarantees 1:1 mathematical bijection without token collision during local rehydration:
+    </p>
+    <pre><code>const rawPrompt = "Authorization: Bearer sk-proj-1234567890abcdef...";
+const result = shield.scanAndRedact(rawPrompt);
+// Sanitized: "Authorization: Bearer [AGENT_SHIELD:OPENAI_API_KEY:4a7f9b8c1d2e3f40]"
+
+// Deterministically restored locally upon agent response:
+const original = shield.rehydrate(result.sanitizedText);</code></pre>
+
+    <h3>6. Regulatory Compliance Attestation</h3>
+    <p>
+      Map findings directly to SOC2 CC6.1, PCI-DSS Req-3.4, HIPAA §164.312, and ISO27001 A.8.28:
+    </p>
+    <pre><code>$ npx agentshield compliance .env
+<span class="output-clean">📋 [ENTERPRISE COMPLIANCE AUDIT] Status: COMPLIANT (Score: 100%)
+  ✅ [SOC2] CC6.1: Logical Access Controls & Credential Integrity
+  ✅ [PCI-DSS] Req-3.4: Protection of Authentication & Cardholder Tokens
+  ✅ [HIPAA] §164.312(a)(1): Technical Safeguards - Access Control
+  ✅ [ISO27001] A.8.28: Secure Coding & Secret Management</span></code></pre>
+
+    <hr>
+
+    <h2>⚡ Performance Benchmarks</h2>
+    <p>
+      Evaluated on standard developer workstations to ensure sub-millisecond agent execution:
+    </p>
+    <ul>
+      <li><strong>Inspection Throughput:</strong> ~3.08 MB / second</li>
+      <li><strong>Operations Velocity:</strong> 29,941 scans / second</li>
+      <li><strong>Average Latency:</strong> <strong>0.033 ms</strong> per scan (sub-15ms constraint met)</li>
+    </ul>
+
+    <hr>
+
+    <h2>🤝 AI Search & LLM Specifications</h2>
+    <p>
+      AgentShield provides standardized specifications for automated consumption by AI search agents:
+    </p>
+    <ul>
+      <li><a href="llms.txt"><code>llms.txt</code></a> — High-level summary for generative models.</li>
+      <li><a href="llms-full.txt"><code>llms-full.txt</code></a> — Deep technical architecture & API specification.</li>
+    </ul>
+
+    <hr>
+
+    <div style="text-align: center; color: var(--color-fg-muted); font-size: 0.85rem; margin-top: 2rem;">
+      <p>Maintained with 💜 by <a href="https://github.com/RitualDev-Lab">RitualDev Lab</a> • Licensed under Apache 2.0</p>
+      <p>Canonical Domain: <a href="https://agentshield.ritualdev.in/">AgentShield.ritualdev.in</a></p>
+    </div>
+
+  </main>
+
 </body>
 </html>

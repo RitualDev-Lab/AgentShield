@@ -3,8 +3,9 @@
 
 AgentShield is an open-source, local-first runtime security layer designed to prevent autonomous AI coding agents (Claude Code, Cursor, Windsurf, Codex, Antigravity) from reading `.env` files, leaking private cloud credentials into LLM inference contexts, or committing secrets into Git repositories.
 
-Website: https://ritualdev-lab.github.io/AgentShield/
+Website: https://agentshield.ritualdev.in/
 Repository: https://github.com/RitualDev-Lab/AgentShield
+
 License: Apache-2.0
 
 ## Quick Start CLI

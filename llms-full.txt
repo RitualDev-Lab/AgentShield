@@ -1,7 +1,8 @@
 # AgentShield: Complete Technical Reference & AI Architecture Guide
 
 > Open-Source Zero-Leak Secret Defense & Sandboxing for Autonomous AI Coding Agents
-> Canonical URL: https://ritualdev-lab.github.io/AgentShield/
+> Canonical URL: https://agentshield.ritualdev.in/
+
 > Repository: https://github.com/RitualDev-Lab/AgentShield
 > Author: RitualDev Lab (https://github.com/RitualDev-Lab)
 > License: Apache-2.0

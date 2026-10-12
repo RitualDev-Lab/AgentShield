@@ -16,7 +16,8 @@
 
 **Stop AI coding assistants from dumping `.env`, cloud tokens, API keys, and database passwords into LLM prompts, terminal logs, or git commits.**
 
-[⚡ Quick Start](#-quick-start) • [🛡️ Agent Sandbox](#-1-autonomous-agent-shell-sandbox) • [🐙 GitHub Action](#-3-cicd-security-gate--github-action) • [🤖 Agent Skill](#-ai-agent-skill-integration) • [📋 Compliance](#-4-enterprise-compliance-auditor) • [🌐 Website](https://ritualdev-lab.github.io/AgentShield/)
+[⚡ Quick Start](#-quick-start) • [🛡️ Agent Sandbox](#-1-autonomous-agent-shell-sandbox) • [🐙 GitHub Action](#-3-cicd-security-gate--github-action) • [🤖 Agent Skill](#-ai-agent-skill-integration) • [📋 Compliance](#-4-enterprise-compliance-auditor) • [🌐 Website](https://agentshield.ritualdev.in/)
+
 
 <br/><br/>
 
