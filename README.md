@@ -8,9 +8,10 @@
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg?style=for-the-badge)](LICENSE)
 [![GitHub Action](https://img.shields.io/badge/GitHub_Action-v1-purple.svg?style=for-the-badge&logo=github-actions)](https://github.com/RitualDev-Lab/AgentShield)
 [![Node Runtime](https://img.shields.io/badge/Node-%3E%3D20.0-emerald.svg?style=for-the-badge&logo=nodedotjs)](https://nodejs.org)
-[![Tests](https://img.shields.io/badge/Tests-21%2F21_Passing-brightgreen.svg?style=for-the-badge)](tests/)
+[![Tests](https://img.shields.io/badge/Tests-45%2F45_Passing-brightgreen.svg?style=for-the-badge)](tests/)
 
 <br />
+
 
 **Stop AI coding assistants from dumping `.env`, cloud tokens, API keys, and database passwords into LLM prompts, terminal logs, or git commits.**
 
@@ -117,8 +118,9 @@ npx agentshield compliance .env
   ✅ [ISO27001] A.8.28: Secure Coding & Secret Management
 ```
 
-### 🔐 5. Zero-Trust Vault Surrogate Injection
-Instead of cleartext `.env` keys, AgentShield provides ephemeral surrogate tokens (`[VAULT_INJECTED:KEY:hash]`). Agents can safely manipulate configurations without ever seeing the real secret in memory.
+### 🔐 5. Zero-Trust In-Memory Surrogate Injection
+Instead of cleartext `.env` keys, AgentShield provides deterministic, collision-resistant surrogate tokens (`[AGENT_SHIELD:ID:hexHash]`). Agents can safely manipulate configurations and inspect outputs without ever seeing the plaintext secret in prompt history, rehydrating values locally when required.
+
 
 ---
 

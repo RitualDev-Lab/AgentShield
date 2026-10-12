@@ -1,0 +1,32 @@
+# AgentShield
+> Enterprise-Grade Zero-Leak Secret Defense & Sandboxing for Autonomous AI Coding Agents
+
+AgentShield is an open-source, local-first runtime security layer designed to prevent autonomous AI coding agents (Claude Code, Cursor, Windsurf, Codex, Antigravity) from reading `.env` files, leaking private cloud credentials into LLM inference contexts, or committing secrets into Git repositories.
+
+Website: https://ritualdev-lab.github.io/AgentShield/
+Repository: https://github.com/RitualDev-Lab/AgentShield
+License: Apache-2.0
+
+## Quick Start CLI
+```bash
+# Audit a configuration file for leaked secrets
+npx agentshield scan .env
+
+# Install pre-commit hook in local repository
+npx agentshield hook git-install
+
+# Sandbox an agent bash command with real-time output redaction
+npx agentshield exec "cat .env"
+
+# Audit git pull request diff in CI
+npx agentshield ci --base origin/main
+```
+
+## Core Security Capabilities
+- **Autonomous Agent Shell Sandbox**: Intercepts high-risk commands (`cat .env`, `grep . .env`, `type .env`, `python -c "open('.env')"`, `env | sort`, `export`, `printenv`, `curl ... $API_KEY`) and prevents secrets from entering agent terminal context.
+- **Active Shannon Entropy Discovery**: Scans candidate tokens for informational entropy H >= 4.5 bits/char to uncover unknown high-entropy passwords, tokens, and random credentials alongside structured regex patterns.
+- **SHA-256 Collision Defense**: Deterministic surrogate tokens map 1:1 using 16-hex digest hashes (`[AGENT_SHIELD:ID:hexHash]`) to guarantee zero collision during rehydration.
+- **Micro-Sandboxing & MCP Protocol Interception**: Micro-sandboxing profiles for macOS (Seatbelt sandbox-exec), Linux (bwrap/seccomp), and Windows integrity levels, combined with inline JSON-RPC sanitization for Model Context Protocol (MCP) server calls.
+- **Cryptographic Write-Ahead Audit Ledger**: SHA-256 HMAC chained event logs with sequential verification preventing retrospective log tampering.
+- **Cross-Turn Taint Graph & Canary Decoys**: Directional taint propagation tracking multi-turn prompt leakages, coupled with honeypot synthetic decoy tripwires that alert on unauthorized tool access.
+- **Local-First Air-Gapped Architecture**: Zero telemetry, zero external network dependencies, ensuring strict compliance with SOC2 CC6.1, PCI-DSS Req-3.4, HIPAA §164.312, and ISO27001 A.8.28.
