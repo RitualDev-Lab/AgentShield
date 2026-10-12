@@ -30,7 +30,7 @@ export class KernelSandboxConfinement {
    * Generates Apple Seatbelt sandbox profile for macOS hosts
    */
   public generateSeatbeltProfile(): string {
-    const safeWorkspace = this.workspaceDir.replace(/"/g, '\\"');
+    const safeWorkspace = this.workspaceDir.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
     return `(version 1)
 (deny default)
 (allow process-exec)
@@ -51,7 +51,11 @@ export class KernelSandboxConfinement {
    * Generates Linux Landlock LSM / seccomp runner script
    */
   public generateLinuxLandlockScript(): string {
-    const safeWorkspace = this.workspaceDir;
+    const safeWorkspace = this.workspaceDir
+      .replace(/\\/g, "\\\\")
+      .replace(/"/g, '\\"')
+      .replace(/\$/g, "\\$")
+      .replace(/`/g, "\\`");
     return `#!/bin/sh
 # AgentShield Landlock LSM & Seccomp Confinement Wrapper
 export LANDLOCK_ENABLED=1

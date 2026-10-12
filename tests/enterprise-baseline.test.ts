@@ -24,7 +24,6 @@ describe("Phase F: Enterprise Value-Adds (Live Verification, Baselines & Benchma
       entropy: 4.8,
     };
 
-
     const res = LiveSecretVerifier.verifyOffline(awsFinding);
     assert.equal(res.isValid, true);
     assert.equal(res.status, "active");

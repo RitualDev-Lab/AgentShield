@@ -13,7 +13,7 @@ describe("Phase 5: Enterprise Distribution, IDE Marketplace & Control Plane", ()
     const policy = controlPlane.getActivePolicy();
     assert.equal(policy.policyVersion, "2026.2.0-LTS");
     assert.equal(policy.enforceKernelSandbox, true);
-    assert.ok(policy.allowedEgressDomains.includes("github.com"));
+    assert.ok(policy.allowedEgressDomains.some((d) => d === "github.com"));
   });
 
   it("should synchronize node telemetry and trigger alerts for blocked or quarantined agents", () => {

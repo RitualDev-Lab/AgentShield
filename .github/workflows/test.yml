@@ -6,7 +6,11 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
+
   test:
     name: Run Test Suite & Biome Check
     runs-on: ubuntu-latest
