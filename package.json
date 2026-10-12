@@ -9,6 +9,18 @@
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "files": ["dist", "README.md", "LICENSE", "SKILL.md", "action.yml"],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RitualDev-Lab/AgentShield.git"
+  },
+  "homepage": "https://github.com/RitualDev-Lab/AgentShield#readme",
+  "bugs": {
+    "url": "https://github.com/RitualDev-Lab/AgentShield/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
