@@ -1,6 +1,7 @@
-#!/usr/bin/env node
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { loadConfig, parseCustomPatterns } from "./config.js";
 import { AgentShieldEngine } from "./engine.js";
+import type { ScanOptions } from "./types.js";
 
 function printBanner() {
   console.log(`
@@ -31,7 +32,7 @@ Options:
   --report <filePath>                    Write Markdown security audit report to file
   --sarif <filePath>                     Export findings in OASIS SARIF 2.1.0 format
   --format <cef|json|syslog>             SIEM log output format
-  --style <token|asterisk>               Redaction format (default: token)
+  --style <token|hash|asterisk>          Redaction format (default: token)
   --json                                 Output findings in structured JSON
   --help, -h                             Show this help message
 `);
@@ -46,7 +47,26 @@ async function main() {
     process.exit(0);
   }
 
-  const engine = new AgentShieldEngine();
+  // Load configuration from .agentshield.json or agentshield.config.json
+  const config = loadConfig(process.cwd());
+  const customPatterns = parseCustomPatterns(config);
+  const engine = new AgentShieldEngine(customPatterns);
+
+  // Parse command options (flags take precedence, fallback to config)
+  let maskStyle = config?.maskStyle || "token";
+  const styleIdx = args.indexOf("--style");
+  if (styleIdx !== -1 && args[styleIdx + 1]) {
+    const s = args[styleIdx + 1].toLowerCase();
+    if (s === "token" || s === "hash" || s === "asterisk") {
+      maskStyle = s as "token" | "hash" | "asterisk";
+    }
+  }
+
+  const scanOptions: ScanOptions = {
+    allowlist: config?.allowlist || [],
+    entropyThreshold: config?.entropyThreshold ?? 4.5,
+    maskStyle,
+  };
 
   if (command === "scan" || command === "redact") {
     const targetFile = args[1];
@@ -62,7 +82,7 @@ async function main() {
 
     const content = readFileSync(targetFile, "utf8");
     const isJson = args.includes("--json");
-    const result = engine.scanAndRedact(content);
+    const result = engine.scanAndRedact(content, scanOptions);
 
     if (command === "scan") {
       if (isJson) {
@@ -124,7 +144,7 @@ async function main() {
       buffer += chunk;
     });
     process.stdin.on("end", () => {
-      const result = engine.scanAndRedact(buffer);
+      const result = engine.scanAndRedact(buffer, scanOptions);
       process.stdout.write(result.sanitizedText);
       process.exit(0);
     });

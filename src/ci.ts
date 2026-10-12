@@ -2,7 +2,7 @@ import { execFileSync } from "node:child_process";
 import { readFileSync, writeFileSync } from "node:fs";
 import { loadConfig, parseCustomPatterns } from "./config.js";
 import { AgentShieldEngine } from "./engine.js";
-import type { DetectedSecret } from "./types.js";
+import type { DetectedSecret, ScanOptions } from "./types.js";
 
 export interface CiAuditResult {
   passed: boolean;
@@ -17,11 +17,12 @@ export interface CiAuditResult {
 export class CiGateRunner {
   private engine: AgentShieldEngine;
   private rootDir: string;
+  private config: ReturnType<typeof loadConfig>;
 
   constructor(rootDir: string = process.cwd()) {
     this.rootDir = rootDir;
-    const config = loadConfig(rootDir);
-    const customPatterns = parseCustomPatterns(config);
+    this.config = loadConfig(rootDir);
+    const customPatterns = parseCustomPatterns(this.config);
     this.engine = new AgentShieldEngine(customPatterns);
   }
 
@@ -35,6 +36,13 @@ export class CiGateRunner {
       throw new Error(`Invalid git base ref: '${sanitizedBase}'`);
     }
 
+    const ignoredFiles = new Set(this.config?.ci?.ignoreFiles || []);
+    const scanOptions: ScanOptions = {
+      allowlist: this.config?.allowlist || [],
+      entropyThreshold: this.config?.entropyThreshold ?? 4.5,
+      maskStyle: this.config?.maskStyle || "token",
+    };
+
     let diffFiles: string[] = [];
     try {
       // Get list of changed files safely via execFileSync
@@ -44,7 +52,7 @@ export class CiGateRunner {
       diffFiles = raw
         .split("\n")
         .map((f) => f.trim())
-        .filter(Boolean);
+        .filter((f) => Boolean(f) && !ignoredFiles.has(f));
     } catch {
       try {
         // Fallback for single-commit pushes
@@ -54,7 +62,7 @@ export class CiGateRunner {
         diffFiles = raw
           .split("\n")
           .map((f) => f.trim())
-          .filter(Boolean);
+          .filter((f) => Boolean(f) && !ignoredFiles.has(f));
       } catch {
         diffFiles = [];
       }
@@ -78,7 +86,7 @@ export class CiGateRunner {
 
         if (!addedLines.trim()) continue;
 
-        const scan = this.engine.scanAndRedact(addedLines);
+        const scan = this.engine.scanAndRedact(addedLines, scanOptions);
         if (scan.hasSecrets) {
           for (const finding of scan.findings) {
             allFindings.push({ ...finding, file });
@@ -91,7 +99,16 @@ export class CiGateRunner {
       }
     }
 
-    const passed = allFindings.length === 0;
+    const failSeverity = this.config?.ci?.failOnSeverity || "high";
+    const failSeverities =
+      failSeverity === "medium"
+        ? ["critical", "high", "medium"]
+        : failSeverity === "high"
+          ? ["critical", "high"]
+          : ["critical"];
+
+    const blockingFindings = allFindings.filter((f) => failSeverities.includes(f.severity));
+    const passed = blockingFindings.length === 0;
 
     // Generate markdown report
     const reportLines: string[] = ["## 🛡️ AgentShield CI/CD Security Gate Report\n"];

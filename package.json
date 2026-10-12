@@ -24,10 +24,11 @@
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
-    "test": "node --test dist/**/*.test.js || tsx --test tests/**/*.test.ts",
+    "test": "tsx --test tests/**/*.test.ts",
     "lint": "biome lint .",
     "format": "biome format --write ."
   },
+
   "keywords": [
     "ai-agent",
     "security",

@@ -52,4 +52,22 @@ describe("AgentShield Team Config Parser", () => {
     assert.equal(patterns.length, 1);
     assert.equal(patterns[0].id, "valid-rule");
   });
+
+  it("should allow configuring allowlist and maskStyle on engine", async () => {
+    const { AgentShieldEngine } = await import("../src/engine.js");
+    const engine = new AgentShieldEngine();
+
+    const allowedSecret = ["sk_live_", "ALLOWEDTOKEN123456789012345"].join("");
+    const res = engine.scanAndRedact(`Authorization: ${allowedSecret}`, {
+      allowlist: [allowedSecret],
+    });
+    assert.equal(res.hasSecrets, false);
+
+    const targetSecret = ["sk_live_", "TARGETTOKEN987654321012345"].join("");
+    const asteriskRes = engine.scanAndRedact(`Authorization: ${targetSecret}`, {
+      maskStyle: "asterisk",
+    });
+    assert.equal(asteriskRes.hasSecrets, true);
+    assert.equal(asteriskRes.sanitizedText.includes("********"), true);
+  });
 });
