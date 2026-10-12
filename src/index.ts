@@ -6,3 +6,6 @@ export * from "./sandbox.js";
 export * from "./gate.js";
 export * from "./config.js";
 export * from "./ci.js";
+export * from "./siem.js";
+export * from "./compliance.js";
+export * from "./vault.js";

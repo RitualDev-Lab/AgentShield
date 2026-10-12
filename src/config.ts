@@ -19,6 +19,25 @@ export interface AgentShieldConfig {
     failOnSeverity?: "critical" | "high" | "medium";
     ignoreFiles?: string[];
   };
+  enterprise?: {
+    apiKey?: string;
+    endpoint?: string;
+    vault?: {
+      provider?: "hashicorp" | "aws_secrets_manager" | "azure_key_vault" | "mock";
+      address?: string;
+      roleId?: string;
+      path?: string;
+    };
+    siem?: {
+      enabled?: boolean;
+      format?: "cef" | "json" | "syslog";
+      webhookUrl?: string;
+    };
+    compliance?: {
+      frameworks?: Array<"soc2" | "pci_dss" | "hipaa" | "iso27001">;
+      strictMode?: boolean;
+    };
+  };
 }
 
 export function loadConfig(rootDir: string = process.cwd()): AgentShieldConfig | null {

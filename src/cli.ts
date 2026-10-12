@@ -21,10 +21,12 @@ Usage:
   npx agentshield hook check             Audit git staged files before commit
   npx agentshield exec <command>         Safely sandbox & intercept agent bash command
   npx agentshield ci                     Audit pull request or git diff in CI/CD pipeline
+  npx agentshield compliance <file-path> Audit credentials for SOC2, PCI-DSS, HIPAA & ISO27001
 
 Options:
   --base <branch>                        Git base ref for CI diff (default: origin/main)
   --report <filePath>                    Write Markdown security audit report to file
+  --format <cef|json|syslog>             SIEM log output format
   --style <token|asterisk>               Redaction format (default: token)
   --json                                 Output findings in structured JSON
   --help, -h                             Show this help message
@@ -178,6 +180,47 @@ async function main() {
     }
 
     if (!result.passed) {
+      process.exit(1);
+    }
+    process.exit(0);
+  } else if (command === "compliance") {
+    const targetFile = args[1];
+    if (!targetFile) {
+      console.error("❌ Error: Please specify a file path to audit for compliance.");
+      process.exit(1);
+    }
+
+    if (!existsSync(targetFile)) {
+      console.error(`❌ Error: File '${targetFile}' does not exist.`);
+      process.exit(1);
+    }
+
+    const content = readFileSync(targetFile, "utf8");
+    const scan = engine.scanAndRedact(content);
+
+    const { ComplianceEngine } = await import("./compliance.js");
+    const report = ComplianceEngine.evaluate(scan.findings);
+
+    if (args.includes("--json")) {
+      console.log(JSON.stringify(report, null, 2));
+      process.exit(report.status === "COMPLIANT" ? 0 : 1);
+    }
+
+    printBanner();
+    console.log(
+      `📋 [ENTERPRISE COMPLIANCE AUDIT] Status: ${report.status} (Score: ${report.score}%)\n`,
+    );
+    for (const ctrl of report.controls) {
+      const icon = ctrl.status === "PASSED" ? "✅" : "❌";
+      console.log(`  ${icon} [${ctrl.framework.toUpperCase()}] ${ctrl.controlId}: ${ctrl.name}`);
+      if (ctrl.violations.length > 0) {
+        for (const v of ctrl.violations) {
+          console.log(`     ⚠️ ${v}`);
+        }
+      }
+    }
+
+    if (report.status !== "COMPLIANT") {
       process.exit(1);
     }
     process.exit(0);

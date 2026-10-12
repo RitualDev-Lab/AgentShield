@@ -93,7 +93,24 @@ Teams can define custom secret patterns, allowlists, and entropy thresholds:
 }
 ```
 
-### 6. Stream Redaction (Pipe Filter)
+### 6. Enterprise Compliance Audit (SOC2, PCI-DSS, HIPAA, ISO27001)
+Audit repositories and files directly against regulatory cybersecurity controls:
+
+```bash
+npx agentshield compliance .env
+# Output:
+# 📋 [ENTERPRISE COMPLIANCE AUDIT] Status: NON_COMPLIANT (Score: 25%)
+#   ❌ [SOC2] CC6.1: Logical Access Controls & Credential Integrity
+#   ❌ [PCI_DSS] Req-3.4: Protection of Authentication & Cardholder Tokens
+```
+
+### 7. SIEM Exporter (CEF / JSON / Syslog)
+Export real-time agent leak and command blocking telemetry to Splunk, Datadog, or Microsoft Sentinel in Common Event Format (CEF) and Syslog RFC 5424.
+
+### 8. Zero-Trust Vault Injection
+Keep zero credentials in local `.env` files. Ephemeral surrogate tokens (`[VAULT_INJECTED:KEY:hash]`) are surfaced to the agent shell and rehydrated only at runtime boundaries.
+
+### 9. Stream Redaction (Pipe Filter)
 ```bash
 # Redact secrets on the fly from any terminal output
 cat server.log | npx agentshield stream
@@ -113,7 +130,15 @@ AgentShield includes a plug-and-play **Agent Skill** (`SKILL.md`) for:
 ## 🧩 Programmatic SDK Usage
 
 ```typescript
-import { AgentShieldEngine, AgentCommandSandbox, GitPreCommitGate, CiGateRunner } from "agentshield";
+import {
+  AgentShieldEngine,
+  AgentCommandSandbox,
+  GitPreCommitGate,
+  CiGateRunner,
+  ComplianceEngine,
+  SiemExporter,
+  VaultInjector,
+} from "agentshield";
 
 const shield = new AgentShieldEngine();
 
@@ -146,7 +171,7 @@ const restored = shield.rehydrate(result.sanitizedText);
 - [x] **Phase 1: Core Detection Engine & Community CLI** (Shannon Entropy, Pattern Engine, Redaction Vault)
 - [x] **Phase 2: Autonomous Agent Shell Sandbox & Pre-commit Gate** (Bash/PowerShell interceptor, Git Gate, SKILL.md)
 - [x] **Phase 3: Team Collaboration & CI/CD Security Gate** (GitHub Action, PR diff auditing, `.agentshield.json`)
-- [ ] **Phase 4: Enterprise Control Plane** (Centralized compliance, SIEM export, Vault zero-trust injection)
+- [x] **Phase 4: Enterprise Control Plane** (Centralized compliance, SIEM export, Vault zero-trust injection)
 
 ---
 
