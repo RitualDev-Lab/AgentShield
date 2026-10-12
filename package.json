@@ -1,0 +1,41 @@
+{
+  "name": "agentshield",
+  "version": "0.1.0",
+  "description": "Enterprise-grade Zero-Leak Secret Defense & Sandbox for Autonomous AI Coding Agents",
+  "type": "module",
+  "bin": {
+    "agentshield": "./dist/cli.js",
+    "ashield": "./dist/cli.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "node --test dist/**/*.test.js || tsx --test tests/**/*.test.ts",
+    "lint": "biome lint .",
+    "format": "biome format --write ."
+  },
+  "keywords": [
+    "ai-agent",
+    "security",
+    "secret-detection",
+    "zero-leak",
+    "claude-code",
+    "cursor",
+    "windsurf",
+    "codex",
+    "antigravity",
+    "redaction",
+    "entropy"
+  ],
+  "author": "RitualDev Lab (https://github.com/RitualDev-Lab)",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@types/node": "^22.10.1",
+    "tsup": "^8.3.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}
