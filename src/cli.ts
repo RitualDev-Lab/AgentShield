@@ -22,10 +22,12 @@ Usage:
   npx agentshield exec <command>         Safely sandbox & intercept agent bash command
   npx agentshield ci                     Audit pull request or git diff in CI/CD pipeline
   npx agentshield compliance <file-path> Audit credentials for SOC2, PCI-DSS, HIPAA & ISO27001
+  npx agentshield audit                  Audit workspace MCP, .claude, and agent permission configs
 
 Options:
   --base <branch>                        Git base ref for CI diff (default: origin/main)
   --report <filePath>                    Write Markdown security audit report to file
+  --sarif <filePath>                     Export findings in OASIS SARIF 2.1.0 format
   --format <cef|json|syslog>             SIEM log output format
   --style <token|asterisk>               Redaction format (default: token)
   --json                                 Output findings in structured JSON
@@ -224,6 +226,44 @@ async function main() {
       process.exit(1);
     }
     process.exit(0);
+  } else if (command === "audit") {
+    const { AgentConfigAuditor } = await import("./auditor.js");
+    const { SarifFormatter } = await import("./sarif.js");
+    const auditor = new AgentConfigAuditor(process.cwd());
+    const report = auditor.auditWorkspace();
+
+    const sarifIdx = args.indexOf("--sarif");
+    if (sarifIdx !== -1 && args[sarifIdx + 1]) {
+      const sarifPath = args[sarifIdx + 1];
+      const sarif = SarifFormatter.generateSarif([], report.issues);
+      writeFileSync(sarifPath, JSON.stringify(sarif, null, 2), "utf8");
+      console.log(`📄 [AgentShield] SARIF 2.1.0 audit log written to ${sarifPath}`);
+    }
+
+    if (args.includes("--json")) {
+      console.log(JSON.stringify(report, null, 2));
+      process.exit(report.passed ? 0 : 1);
+    }
+
+    printBanner();
+    console.log(
+      `🔍 [AGENT ENVIRONMENT & PERMISSION AUDIT] Files Checked: ${report.totalFilesAudited}`,
+    );
+    if (report.issues.length === 0) {
+      console.log(
+        "✅ [CLEAN] No excessive agent permissions or exposed config credentials detected!",
+      );
+      process.exit(0);
+    } else {
+      console.log(`🚨 Found ${report.issues.length} configuration security issue(s):\n`);
+      for (const issue of report.issues) {
+        console.log(`  • [${issue.severity.toUpperCase()}] ${issue.title}`);
+        console.log(`    File: ${issue.file}`);
+        console.log(`    Risk: ${issue.description}`);
+        console.log(`    Fix:  ${issue.recommendation}\n`);
+      }
+      process.exit(report.passed ? 0 : 1);
+    }
   } else {
     console.error(`❌ Unknown command '${command}'. Run 'agentshield --help' for usage.`);
     process.exit(1);

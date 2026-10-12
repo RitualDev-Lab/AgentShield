@@ -9,3 +9,7 @@ export * from "./ci.js";
 export * from "./siem.js";
 export * from "./compliance.js";
 export * from "./vault.js";
+export * from "./taxonomy.js";
+export * from "./rules.js";
+export * from "./auditor.js";
+export * from "./sarif.js";

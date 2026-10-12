@@ -7,24 +7,10 @@
   "engines": {
     "vscode": "^1.85.0"
   },
-  "categories": [
-    "Security",
-    "Linters",
-    "Other"
-  ],
-  "keywords": [
-    "agent",
-    "secret",
-    "security",
-    "cursor",
-    "zero-leak",
-    "redaction",
-    "env-shield"
-  ],
+  "categories": ["Security", "Linters", "Other"],
+  "keywords": ["agent", "secret", "security", "cursor", "zero-leak", "redaction", "env-shield"],
   "main": "./dist/extension.js",
-  "activationEvents": [
-    "onStartupFinished"
-  ],
+  "activationEvents": ["onStartupFinished"],
   "contributes": {
     "commands": [
       {
