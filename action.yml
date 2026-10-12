@@ -1,0 +1,35 @@
+name: "AgentShield Security Gate"
+description: "Zero-Leak Secret Defense & Sandbox for Pull Requests and Autonomous AI Agents"
+author: "RitualDev Lab"
+
+inputs:
+  base_ref:
+    description: "Target base git branch to compare diff against (default: origin/main)"
+    required: false
+    default: "origin/main"
+  fail_on_leak:
+    description: "Whether to fail the CI step if secrets are detected"
+    required: false
+    default: "true"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Run AgentShield CI Security Audit
+      shell: bash
+      run: |
+        npx agentshield ci --base "${{ inputs.base_ref }}" --report .agentshield-report.md
+        EXIT_CODE=$?
+        
+        if [ -f .agentshield-report.md ]; then
+          cat .agentshield-report.md >> $GITHUB_STEP_SUMMARY
+        fi
+
+        if [ "${{ inputs.fail_on_leak }}" = "true" ] && [ $EXIT_CODE -ne 0 ]; then
+          echo "❌ [AgentShield] Exposed secrets detected in Pull Request diff. Merging blocked."
+          exit 1
+        fi
+
+branding:
+  icon: "shield"
+  color: "purple"

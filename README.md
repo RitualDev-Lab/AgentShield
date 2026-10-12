@@ -51,7 +51,49 @@ npx agentshield hook git-install
 npx agentshield hook check
 ```
 
-### 4. Stream Redaction (Pipe Filter)
+### 4. CI/CD Pull Request Gate & GitHub Action
+Run AgentShield on pull requests to fail jobs when unredacted secrets are introduced in git diffs:
+
+```yaml
+name: Security Audit
+on: [pull_request, push]
+
+jobs:
+  agent-shield:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: RitualDev-Lab/AgentShield@v1
+        with:
+          fail_on_leak: "true"
+```
+
+Or run via CLI in any CI runner:
+```bash
+npx agentshield ci --base origin/main --report .agentshield-report.md
+```
+
+### 5. Team Configuration (`.agentshield.json`)
+Teams can define custom secret patterns, allowlists, and entropy thresholds:
+
+```json
+{
+  "version": "1.0.0",
+  "maskStyle": "token",
+  "customPatterns": [
+    {
+      "id": "corp-api-key",
+      "name": "Internal Corp Key",
+      "regex": "CORP_SECRET_[A-Za-z0-9]{16}",
+      "severity": "critical"
+    }
+  ]
+}
+```
+
+### 6. Stream Redaction (Pipe Filter)
 ```bash
 # Redact secrets on the fly from any terminal output
 cat server.log | npx agentshield stream
@@ -71,7 +113,7 @@ AgentShield includes a plug-and-play **Agent Skill** (`SKILL.md`) for:
 ## 🧩 Programmatic SDK Usage
 
 ```typescript
-import { AgentShieldEngine, AgentCommandSandbox, GitPreCommitGate } from "agentshield";
+import { AgentShieldEngine, AgentCommandSandbox, GitPreCommitGate, CiGateRunner } from "agentshield";
 
 const shield = new AgentShieldEngine();
 
@@ -103,7 +145,7 @@ const restored = shield.rehydrate(result.sanitizedText);
 ## 🗺️ Roadmap & Phases
 - [x] **Phase 1: Core Detection Engine & Community CLI** (Shannon Entropy, Pattern Engine, Redaction Vault)
 - [x] **Phase 2: Autonomous Agent Shell Sandbox & Pre-commit Gate** (Bash/PowerShell interceptor, Git Gate, SKILL.md)
-- [ ] **Phase 3: CI/CD Security Gate & GitHub Action** (Automatic PR defense)
+- [x] **Phase 3: Team Collaboration & CI/CD Security Gate** (GitHub Action, PR diff auditing, `.agentshield.json`)
 - [ ] **Phase 4: Enterprise Control Plane** (Centralized compliance, SIEM export, Vault zero-trust injection)
 
 ---

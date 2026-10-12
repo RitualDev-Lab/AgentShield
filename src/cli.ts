@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { readFileSync, existsSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { AgentShieldEngine } from "./engine.js";
 
 function printBanner() {
@@ -18,8 +18,13 @@ Usage:
   npx agentshield redact <file-path>     Redact secrets and print sanitized text
   npx agentshield stream                 Redact secrets from piped stdin (for terminal hooks)
   npx agentshield hook git-install       Install automatic git pre-commit leak shield
+  npx agentshield hook check             Audit git staged files before commit
+  npx agentshield exec <command>         Safely sandbox & intercept agent bash command
+  npx agentshield ci                     Audit pull request or git diff in CI/CD pipeline
 
 Options:
+  --base <branch>                        Git base ref for CI diff (default: origin/main)
+  --report <filePath>                    Write Markdown security audit report to file
   --style <token|asterisk>               Redaction format (default: token)
   --json                                 Output findings in structured JSON
   --help, -h                             Show this help message
@@ -148,6 +153,34 @@ async function main() {
           : 1;
       process.exit(exitCode);
     }
+  } else if (command === "ci") {
+    const { CiGateRunner } = await import("./ci.js");
+    const runner = new CiGateRunner(process.cwd());
+
+    let baseRef = "origin/main";
+    const baseIdx = args.indexOf("--base");
+    if (baseIdx !== -1 && args[baseIdx + 1]) {
+      baseRef = args[baseIdx + 1];
+    }
+
+    let reportPath: string | null = null;
+    const reportIdx = args.indexOf("--report");
+    if (reportIdx !== -1 && args[reportIdx + 1]) {
+      reportPath = args[reportIdx + 1];
+    }
+
+    const result = runner.auditPullRequest(baseRef);
+    console.log(result.markdownReport);
+
+    if (reportPath) {
+      writeFileSync(reportPath, result.markdownReport, "utf8");
+      console.log(`\n📄 [AgentShield] Security report written to ${reportPath}`);
+    }
+
+    if (!result.passed) {
+      process.exit(1);
+    }
+    process.exit(0);
   } else {
     console.error(`❌ Unknown command '${command}'. Run 'agentshield --help' for usage.`);
     process.exit(1);
