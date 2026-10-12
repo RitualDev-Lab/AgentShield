@@ -23,6 +23,7 @@ Usage:
   npx agentshield ci                     Audit pull request or git diff in CI/CD pipeline
   npx agentshield compliance <file-path> Audit credentials for SOC2, PCI-DSS, HIPAA & ISO27001
   npx agentshield audit                  Audit workspace MCP, .claude, and agent permission configs
+  npx agentshield mcp-proxy              Run inline JSON-RPC proxy filter for MCP tool calls
 
 Options:
   --base <branch>                        Git base ref for CI diff (default: origin/main)
@@ -264,6 +265,36 @@ async function main() {
       }
       process.exit(report.passed ? 0 : 1);
     }
+  } else if (command === "mcp-proxy") {
+    // Pipe filter for MCP stdio / JSON-RPC communication
+    const { McpProxyInterceptor } = await import("./mcp-proxy.js");
+    const proxy = new McpProxyInterceptor(engine);
+
+    let buffer = "";
+    process.stdin.setEncoding("utf8");
+    process.stdin.on("data", (chunk) => {
+      buffer += chunk;
+      const lines = buffer.split("\n");
+      buffer = lines.pop() || "";
+
+      for (const line of lines) {
+        if (!line.trim()) continue;
+        const verdict = proxy.inspectRequest(line);
+        if (verdict.isBlocked) {
+          const errResponse = {
+            jsonrpc: "2.0",
+            error: { code: -32600, message: verdict.reason },
+          };
+          process.stdout.write(`${JSON.stringify(errResponse)}\n`);
+        } else {
+          process.stdout.write(`${verdict.sanitizedPayload || line}\n`);
+        }
+      }
+    });
+
+    process.stdin.on("end", () => {
+      process.exit(0);
+    });
   } else {
     console.error(`❌ Unknown command '${command}'. Run 'agentshield --help' for usage.`);
     process.exit(1);

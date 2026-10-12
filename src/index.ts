@@ -13,3 +13,6 @@ export * from "./taxonomy.js";
 export * from "./rules.js";
 export * from "./auditor.js";
 export * from "./sarif.js";
+export * from "./mcp-types.js";
+export * from "./automata.js";
+export * from "./mcp-proxy.js";
