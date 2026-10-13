@@ -30,3 +30,4 @@ export * from "./enterprise-baseline.js";
 export * from "./remote-policy.js";
 export * from "./control-plane-server.js";
 export * from "./enterprise-sso.js";
+export * from "./enterprise-bundle.js";

@@ -42,6 +42,7 @@ Enterprise Team Fleet & Remote Policy:
   npx @ritualdev_lab/agentshield logout                           Disconnect machine and clear organization credentials
   npx @ritualdev_lab/agentshield policy sync                      Fetch and synchronize remote enterprise security policy
   npx @ritualdev_lab/agentshield server [--port <number>]         Run local/self-hosted SaaS Control Plane server MVP
+  npx @ritualdev_lab/agentshield attestation [--org <name>]       Generate cryptographic SOC 2 / ISO 27001 bundle
 
 Experimental Labs & Enterprise Controls (--labs / --experimental):
   npx @ritualdev_lab/agentshield compliance <file>      Audit credentials for SOC2, PCI-DSS, HIPAA & ISO27001
@@ -179,6 +180,49 @@ async function main() {
 
     // Keep server process running
     return new Promise(() => {});
+  }
+
+  if (command === "attestation") {
+    printBanner();
+    let orgName = "Enterprise Organization";
+    const orgIdx = args.indexOf("--org");
+    if (orgIdx !== -1 && args[orgIdx + 1]) orgName = args[orgIdx + 1];
+
+    const isMarkdown = args.includes("--markdown");
+    const outIdx = args.indexOf("--out");
+    const outPath = outIdx !== -1 ? args[outIdx + 1] : null;
+
+    const { EnterpriseComplianceBundleGenerator } = await import("./enterprise-bundle.js");
+    const { TamperEvidentLedger } = await import("./ledger.js");
+
+    // Load ledger entries from local workspace ledger if available
+    const ledgerPath = join(process.cwd(), ".agentshield", "audit.ledger.jsonl");
+    const ledger = new TamperEvidentLedger(ledgerPath);
+    const ledgerEntries = ledger.getEntries();
+
+    const creds = loadCredentials();
+    if (creds?.orgId && orgName === "Enterprise Organization") {
+      orgName = creds.orgId;
+    }
+
+    const bundle = EnterpriseComplianceBundleGenerator.generateBundle(
+      [],
+      ledgerEntries,
+      process.env.AGENTSHIELD_LEDGER_KEY || "agentshield-tamper-evident-salt-v1",
+      { organizationName: orgName },
+    );
+
+    const outputText = isMarkdown
+      ? EnterpriseComplianceBundleGenerator.toExecutiveMarkdown(bundle)
+      : JSON.stringify(bundle, null, 2);
+
+    if (outPath) {
+      writeFileSync(outPath, outputText, "utf8");
+      console.log(`✅ Attestation bundle successfully written to '${outPath}'.\n`);
+    } else {
+      console.log(outputText);
+    }
+    process.exit(0);
   }
 
   // Load configuration from local workspace and overlay remote enterprise policy

@@ -112,7 +112,7 @@ export class ControlPlaneServer {
     });
   }
 
-  private handleRequest(req: IncomingMessage, res: ServerResponse): void {
+  private async handleRequest(req: IncomingMessage, res: ServerResponse): Promise<void> {
     const parsedUrl = new URL(req.url || "/", `http://${req.headers.host || "localhost"}`);
     const pathname = parsedUrl.pathname;
     const method = req.method || "GET";
@@ -339,6 +339,29 @@ export class ControlPlaneServer {
           timestamp: new Date().toISOString(),
         }),
       );
+      return;
+    }
+
+    // GET /api/v1/compliance/attestation
+    if (pathname === "/api/v1/compliance/attestation" && method === "GET") {
+      const { EnterpriseComplianceBundleGenerator } = await import("./enterprise-bundle.js");
+      const orgName = parsedUrl.searchParams.get("org") || "Enterprise Fleet";
+      const pkg = EnterpriseComplianceBundleGenerator.generateBundle(
+        Array.from(this.heartbeats.values()),
+        [],
+        undefined,
+        { organizationName: orgName },
+      );
+
+      const format = parsedUrl.searchParams.get("format");
+      if (format === "markdown" || format === "md") {
+        const md = EnterpriseComplianceBundleGenerator.toExecutiveMarkdown(pkg);
+        res.writeHead(200, { "Content-Type": "text/markdown; charset=utf-8" });
+        res.end(md);
+      } else {
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(pkg, null, 2));
+      }
       return;
     }
 

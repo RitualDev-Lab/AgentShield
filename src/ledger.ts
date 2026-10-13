@@ -166,4 +166,55 @@ export class TamperEvidentLedger {
       this.entries[index].command = tamperedCommand;
     }
   }
+
+  /**
+   * Static helper to verify mathematical integrity of any external array of ledger entries
+   */
+  public static verifyEntries(
+    entries: AuditLedgerEntry[],
+    secretKey: string = process.env.AGENTSHIELD_LEDGER_KEY || "agentshield-tamper-evident-salt-v1",
+  ): LedgerVerificationResult {
+    let prevHash = TamperEvidentLedger.GENESIS_HASH;
+
+    for (let i = 0; i < entries.length; i++) {
+      const entry = entries[i];
+
+      if (entry.sequence !== i + 1) {
+        return {
+          isValid: false,
+          totalEntries: entries.length,
+          corruptedSequence: entry.sequence,
+          error: `Sequence mismatch at index ${i}: expected ${i + 1}, got ${entry.sequence}`,
+        };
+      }
+
+      if (entry.previousHash !== prevHash) {
+        return {
+          isValid: false,
+          totalEntries: entries.length,
+          corruptedSequence: entry.sequence,
+          error: `Broken chain link at sequence ${entry.sequence}: previousHash does not match prior block`,
+        };
+      }
+
+      const payload = `${entry.previousHash}|${entry.sequence}|${entry.timestamp}|${entry.actor}|${entry.command}|${entry.verdict}|${entry.reason}`;
+      const expectedHash = createHmac("sha256", secretKey).update(payload).digest("hex");
+
+      if (entry.hash !== expectedHash) {
+        return {
+          isValid: false,
+          totalEntries: entries.length,
+          corruptedSequence: entry.sequence,
+          error: `Tampered block detected at sequence ${entry.sequence}: signature verification failed`,
+        };
+      }
+
+      prevHash = entry.hash;
+    }
+
+    return {
+      isValid: true,
+      totalEntries: entries.length,
+    };
+  }
 }
