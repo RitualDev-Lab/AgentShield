@@ -12,10 +12,11 @@ export interface GitPreCommitResult {
 
 const CRITICAL_FILE_PATTERNS = [
   /^\.env(?:\..*)?$/i,
-  /^id_rsa(?:\.pub)?$/i,
-  /^id_ed25519(?:\.pub)?$/i,
+  /^id_rsa$/i,
+  /^id_ed25519$/i,
+  /^id_ecdsa$/i,
   /.*\.pem$/i,
-  /.*\.key$/i,
+  /(?:^|[\/\\])(?:private|id_rsa|server|client|tls|ssl|secret).*\.key$/i,
   /.*\.pfx$/i,
   /.*\.p12$/i,
   /^\.npmrc$/i,

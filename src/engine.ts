@@ -22,9 +22,16 @@ export class AgentShieldEngine {
     const detectedSecretsSet = new Set<string>();
     let sanitizedText = text;
 
+    const activePatterns = [
+      ...this.patterns,
+      ...(options.customPatterns || []),
+    ];
+
     // 1. Pattern-based detection
-    for (const pattern of this.patterns) {
-      const regex = new RegExp(pattern.regex.source, pattern.regex.flags);
+    for (const pattern of activePatterns) {
+      // Ensure global flag 'g' is present to prevent zero-length match infinite loops
+      const flags = pattern.regex.flags.includes("g") ? pattern.regex.flags : `${pattern.regex.flags}g`;
+      const regex = new RegExp(pattern.regex.source, flags);
       let match = regex.exec(text);
 
       while (match !== null) {
@@ -124,14 +131,25 @@ export class AgentShieldEngine {
     }
 
     // 3. Perform safe deterministic redactions
-    for (const finding of findings) {
-      sanitizedText = sanitizedText.split(finding.raw).join(finding.redacted);
+    // Sort descending by raw secret length to prevent shorter substrings colliding with longer tokens
+    const uniqueRedactions = Array.from(
+      new Map(findings.map((f) => [f.raw, f.redacted])).entries(),
+    ).sort((a, b) => b[0].length - a[0].length);
+
+    for (const [raw, redacted] of uniqueRedactions) {
+      sanitizedText = sanitizedText.split(raw).join(redacted);
     }
+
+    // 4. Default raw masking in findings unless explicitly opted in
+    const safeFindings = findings.map((f) => ({
+      ...f,
+      raw: options.includeRaw ? f.raw : f.redacted,
+    }));
 
     return {
       hasSecrets: findings.length > 0,
       totalFound: findings.length,
-      findings,
+      findings: safeFindings,
       sanitizedText,
       vaultMap: new Map(this.vaultMap),
     };

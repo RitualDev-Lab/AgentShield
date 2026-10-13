@@ -26,6 +26,7 @@ export interface ScanOptions {
   maskStyle?: "token" | "hash" | "asterisk";
   allowlist?: string[];
   customPatterns?: SecretPattern[];
+  includeRaw?: boolean; // Defaults to false to prevent accidental secret leakage in logs
 }
 
 export interface ScanResult {
