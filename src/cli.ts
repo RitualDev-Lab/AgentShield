@@ -3,6 +3,13 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { loadConfig, parseCustomPatterns } from "./config.js";
 import { AgentShieldEngine } from "./engine.js";
+import {
+  clearCredentials,
+  fetchRemotePolicy,
+  loadCredentials,
+  mergeRemotePolicyIntoConfig,
+  saveCredentials,
+} from "./remote-policy.js";
 import type { ScanOptions } from "./types.js";
 import { AGENTSHIELD_VERSION } from "./version.js";
 
@@ -29,6 +36,11 @@ Usage:
   npx @ritualdev_lab/agentshield init-claude            Generate Claude Code PreToolUse hook configuration
   npx @ritualdev_lab/agentshield init-cursor            Generate Cursor / Windsurf settings.json protection rules
   npx @ritualdev_lab/agentshield benchmark              Run sub-millisecond scanning throughput benchmarks
+
+Enterprise Team Fleet & Remote Policy:
+  npx @ritualdev_lab/agentshield login --org <id> --token <key>   Authenticate machine with enterprise organization
+  npx @ritualdev_lab/agentshield logout                           Disconnect machine and clear organization credentials
+  npx @ritualdev_lab/agentshield policy sync                      Fetch and synchronize remote enterprise security policy
 
 Experimental Labs & Enterprise Controls (--labs / --experimental):
   npx @ritualdev_lab/agentshield compliance <file>      Audit credentials for SOC2, PCI-DSS, HIPAA & ISO27001
@@ -57,8 +69,103 @@ async function main() {
     process.exit(0);
   }
 
-  // Load configuration from .agentshield.json or agentshield.config.json
-  const config = loadConfig(process.cwd());
+  if (command === "login") {
+    printBanner();
+    let orgId = "";
+    let token = "";
+    let endpoint = "";
+
+    const orgIdx = args.indexOf("--org");
+    if (orgIdx !== -1 && args[orgIdx + 1]) orgId = args[orgIdx + 1];
+
+    const tokenIdx =
+      args.indexOf("--token") !== -1 ? args.indexOf("--token") : args.indexOf("--key");
+    if (tokenIdx !== -1 && args[tokenIdx + 1]) token = args[tokenIdx + 1];
+
+    const endpointIdx = args.indexOf("--endpoint");
+    if (endpointIdx !== -1 && args[endpointIdx + 1]) endpoint = args[endpointIdx + 1];
+
+    if (!orgId || !token) {
+      console.error(
+        "❌ Error: Missing required credentials. Usage: agentshield login --org <org-id> --token <token>",
+      );
+      process.exit(1);
+    }
+
+    saveCredentials({ orgId, token, endpoint });
+    console.log(`✅ [AgentShield Enterprise] Machine registered with organization '${orgId}'.`);
+    console.log("   Fetching enterprise security policies...");
+
+    const { policy, isCached, error } = await fetchRemotePolicy();
+    if (policy) {
+      console.log(
+        `   Policy Version: ${policy.policyVersion} (${policy.customPatterns?.length || 0} custom enterprise rules active)`,
+      );
+      if (isCached) console.log("   (Loaded from resilient local cache)");
+    } else if (error) {
+      console.warn(
+        `   ⚠️ Warning: Connected but could not fetch initial policy (${error}). Will retry on next scan.`,
+      );
+    }
+    console.log("\n🚀 Enterprise policies active for all AI agent executions on this machine.\n");
+    process.exit(0);
+  }
+
+  if (command === "logout") {
+    printBanner();
+    const success = clearCredentials();
+    if (success) {
+      console.log(
+        "✅ [AgentShield Enterprise] Machine disconnected. Organization credentials cleared.\n",
+      );
+    } else {
+      console.log("ℹ️ No active organization credentials found.\n");
+    }
+    process.exit(0);
+  }
+
+  if (command === "policy") {
+    const subAction = args[1] || "sync";
+    printBanner();
+    if (subAction === "sync") {
+      const creds = loadCredentials();
+      if (!creds) {
+        console.error(
+          "❌ Error: Machine is not logged into an enterprise organization. Run 'agentshield login --org <id> --token <token>' first.",
+        );
+        process.exit(1);
+      }
+      console.log(`🔄 Fetching latest policies for org '${creds.orgId}' from ${creds.endpoint}...`);
+      const { policy, isCached, error } = await fetchRemotePolicy(creds, { timeoutMs: 5000 });
+      if (policy) {
+        console.log("✅ [Policy Sync Success]");
+        console.log(`   Policy Version:       ${policy.policyVersion}`);
+        console.log(`   Custom Rules Count:   ${policy.customPatterns?.length || 0}`);
+        console.log(`   Allowlist Entries:    ${policy.allowlist?.length || 0}`);
+        console.log(
+          `   Status:               ${isCached ? "Offline Cache Activated" : "Live Sync Fresh"}`,
+        );
+        console.log(`   Updated At:           ${policy.updatedAt}\n`);
+      } else {
+        console.error(`❌ Policy sync failed: ${error || "Unknown network error"}\n`);
+        process.exit(1);
+      }
+      process.exit(0);
+    } else {
+      console.error(`❌ Unknown policy action '${subAction}'. Usage: agentshield policy sync`);
+      process.exit(1);
+    }
+  }
+
+  // Load configuration from local workspace and overlay remote enterprise policy
+  const localConfig = loadConfig(process.cwd());
+  const creds = loadCredentials();
+  let remotePolicy = null;
+  if (creds?.orgId) {
+    const remoteRes = await fetchRemotePolicy(creds, { timeoutMs: 1500 });
+    remotePolicy = remoteRes.policy;
+  }
+  const config = mergeRemotePolicyIntoConfig(localConfig, remotePolicy);
   const customPatterns = parseCustomPatterns(config);
   const engine = new AgentShieldEngine(customPatterns);
 

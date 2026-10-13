@@ -125,7 +125,9 @@ export class AgentStdioInterceptor {
       let execCmd = command;
       if (options.enableKernelSandbox && osType === "darwin") {
         const home = homedir().replace(/\\/g, "\\\\").replace(/"/g, '\\"');
-        const ws = (options.workspaceDir || process.cwd()).replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+        const ws = (options.workspaceDir || process.cwd())
+          .replace(/\\/g, "\\\\")
+          .replace(/"/g, '\\"');
         // Note: Workspace allow permits subpath file-read*; reading workspace .env directly
         // is captured and scrubbed by the stdio output transform stream and AST pre-flight gate.
         execCmd = `sandbox-exec -p '(version 1)(deny default)(allow process-exec)(allow sysctl-read)(allow file-read* (subpath "${ws}"))(allow file-write* (subpath "${ws}"))(allow file-read* (subpath "/usr/lib"))(allow file-read* (subpath "/dev/null"))(deny file-read* (subpath "${home}/.ssh"))(deny file-read* (subpath "${home}/.aws"))' ${command}`;
