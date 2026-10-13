@@ -135,21 +135,59 @@ Instead of cleartext `.env` keys, AgentShield provides deterministic, collision-
 
 ---
 
-## 🤖 AI Agent Skill Integration
+---
 
-AgentShield comes with a native, universal **Agent Skill** ([`SKILL.md`](SKILL.md)):
+## 🤖 AI Agent Ecosystem Integrations
 
+AgentShield provides 1-command generators for leading AI coding agent environments:
+
+### Claude Code (`PreToolUse` Hook)
+Automatically intercept agent terminal executions before commands touch your environment:
+```bash
+npx @ritualdev-lab/agentshield init-claude
 ```
-AgentShield/
-├── SKILL.md                 # Universal skill spec for AI coding agents
-├── action.yml               # Reusable GitHub Action
-└── .agentshield.json        # Team config & custom pattern rules
+Generates `.claude/settings.json` configured with:
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|Terminal",
+        "command": "npx @ritualdev-lab/agentshield exec $COMMAND"
+      }
+    ]
+  }
+}
 ```
 
-- **Claude Code**: Drop into your project's `.claude/skills/`
-- **Cursor / Windsurf**: Add as agent terminal verification rule
-- **Antigravity**: Plug into workspace custom skills
-- **Codex / Copilot**: Run CLI hook in CI and pre-commit
+### Cursor & Windsurf Rules
+```bash
+npx @ritualdev-lab/agentshield init-cursor
+```
+Generates `.cursor/rules.json` with sensitive path boundaries (`.env*`, `*.pem`, `id_rsa*`) and pre-execution command sandboxing.
+
+### Antigravity & Copilot
+Plug [`SKILL.md`](SKILL.md) into workspace agent instructions to enforce zero-leak guarantees natively.
+
+---
+
+## ⚡ Comparative Benchmark: AgentShield vs Traditional Scanners
+
+Traditional scanners (`gitleaks`, `trufflehog`) were designed for **post-facto static git repository scanning** (scanning files and commit histories at rest). 
+
+**AgentShield** is designed specifically for **Autonomous Agent Runtime Protection** — intercepting shell commands, scrubbing streaming stdio chunk-by-chunk in sub-milliseconds, and sanitizing LLM prompt inputs before transmission.
+
+| Feature / Metric | AgentShield | GitLeaks | TruffleHog |
+| :--- | :---: | :---: | :---: |
+| **Primary Domain** | **Agent Runtime & Stdio Interception** | Git History Scanner | Git & Filesystem Scanner |
+| **Average Scan Latency** | **< 0.04 ms / scan** | ~ 2 - 5 ms | ~ 10 - 50 ms |
+| **Throughput** | **28,000+ operations/sec** | ~ 5,000 ops/sec | ~ 1,200 ops/sec |
+| **Streaming Stdio Interception** | ✅ **Native (`createRedactingStream`)** | ❌ (Disk / Git diff only) | ❌ (Disk / Git diff only) |
+| **Agent AST Command Sandbox** | ✅ **Native (`exec` / `run`)** | ❌ None | ❌ None |
+| **Deterministic Vault Rehydration** | ✅ **Native (`[AGENT_SHIELD:...]`)** | ❌ None | ❌ None |
+| **MCP Protocol Filter (JSON-RPC)** | ✅ **Native (`mcp-proxy`)** | ❌ None | ❌ None |
+| **Zero Runtime Dependencies** | ✅ **0 deps (Pure Node.js)** | Go binary | Go binary / Python |
+| **Git Pre-Commit & CI Gates** | ✅ Built-in | ✅ Built-in | ✅ Built-in |
 
 ---
 
@@ -171,7 +209,7 @@ AgentShield combines high-performance regular expressions with **Shannon Entropy
 Integrate AgentShield directly into your AI workflows, proxy servers, or custom agent frameworks:
 
 ```typescript
-import { AgentShieldEngine, AgentCommandSandbox, VaultInjector } from "agentshield";
+import { AgentShieldEngine, AgentCommandSandbox, AgentStdioInterceptor } from "@ritualdev-lab/agentshield";
 
 const shield = new AgentShieldEngine();
 

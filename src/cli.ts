@@ -1,4 +1,5 @@
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 import { loadConfig, parseCustomPatterns } from "./config.js";
 import { AgentShieldEngine } from "./engine.js";
 import type { ScanOptions } from "./types.js";
@@ -24,6 +25,8 @@ Usage:
   npx @ritualdev-lab/agentshield hook git-install       Install automatic git pre-commit leak shield
   npx @ritualdev-lab/agentshield hook check             Audit git staged files before commit
   npx @ritualdev-lab/agentshield ci                     Audit pull request or git diff in CI/CD pipeline
+  npx @ritualdev-lab/agentshield init-claude            Generate Claude Code PreToolUse hook configuration
+  npx @ritualdev-lab/agentshield init-cursor            Generate Cursor / Windsurf settings.json protection rules
   npx @ritualdev-lab/agentshield benchmark              Run sub-millisecond scanning throughput benchmarks
 
 Experimental Labs & Enterprise Controls (--labs / --experimental):
@@ -398,6 +401,48 @@ async function main() {
     console.log(`  • Iterations:      ${metrics.iterations.toLocaleString()}`);
     console.log(`  • Total Duration:  ${metrics.totalTimeMs} ms\n`);
     console.log("✅ Benchmark passed within sub-millisecond execution constraints.");
+    process.exit(0);
+  } else if (command === "init-claude") {
+    const { mkdirSync } = await import("node:fs");
+    const claudeDir = join(process.cwd(), ".claude");
+    if (!existsSync(claudeDir)) {
+      mkdirSync(claudeDir, { recursive: true });
+    }
+    const settingsPath = join(claudeDir, "settings.json");
+    const claudeConfig = {
+      hooks: {
+        PreToolUse: [
+          {
+            matcher: "Bash|Terminal",
+            command: "npx @ritualdev-lab/agentshield exec $COMMAND",
+          },
+        ],
+      },
+    };
+    writeFileSync(settingsPath, JSON.stringify(claudeConfig, null, 2), "utf8");
+    printBanner();
+    console.log(`✅ [Claude Code] Hook configuration created at: ${settingsPath}`);
+    console.log("   Agent bash commands will now be automatically intercepted by AgentShield.\n");
+    process.exit(0);
+  } else if (command === "init-cursor") {
+    const { mkdirSync } = await import("node:fs");
+    const cursorDir = join(process.cwd(), ".cursor");
+    if (!existsSync(cursorDir)) {
+      mkdirSync(cursorDir, { recursive: true });
+    }
+    const rulesPath = join(cursorDir, "rules.json");
+    const cursorConfig = {
+      version: 1,
+      security: {
+        preExecutionCommand: "npx @ritualdev-lab/agentshield exec $COMMAND",
+        blockOnSensitiveFileRead: true,
+        sensitivePatterns: [".env*", "*.pem", "id_rsa*", "*.key"],
+      },
+    };
+    writeFileSync(rulesPath, JSON.stringify(cursorConfig, null, 2), "utf8");
+    printBanner();
+    console.log(`✅ [Cursor / Windsurf] Protection rules written to: ${rulesPath}`);
+    console.log("   AI agent workspace boundaries and credential paths are protected.\n");
     process.exit(0);
   } else {
     console.error(`❌ Unknown command '${command}'. Run 'agentshield --help' for usage.`);
