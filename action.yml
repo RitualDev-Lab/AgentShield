@@ -1,4 +1,4 @@
-name: "AgentShield Security Gate"
+﻿name: "AgentShield Security Gate"
 description: "Zero-Leak Secret Defense & Sandbox for Pull Requests and Autonomous AI Agents"
 author: "RitualDev Lab"
 
@@ -25,7 +25,7 @@ runs:
           (cd "${{ github.action_path }}" && npm install --silent && npm run build --silent)
           node "${{ github.action_path }}/dist/cli.js" ci --base "${{ inputs.base_ref }}" --report .agentshield-report.md || EXIT_CODE=$?
         else
-          npx --yes @ritualdev_lab/agentshield@latest ci --base "${{ inputs.base_ref }}" --report .agentshield-report.md || EXIT_CODE=$?
+          npx --yes @ritualdev-lab/agentshield@latest ci --base "${{ inputs.base_ref }}" --report .agentshield-report.md || EXIT_CODE=$?
         fi
         
         if [ -f .agentshield-report.md ]; then

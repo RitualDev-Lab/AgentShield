@@ -22,7 +22,7 @@ jobs:
         with:
           node-version: 22
           registry-url: "https://npm.pkg.github.com"
-          scope: "@ritualdev_lab"
+          scope: "@ritualdev-lab"
 
       - name: Install pnpm
         uses: pnpm/action-setup@v3
@@ -42,11 +42,11 @@ jobs:
         run: |
           node -e '
             const pkg = JSON.parse(require("fs").readFileSync("package.json", "utf8"));
-            pkg.name = "@ritualdev_lab/agentshield";
+            pkg.name = "@ritualdev-lab/agentshield";
             pkg.publishConfig = { registry: "https://npm.pkg.github.com" };
             require("fs").writeFileSync("package.json", JSON.stringify(pkg, null, 2));
           '
-          echo "@ritualdev_lab:registry=https://npm.pkg.github.com" > .npmrc
+          echo "@ritualdev-lab:registry=https://npm.pkg.github.com" > .npmrc
           echo "//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}" >> .npmrc
           npm publish
         env:

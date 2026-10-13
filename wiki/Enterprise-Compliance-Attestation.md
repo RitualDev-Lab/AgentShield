@@ -20,5 +20,5 @@ Autonomous AI tools present unique governance risks for security officers and co
 Generate an executive compliance attestation bundle for audit reviews:
 
 ```bash
-npx @ritualdev_lab/agentshield audit-compliance --framework soc2,pci-dss --format json > compliance-bundle.json
+npx @ritualdev-lab/agentshield audit-compliance --framework soc2,pci-dss --format json > compliance-bundle.json
 ```

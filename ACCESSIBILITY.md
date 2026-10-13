@@ -16,7 +16,7 @@ The AgentShield CLI is designed with the following accessibility standards in mi
    - Structured JSON mode (`--json`) is supported across all CLI commands (`scan`, `ci`, `compliance`) to allow programmatic parsing and speech rendering.
 
 3. **Plain Text Fallback:**
-   - Piped stream mode (`npx @ritualdev_lab/agentshield stream`) strips unnecessary terminal formatting codes, providing clean standard UNIX stream processing.
+   - Piped stream mode (`npx @ritualdev-lab/agentshield stream`) strips unnecessary terminal formatting codes, providing clean standard UNIX stream processing.
 
 ---
 

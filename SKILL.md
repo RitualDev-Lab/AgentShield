@@ -19,16 +19,16 @@ When developing, testing, or modifying code:
 2. **Pre-Flight Commit Verification**:
    - Before executing `git commit` or opening a PR, always audit staged files:
      ```bash
-     npx @ritualdev_lab/agentshield hook check
+     npx @ritualdev-lab/agentshield hook check
      ```
    - If secrets or `.env` files are detected, unstage or redact them before proceeding.
 3. **Execution Sandbox**:
    - Wrap sensitive or dynamic script executions with AgentShield:
      ```bash
-     npx @ritualdev_lab/agentshield exec "<command>"
+     npx @ritualdev-lab/agentshield exec "<command>"
      ```
 4. **Stream Redaction**:
    - When inspecting logs that might contain tokens:
      ```bash
-     <command> | npx @ritualdev_lab/agentshield stream
+     <command> | npx @ritualdev-lab/agentshield stream
      ```
