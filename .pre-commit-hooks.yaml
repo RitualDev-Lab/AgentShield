@@ -1,4 +1,4 @@
-﻿- id: agentshield
+- id: agentshield
   name: AgentShield Secret Gate
   description: High-assurance AI secret redactor and zero-leak commit shield
   entry: agentshield hook check
