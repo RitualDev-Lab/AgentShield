@@ -18,23 +18,23 @@ function printHelp() {
   printBanner();
   console.log(`
 Usage:
-  npx @ritualdev-lab/agentshield scan <file-path>       Scan a file for leaked secrets
-  npx @ritualdev-lab/agentshield redact <file-path>     Redact secrets and print sanitized text
-  npx @ritualdev-lab/agentshield stream                 Redact secrets from piped stdin (for terminal hooks)
-  npx @ritualdev-lab/agentshield exec <command>         Safely sandbox & intercept agent bash command
-  npx @ritualdev-lab/agentshield run <command>          Run command with real-time streaming stdio secret redaction
-  npx @ritualdev-lab/agentshield hook git-install       Install automatic git pre-commit leak shield
-  npx @ritualdev-lab/agentshield hook check             Audit git staged files before commit
-  npx @ritualdev-lab/agentshield ci                     Audit pull request or git diff in CI/CD pipeline
-  npx @ritualdev-lab/agentshield init-claude            Generate Claude Code PreToolUse hook configuration
-  npx @ritualdev-lab/agentshield init-cursor            Generate Cursor / Windsurf settings.json protection rules
-  npx @ritualdev-lab/agentshield benchmark              Run sub-millisecond scanning throughput benchmarks
+  npx @ritualdev_lab/agentshield scan <file-path>       Scan a file for leaked secrets
+  npx @ritualdev_lab/agentshield redact <file-path>     Redact secrets and print sanitized text
+  npx @ritualdev_lab/agentshield stream                 Redact secrets from piped stdin (for terminal hooks)
+  npx @ritualdev_lab/agentshield exec <command>         Safely sandbox & intercept agent bash command
+  npx @ritualdev_lab/agentshield run <command>          Run command with real-time streaming stdio secret redaction
+  npx @ritualdev_lab/agentshield hook git-install       Install automatic git pre-commit leak shield
+  npx @ritualdev_lab/agentshield hook check             Audit git staged files before commit
+  npx @ritualdev_lab/agentshield ci                     Audit pull request or git diff in CI/CD pipeline
+  npx @ritualdev_lab/agentshield init-claude            Generate Claude Code PreToolUse hook configuration
+  npx @ritualdev_lab/agentshield init-cursor            Generate Cursor / Windsurf settings.json protection rules
+  npx @ritualdev_lab/agentshield benchmark              Run sub-millisecond scanning throughput benchmarks
 
 Experimental Labs & Enterprise Controls (--labs / --experimental):
-  npx @ritualdev-lab/agentshield compliance <file>      Audit credentials for SOC2, PCI-DSS, HIPAA & ISO27001
-  npx @ritualdev-lab/agentshield audit                  Audit workspace MCP, .claude, and agent permission configs
-  npx @ritualdev-lab/agentshield mcp-proxy              Run inline JSON-RPC proxy filter for MCP tool calls
-  npx @ritualdev-lab/agentshield ledger verify          Verify cryptographic integrity of audit ledger HMAC chain
+  npx @ritualdev_lab/agentshield compliance <file>      Audit credentials for SOC2, PCI-DSS, HIPAA & ISO27001
+  npx @ritualdev_lab/agentshield audit                  Audit workspace MCP, .claude, and agent permission configs
+  npx @ritualdev_lab/agentshield mcp-proxy              Run inline JSON-RPC proxy filter for MCP tool calls
+  npx @ritualdev_lab/agentshield ledger verify          Verify cryptographic integrity of audit ledger HMAC chain
 
 Options:
   --base <branch>                        Git base ref for CI diff (default: origin/main)
@@ -192,10 +192,13 @@ async function main() {
     }
   } else if (command === "exec" || command === "run") {
     // Intercept agent command execution using streaming stdio interceptor
-    const rawCmd = args.slice(1).filter((a) => !a.startsWith("--kernel")).join(" ");
+    const rawCmd = args
+      .slice(1)
+      .filter((a) => !a.startsWith("--kernel"))
+      .join(" ");
     if (!rawCmd) {
       console.error(
-        `❌ Error: No command provided to sandbox. Usage: npx @ritualdev-lab/agentshield ${command} <command>`,
+        `❌ Error: No command provided to sandbox. Usage: npx @ritualdev_lab/agentshield ${command} <command>`,
       );
       process.exit(1);
     }
@@ -209,7 +212,9 @@ async function main() {
       enableKernelSandbox: enableKernel,
       maskStyle,
       onBlock: (check) => {
-        console.error(`\n🚨 [AgentShield Sandbox Block] ${check.reason}\n   Command: '${rawCmd}'\n`);
+        console.error(
+          `\n🚨 [AgentShield Sandbox Block] ${check.reason}\n   Command: '${rawCmd}'\n`,
+        );
       },
     });
 
@@ -399,7 +404,9 @@ async function main() {
         process.exit(1);
       }
     } else {
-      console.error("❌ Unknown ledger action. Use 'npx @ritualdev-lab/agentshield ledger verify'.");
+      console.error(
+        "❌ Unknown ledger action. Use 'npx @ritualdev_lab/agentshield ledger verify'.",
+      );
       process.exit(1);
     }
   } else if (command === "benchmark") {
@@ -430,7 +437,7 @@ async function main() {
         PreToolUse: [
           {
             matcher: "Bash|Terminal",
-            command: "npx @ritualdev-lab/agentshield exec $COMMAND",
+            command: "npx @ritualdev_lab/agentshield exec $COMMAND",
           },
         ],
       },
@@ -450,7 +457,7 @@ async function main() {
     const cursorConfig = {
       version: 1,
       security: {
-        preExecutionCommand: "npx @ritualdev-lab/agentshield exec $COMMAND",
+        preExecutionCommand: "npx @ritualdev_lab/agentshield exec $COMMAND",
         blockOnSensitiveFileRead: true,
         sensitivePatterns: [".env*", "*.pem", "id_rsa*", "*.key"],
       },

@@ -26,10 +26,10 @@ Wrap commands with `agentshield exec`:
 
 ```bash
 # Legitimate developer command (Passes through untouched)
-npx @ritualdev-lab/agentshield exec "npm run build"
+npx @ritualdev_lab/agentshield exec "npm run build"
 
 # Risky agent inspection command (Blocked immediately)
-npx @ritualdev-lab/agentshield exec "cat .env"
+npx @ritualdev_lab/agentshield exec "cat .env"
 ```
 
 ### Terminal Output on Interception:

@@ -43,7 +43,7 @@
   <!-- Terminal Content Lines -->
   <!-- Line 1: Agent tries command -->
   <text x="50" y="92" class="mono prompt">agent@claude-code:~$</text>
-  <text x="235" y="92" class="mono cmd">npx @ritualdev-lab/agentshield exec "cat .env"</text>
+  <text x="235" y="92" class="mono cmd">npx @ritualdev_lab/agentshield exec "cat .env"</text>
 
   <!-- Line 2: Sandbox Intercept Alert -->
   <text x="50" y="125" class="mono text-red">🚨 [AgentShield Sandbox Block] Attempted credential exfiltration blocked!</text>
@@ -65,7 +65,7 @@
 
   <!-- Line 5: Clean Result -->
   <text x="50" y="365" class="mono prompt">agent@windsurf:~$</text>
-  <text x="200" y="365" class="mono cmd">npx @ritualdev-lab/agentshield scan . --clean</text>
+  <text x="200" y="365" class="mono cmd">npx @ritualdev_lab/agentshield scan . --clean</text>
   <text x="50" y="392" class="mono text-green">✅ [CLEAN] Workspace shielded. 0 credentials exposed. Safe to run agents.</text>
   <rect x="710" y="380" width="8" height="15" fill="#06b6d4" class="cursor"/>
 </svg>

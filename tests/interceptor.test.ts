@@ -17,11 +17,7 @@ describe("Phase 2: AgentStdioInterceptor & Streaming Redaction", () => {
     const body = "MockStripeKey1234567890123456789012345";
     const expectedSecret = `${prefix}${body}`;
 
-    const chunks = [
-      `Process initialized. Token: ${prefix}`,
-      body,
-      " ready for deployment.\n",
-    ];
+    const chunks = [`Process initialized. Token: ${prefix}`, body, " ready for deployment.\n"];
 
     const source = Readable.from(chunks);
     let output = "";
@@ -53,7 +49,7 @@ describe("Phase 2: AgentStdioInterceptor & Streaming Redaction", () => {
   it("executes safe commands and scrubs stdout output", async () => {
     const interceptor = new AgentStdioInterceptor(engine);
     // Node print command emitting a secret
-    const cmd = `node -e "console.log('API_KEY=ghp_' + '123456789012345678901234567890123456')"`
+    const cmd = `node -e "console.log('API_KEY=ghp_' + '123456789012345678901234567890123456')"`;
     const result = await interceptor.execute(cmd);
 
     assert.strictEqual(result.isBlocked, false);

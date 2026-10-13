@@ -25,8 +25,14 @@ describe("Phase 1: Adversarial Red-Team & Bypass Test Suite", () => {
     });
 
     it("should intercept deno and bun runtime env inspections", () => {
-      assert.strictEqual(sandbox.inspectCommand("deno eval 'console.log(Deno.env.toObject())'").isBlocked, true);
-      assert.strictEqual(sandbox.inspectCommand("bun -e 'console.log(process.env)'").isBlocked, true);
+      assert.strictEqual(
+        sandbox.inspectCommand("deno eval 'console.log(Deno.env.toObject())'").isBlocked,
+        true,
+      );
+      assert.strictEqual(
+        sandbox.inspectCommand("bun -e 'console.log(process.env)'").isBlocked,
+        true,
+      );
     });
   });
 
@@ -56,12 +62,15 @@ describe("Phase 1: Adversarial Red-Team & Bypass Test Suite", () => {
       assert.strictEqual(sandbox.inspectCommand("move .env safe.txt").isBlocked, true);
       assert.strictEqual(sandbox.inspectCommand("rsync -av .env /tmp/").isBlocked, true);
       assert.strictEqual(sandbox.inspectCommand("install .env /tmp/").isBlocked, true);
-      assert.strictEqual(sandbox.inspectCommand("openssl enc -in .env -out .env.enc").isBlocked, true);
+      assert.strictEqual(
+        sandbox.inspectCommand("openssl enc -in .env -out .env.enc").isBlocked,
+        true,
+      );
     });
   });
 
   describe("3. Shell Obfuscation & Quote Splitting", () => {
-    it("should neutralize quote-splitting: cat .e\"\"nv", () => {
+    it('should neutralize quote-splitting: cat .e""nv', () => {
       assert.strictEqual(sandbox.inspectCommand('cat .e""nv').isBlocked, true);
       assert.strictEqual(sandbox.inspectCommand("cat .e''nv").isBlocked, true);
     });
@@ -130,7 +139,9 @@ describe("Phase 1: Adversarial Red-Team & Bypass Test Suite", () => {
         },
       ]);
 
-      const res = hungEngine.scanAndRedact("SECRET_9876543210ab first, and another SECRET_9876543210ab");
+      const res = hungEngine.scanAndRedact(
+        "SECRET_9876543210ab first, and another SECRET_9876543210ab",
+      );
       assert.strictEqual(res.hasSecrets, true);
       assert.strictEqual(res.totalFound >= 1, true);
     });
@@ -146,8 +157,14 @@ describe("Phase 1: Adversarial Red-Team & Bypass Test Suite", () => {
       const tempRepo = mkdtempSync(join(tmpdir(), "agentshield-gate-test-"));
       try {
         execFileSync("git", ["init"], { cwd: tempRepo, stdio: "ignore" });
-        execFileSync("git", ["config", "user.name", "TestUser"], { cwd: tempRepo, stdio: "ignore" });
-        execFileSync("git", ["config", "user.email", "test@ritualdev.in"], { cwd: tempRepo, stdio: "ignore" });
+        execFileSync("git", ["config", "user.name", "TestUser"], {
+          cwd: tempRepo,
+          stdio: "ignore",
+        });
+        execFileSync("git", ["config", "user.email", "test@ritualdev.in"], {
+          cwd: tempRepo,
+          stdio: "ignore",
+        });
 
         // Stage public key (should pass)
         const pubKeyContent = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC12345 user@example.com";
@@ -163,7 +180,11 @@ describe("Phase 1: Adversarial Red-Team & Bypass Test Suite", () => {
           assert.strictEqual(auditPass.blockedFiles.length, 0);
 
           // Now stage an actual private key and verify gate blocks it
-          writeFileSync(join(tempRepo, "id_rsa"), "-----BEGIN OPENSSH PRIVATE KEY-----\ntest\n", "utf8");
+          writeFileSync(
+            join(tempRepo, "id_rsa"),
+            "-----BEGIN OPENSSH PRIVATE KEY-----\ntest\n",
+            "utf8",
+          );
           execFileSync("git", ["add", "id_rsa"], { cwd: tempRepo, stdio: "ignore" });
 
           const auditBlock = gate.auditStagedFiles();

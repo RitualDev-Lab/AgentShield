@@ -36,7 +36,9 @@ export function normalizeShellCommand(cmd: string): string[] {
   });
 
   // 2. Decode inline eval base64 patterns: eval $(echo ... | base64 -d)
-  const b64EvalMatch = normalized.match(/(?:eval\s+)?(?:\$\()?echo\s+([A-Za-z0-9+/=]{8,})\s*\|\s*base64\s+(?:-d|--decode)/i);
+  const b64EvalMatch = normalized.match(
+    /(?:eval\s+)?(?:\$\()?echo\s+([A-Za-z0-9+/=]{8,})\s*\|\s*base64\s+(?:-d|--decode)/i,
+  );
   if (b64EvalMatch?.[1]) {
     try {
       const decoded = Buffer.from(b64EvalMatch[1], "base64").toString("utf8");

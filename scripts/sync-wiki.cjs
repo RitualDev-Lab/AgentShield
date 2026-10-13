@@ -27,7 +27,9 @@ try {
     console.log("✅ Cloned existing wiki repository.");
   } catch (err) {
     console.log("⚠️ Wiki repository not yet created on GitHub.");
-    console.log('💡 To activate: Visit https://github.com/RitualDev-Lab/AgentShield/wiki and click "Create the first page".');
+    console.log(
+      '💡 To activate: Visit https://github.com/RitualDev-Lab/AgentShield/wiki and click "Create the first page".',
+    );
     console.log("📦 All wiki pages are safely tracked in the /wiki directory in the main repo.");
     process.exit(0);
   }

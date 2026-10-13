@@ -59,13 +59,13 @@ You can run AgentShield immediately with `npx` without installing any global pac
 
 ```bash
 # 1. Check your codebase or .env file for leaked secrets
-npx @ritualdev-lab/agentshield scan .env
+npx @ritualdev_lab/agentshield scan .env
 
 # 2. Install pre-commit guard into your current git repository
-npx @ritualdev-lab/agentshield hook git-install
+npx @ritualdev_lab/agentshield hook git-install
 
 # 3. Test the agent sandbox against sensitive file access
-npx @ritualdev-lab/agentshield exec "cat .env"
+npx @ritualdev_lab/agentshield exec "cat .env"
 ```
 
 To install AgentShield globally or as a project dependency:
@@ -89,11 +89,11 @@ Scan any file, configuration, or log for exposed credentials:
 
 ```bash
 # Scan a specific file
-npx @ritualdev-lab/agentshield scan .env
-npx @ritualdev-lab/agentshield scan config/secrets.yaml
+npx @ritualdev_lab/agentshield scan .env
+npx @ritualdev_lab/agentshield scan config/secrets.yaml
 
 # Output structured JSON for tooling / scripts
-npx @ritualdev-lab/agentshield scan .env --json
+npx @ritualdev_lab/agentshield scan .env --json
 ```
 
 **Example Output:**
@@ -120,11 +120,11 @@ Sanitize a file or text with deterministic, non-leaking surrogate tokens:
 
 ```bash
 # Redact secrets and print sanitized output to stdout
-npx @ritualdev-lab/agentshield redact server.js
+npx @ritualdev_lab/agentshield redact server.js
 
 # Custom surrogate formatting styles (token, hash, asterisk)
-npx @ritualdev-lab/agentshield redact server.js --style asterisk
-npx @ritualdev-lab/agentshield redact server.js --style hash
+npx @ritualdev_lab/agentshield redact server.js --style asterisk
+npx @ritualdev_lab/agentshield redact server.js --style hash
 ```
 
 **Surrogate Token Formats:**
@@ -139,10 +139,10 @@ Pipe terminal output, build logs, or AI agent input streams through AgentShield:
 
 ```bash
 # Pipe environment dump through real-time redactor
-env | npx @ritualdev-lab/agentshield stream
+env | npx @ritualdev_lab/agentshield stream
 
 # Pipe AI agent standard input/output
-claude-code | npx @ritualdev-lab/agentshield stream
+claude-code | npx @ritualdev_lab/agentshield stream
 ```
 
 ---
@@ -152,20 +152,20 @@ Safely wrap bash execution for autonomous agents. If an agent tries to read `.en
 
 ```bash
 # Block direct reading of sensitive environment files
-npx @ritualdev-lab/agentshield exec "cat .env"
+npx @ritualdev_lab/agentshield exec "cat .env"
 # 🚨 [AgentShield Sandbox Block] Blocked attempt to read raw .env file directly.
 
 # Block obfuscated ANSI-C escapes and tab bypasses
-npx @ritualdev-lab/agentshield exec "sh -c $'cat\t.env'"
+npx @ritualdev_lab/agentshield exec "sh -c $'cat\t.env'"
 # 🚨 [AgentShield Sandbox Block] Blocked obfuscated ANSI-C escape subshell targeting .env file.
 
 # Block shell variable dumping
-npx @ritualdev-lab/agentshield exec "printenv"
+npx @ritualdev_lab/agentshield exec "printenv"
 # 🚨 [AgentShield Sandbox Block] Blocked unconstrained environment variable dump.
 
 # Allowed safe developer commands execute transparently:
-npx @ritualdev-lab/agentshield exec "npm test"
-npx @ritualdev-lab/agentshield exec "git status"
+npx @ritualdev_lab/agentshield exec "npm test"
+npx @ritualdev_lab/agentshield exec "git status"
 ```
 
 ---
@@ -175,10 +175,10 @@ Prevent developers or agents from committing secrets into local Git history:
 
 ```bash
 # Install automatic pre-commit hook into .git/hooks/pre-commit
-npx @ritualdev-lab/agentshield hook git-install
+npx @ritualdev_lab/agentshield hook git-install
 
 # Manually audit currently staged files
-npx @ritualdev-lab/agentshield hook check
+npx @ritualdev_lab/agentshield hook check
 ```
 
 **What the hook does:**
@@ -194,13 +194,13 @@ Audit entire git diffs in pull requests and generate compliance reports:
 
 ```bash
 # Audit diff against base branch (default: origin/main)
-npx @ritualdev-lab/agentshield ci --base origin/main
+npx @ritualdev_lab/agentshield ci --base origin/main
 
 # Generate Markdown report artifact for GitHub Actions summary
-npx @ritualdev-lab/agentshield ci --base origin/main --report security-report.md
+npx @ritualdev_lab/agentshield ci --base origin/main --report security-report.md
 
 # Export findings in OASIS SARIF format for GitHub Security Code Scanning tab
-npx @ritualdev-lab/agentshield ci --base origin/main --sarif results.sarif
+npx @ritualdev_lab/agentshield ci --base origin/main --sarif results.sarif
 ```
 
 ---
@@ -209,7 +209,7 @@ npx @ritualdev-lab/agentshield ci --base origin/main --sarif results.sarif
 Generate formal audit reports mapped to industry cybersecurity frameworks:
 
 ```bash
-npx @ritualdev-lab/agentshield compliance .env
+npx @ritualdev_lab/agentshield compliance .env
 ```
 
 **Supported Regulatory Frameworks:**
@@ -224,7 +224,7 @@ npx @ritualdev-lab/agentshield compliance .env
 Inspect configuration files in your repository for risky agent permissions:
 
 ```bash
-npx @ritualdev-lab/agentshield audit
+npx @ritualdev_lab/agentshield audit
 ```
 Audits `.claude/skills/`, Cursor rules (`.cursorrules`), Windsurf configurations, and MCP settings for overly permissive shell scopes or unencrypted credentials.
 
@@ -234,7 +234,7 @@ Audits `.claude/skills/`, Cursor rules (`.cursorrules`), Windsurf configurations
 Run a transparent inline JSON-RPC proxy to intercept and sanitize tool calls made by MCP agents:
 
 ```bash
-npx @ritualdev-lab/agentshield mcp-proxy
+npx @ritualdev_lab/agentshield mcp-proxy
 ```
 Inspects all incoming and outgoing tool arguments, replacing cleartext secrets with surrogate tokens before forwarding payloads to external tools or LLM context windows.
 
@@ -244,7 +244,7 @@ Inspects all incoming and outgoing tool arguments, replacing cleartext secrets w
 AgentShield logs all intercepted leaks into an append-only cryptographic ledger (`.agentshield/ledger.jsonl`). Verify ledger integrity against tampering:
 
 ```bash
-npx @ritualdev-lab/agentshield ledger verify
+npx @ritualdev_lab/agentshield ledger verify
 ```
 Validates the HMAC-SHA256 hash chain across all log entries to prove security audit trail authenticity.
 
@@ -258,7 +258,7 @@ AgentShield provides seamless integration across leading autonomous coding envir
 Add AgentShield execution wrapper or install the universal skill:
 ```bash
 # In Claude Code session, prepend shell executions:
-npx @ritualdev-lab/agentshield exec "<command>"
+npx @ritualdev_lab/agentshield exec "<command>"
 ```
 Or place [SKILL.md](file:///D:/Repos/AgentShield/SKILL.md) in your project's `.claude/skills/agentshield/SKILL.md`.
 
@@ -266,8 +266,8 @@ Or place [SKILL.md](file:///D:/Repos/AgentShield/SKILL.md) in your project's `.c
 Add the following instruction to your project's `.cursorrules` or `.windsurfrules`:
 ```markdown
 Before executing bash commands that interact with configuration files or environment variables, run them through:
-`npx @ritualdev-lab/agentshield exec "<command>"`
-Run `npx @ritualdev-lab/agentshield hook check` before finalizing any git commits.
+`npx @ritualdev_lab/agentshield exec "<command>"`
+Run `npx @ritualdev_lab/agentshield hook check` before finalizing any git commits.
 ```
 
 ### 5.3 Google Antigravity
@@ -405,7 +405,7 @@ console.log(check.reason);  // "Blocked attempt to read raw .env file"
 ## 9. Troubleshooting & FAQ
 
 ### Q: Why did the pre-commit hook block my commit?
-**A:** AgentShield detected a high-entropy string or recognized secret header in your staged diff. Run `npx @ritualdev-lab/agentshield hook check` to see the exact file and line number. If it is a false positive test fixture, add the path to `ignorePaths` in `.agentshield.json`.
+**A:** AgentShield detected a high-entropy string or recognized secret header in your staged diff. Run `npx @ritualdev_lab/agentshield hook check` to see the exact file and line number. If it is a false positive test fixture, add the path to `ignorePaths` in `.agentshield.json`.
 
 ### Q: Can AgentShield run in offline / air-gapped environments?
 **A:** Yes. AgentShield has zero telemetry, does not send data over any network, and operates 100% locally on your machine.

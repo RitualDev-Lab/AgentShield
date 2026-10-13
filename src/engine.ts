@@ -22,15 +22,14 @@ export class AgentShieldEngine {
     const detectedSecretsSet = new Set<string>();
     let sanitizedText = text;
 
-    const activePatterns = [
-      ...this.patterns,
-      ...(options.customPatterns || []),
-    ];
+    const activePatterns = [...this.patterns, ...(options.customPatterns || [])];
 
     // 1. Pattern-based detection
     for (const pattern of activePatterns) {
       // Ensure global flag 'g' is present to prevent zero-length match infinite loops
-      const flags = pattern.regex.flags.includes("g") ? pattern.regex.flags : `${pattern.regex.flags}g`;
+      const flags = pattern.regex.flags.includes("g")
+        ? pattern.regex.flags
+        : `${pattern.regex.flags}g`;
       const regex = new RegExp(pattern.regex.source, flags);
       let match = regex.exec(text);
 
