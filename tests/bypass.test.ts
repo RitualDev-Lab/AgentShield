@@ -50,12 +50,30 @@ describe("Phase 1: Adversarial Red-Team & Bypass Test Suite", () => {
       assert.strictEqual(sandbox.inspectCommand("xxd .env").isBlocked, true);
       assert.strictEqual(sandbox.inspectCommand("git show HEAD:.env").isBlocked, true);
     });
+
+    it("should intercept move, rename, rsync, install and openssl encryption targeting .env", () => {
+      assert.strictEqual(sandbox.inspectCommand("mv .env /tmp/renamed").isBlocked, true);
+      assert.strictEqual(sandbox.inspectCommand("move .env safe.txt").isBlocked, true);
+      assert.strictEqual(sandbox.inspectCommand("rsync -av .env /tmp/").isBlocked, true);
+      assert.strictEqual(sandbox.inspectCommand("install .env /tmp/").isBlocked, true);
+      assert.strictEqual(sandbox.inspectCommand("openssl enc -in .env -out .env.enc").isBlocked, true);
+    });
   });
 
   describe("3. Shell Obfuscation & Quote Splitting", () => {
     it("should neutralize quote-splitting: cat .e\"\"nv", () => {
       assert.strictEqual(sandbox.inspectCommand('cat .e""nv').isBlocked, true);
       assert.strictEqual(sandbox.inspectCommand("cat .e''nv").isBlocked, true);
+    });
+
+    it("should intercept wildcard and single-char glob evasion: cat .e?v", () => {
+      assert.strictEqual(sandbox.inspectCommand("cat .e?v").isBlocked, true);
+      assert.strictEqual(sandbox.inspectCommand("cat .e*v").isBlocked, true);
+    });
+
+    it("should intercept compgen -v and declare -p environment dumps", () => {
+      assert.strictEqual(sandbox.inspectCommand("compgen -v").isBlocked, true);
+      assert.strictEqual(sandbox.inspectCommand("declare -p").isBlocked, true);
     });
 
     it("should decode and intercept inline base64 eval payloads", () => {
@@ -90,6 +108,16 @@ describe("Phase 1: Adversarial Red-Team & Bypass Test Suite", () => {
       assert.strictEqual(result.sanitizedText.includes("LONG]"), false); // No corrupted trailing fragments
     });
 
+    it("should gate vaultMap behind includeRaw to avoid returning plaintext credentials in SDK by default", () => {
+      const secret = "sk-proj-1234567890123456789012345678901234567890";
+      const defaultResult = engine.scanAndRedact(`api_key = "${secret}"`);
+      assert.strictEqual(defaultResult.vaultMap.size, 0);
+
+      const optedInResult = engine.scanAndRedact(`api_key = "${secret}"`, { includeRaw: true });
+      assert.strictEqual(optedInResult.vaultMap.size > 0, true);
+      assert.strictEqual(Array.from(optedInResult.vaultMap.values()).includes(secret), true);
+    });
+
     it("should safely handle custom patterns without 'g' flag and zero-length matches without hanging", () => {
       const hungEngine = new AgentShieldEngine([
         {
@@ -109,18 +137,44 @@ describe("Phase 1: Adversarial Red-Team & Bypass Test Suite", () => {
   });
 
   describe("5. False Positive Guard: Public Keys Allowed", () => {
-    it("should allow id_rsa.pub to be committed without blocking", () => {
-      // id_rsa.pub should not be blocked in CRITICAL_FILE_PATTERNS
-      const criticalFiles = [
-        ".env",
-        "id_rsa",
-        "private.key",
-        "server.key",
-      ];
-      const gate = new GitPreCommitGate();
-      // Internal validation check
-      const auditResult = gate.auditStagedFiles();
-      assert.ok(auditResult);
+    it("should allow id_rsa.pub to be committed without blocking in an active git repository", async () => {
+      const { execFileSync } = await import("node:child_process");
+      const { mkdtempSync, rmSync, writeFileSync } = await import("node:fs");
+      const { tmpdir } = await import("node:os");
+      const { join } = await import("node:path");
+
+      const tempRepo = mkdtempSync(join(tmpdir(), "agentshield-gate-test-"));
+      try {
+        execFileSync("git", ["init"], { cwd: tempRepo, stdio: "ignore" });
+        execFileSync("git", ["config", "user.name", "TestUser"], { cwd: tempRepo, stdio: "ignore" });
+        execFileSync("git", ["config", "user.email", "test@ritualdev.in"], { cwd: tempRepo, stdio: "ignore" });
+
+        // Stage public key (should pass)
+        const pubKeyContent = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC12345 user@example.com";
+        writeFileSync(join(tempRepo, "id_rsa.pub"), pubKeyContent, "utf8");
+        execFileSync("git", ["add", "id_rsa.pub"], { cwd: tempRepo, stdio: "ignore" });
+
+        const originalCwd = process.cwd();
+        try {
+          process.chdir(tempRepo);
+          const gate = new GitPreCommitGate();
+          const auditPass = gate.auditStagedFiles();
+          assert.strictEqual(auditPass.passed, true);
+          assert.strictEqual(auditPass.blockedFiles.length, 0);
+
+          // Now stage an actual private key and verify gate blocks it
+          writeFileSync(join(tempRepo, "id_rsa"), "-----BEGIN OPENSSH PRIVATE KEY-----\ntest\n", "utf8");
+          execFileSync("git", ["add", "id_rsa"], { cwd: tempRepo, stdio: "ignore" });
+
+          const auditBlock = gate.auditStagedFiles();
+          assert.strictEqual(auditBlock.passed, false);
+          assert.strictEqual(auditBlock.blockedFiles.includes("id_rsa"), true);
+        } finally {
+          process.chdir(originalCwd);
+        }
+      } finally {
+        rmSync(tempRepo, { recursive: true, force: true });
+      }
     });
   });
 });

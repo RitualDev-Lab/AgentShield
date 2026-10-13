@@ -1,5 +1,5 @@
 import { spawn, type ChildProcess } from "node:child_process";
-import { platform } from "node:os";
+import { homedir, platform } from "node:os";
 import { Transform } from "node:stream";
 import { AgentShieldEngine } from "./engine.js";
 import { KernelSandboxConfinement } from "./kernel.js";
@@ -124,8 +124,11 @@ export class AgentStdioInterceptor {
       // Wrap in OS-level sandbox if requested and supported
       let execCmd = command;
       if (options.enableKernelSandbox && osType === "darwin") {
-        // macOS seatbelt sandbox-exec profile
-        execCmd = `sandbox-exec -p '(version 1)(deny default)(allow process-exec)(allow sysctl-read)(allow file-read* (subpath "${options.workspaceDir || process.cwd()}"))(allow file-write* (subpath "${options.workspaceDir || process.cwd()}"))(allow file-read* (subpath "/usr/lib"))(allow file-read* (subpath "/dev/null"))(deny file-read* (subpath "~/.ssh"))(deny file-read* (subpath "~/.aws"))' ${command}`;
+        const home = homedir();
+        const ws = (options.workspaceDir || process.cwd()).replace(/"/g, '\\"');
+        // Note: Workspace allow permits subpath file-read*; reading workspace .env directly
+        // is captured and scrubbed by the stdio output transform stream and AST pre-flight gate.
+        execCmd = `sandbox-exec -p '(version 1)(deny default)(allow process-exec)(allow sysctl-read)(allow file-read* (subpath "${ws}"))(allow file-write* (subpath "${ws}"))(allow file-read* (subpath "/usr/lib"))(allow file-read* (subpath "/dev/null"))(deny file-read* (subpath "${home}/.ssh"))(deny file-read* (subpath "${home}/.aws"))' ${command}`;
       }
 
       try {

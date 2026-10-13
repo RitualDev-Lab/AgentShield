@@ -94,17 +94,21 @@ async function main() {
 
     const content = readFileSync(targetFile, "utf8");
     const isJson = args.includes("--json");
-    const result = engine.scanAndRedact(content, scanOptions);
+    const includeRaw = args.includes("--include-raw");
+
+    if (includeRaw) {
+      console.warn(
+        "⚠️ [SECURITY WARNING] Output includes plaintext unredacted credentials (--include-raw).",
+      );
+    }
+
+    const result = engine.scanAndRedact(content, {
+      ...scanOptions,
+      includeRaw,
+    });
 
     if (command === "scan") {
       if (isJson) {
-        const includeRaw = args.includes("--include-raw");
-        if (includeRaw) {
-          console.warn(
-            "⚠️ [SECURITY WARNING] Output includes plaintext unredacted credentials (--include-raw).",
-          );
-        }
-
         const safeOutput = {
           hasSecrets: result.hasSecrets,
           totalFound: result.totalFound,
@@ -121,7 +125,6 @@ async function main() {
             ...(includeRaw ? { raw: f.raw } : {}),
           })),
           sanitizedText: result.sanitizedText,
-          ...(includeRaw ? { vaultMap: Object.fromEntries(result.vaultMap) } : {}),
         };
 
         console.log(JSON.stringify(safeOutput, null, 2));
@@ -244,7 +247,10 @@ async function main() {
     process.exit(0);
   } else if (command === "compliance") {
     if (!isLabs) {
-      console.warn("🧪 [AgentShield Labs] 'compliance' is an experimental enterprise control plane feature.");
+      console.error(
+        "❌ Error: 'compliance' is an experimental enterprise control plane feature. Pass --labs or --experimental to enable.",
+      );
+      process.exit(1);
     }
     const targetFile = args.filter((a) => !a.startsWith("--"))[1];
     if (!targetFile) {
@@ -288,7 +294,10 @@ async function main() {
     process.exit(0);
   } else if (command === "audit") {
     if (!isLabs) {
-      console.warn("🧪 [AgentShield Labs] 'audit' is an experimental agent configuration static analysis feature.");
+      console.error(
+        "❌ Error: 'audit' is an experimental agent configuration static analysis feature. Pass --labs or --experimental to enable.",
+      );
+      process.exit(1);
     }
     const { AgentConfigAuditor } = await import("./auditor.js");
     const { SarifFormatter } = await import("./sarif.js");
@@ -329,7 +338,10 @@ async function main() {
     }
   } else if (command === "mcp-proxy") {
     if (!isLabs) {
-      console.warn("🧪 [AgentShield Labs] 'mcp-proxy' is an experimental stdio protocol interceptor.");
+      console.error(
+        "❌ Error: 'mcp-proxy' is an experimental stdio protocol interceptor. Pass --labs or --experimental to enable.",
+      );
+      process.exit(1);
     }
     // Pipe filter for MCP stdio / JSON-RPC communication
     const { McpProxyInterceptor } = await import("./mcp-proxy.js");
@@ -362,7 +374,10 @@ async function main() {
     });
   } else if (command === "ledger") {
     if (!isLabs) {
-      console.warn("🧪 [AgentShield Labs] 'ledger' is an experimental tamper-evident audit ledger.");
+      console.error(
+        "❌ Error: 'ledger' is an experimental tamper-evident audit ledger. Pass --labs or --experimental to enable.",
+      );
+      process.exit(1);
     }
     const subCmd = args.filter((a) => !a.startsWith("--"))[1];
     const { TamperEvidentLedger } = await import("./ledger.js");

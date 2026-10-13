@@ -1,4 +1,4 @@
-import { platform } from "node:os";
+import { homedir, platform } from "node:os";
 import { join } from "node:path";
 
 export interface SandboxProfile {
@@ -31,6 +31,7 @@ export class KernelSandboxConfinement {
    */
   public generateSeatbeltProfile(): string {
     const safeWorkspace = this.workspaceDir.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+    const home = homedir().replace(/\\/g, "\\\\").replace(/"/g, '\\"');
     return `(version 1)
 (deny default)
 (allow process-exec)
@@ -40,9 +41,9 @@ export class KernelSandboxConfinement {
 (allow file-read* (subpath "/usr/lib"))
 (allow file-read* (subpath "/usr/share"))
 (allow file-read* (subpath "/dev/null"))
-(deny file-read* (subpath "~/.ssh"))
-(deny file-read* (subpath "~/.aws"))
-(deny file-read* (subpath "~/.config"))
+(deny file-read* (subpath "${home}/.ssh"))
+(deny file-read* (subpath "${home}/.aws"))
+(deny file-read* (subpath "${home}/.config"))
 (deny network*)
 `;
   }

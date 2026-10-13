@@ -1,4 +1,4 @@
-﻿<div align="center">
+<div align="center">
 
 # 🛡️ AgentShield
 
@@ -8,7 +8,7 @@
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg?style=for-the-badge)](LICENSE)
 [![GitHub Action](https://img.shields.io/badge/GitHub_Action-v1-purple.svg?style=for-the-badge&logo=github-actions)](https://github.com/RitualDev-Lab/AgentShield)
 [![Node Runtime](https://img.shields.io/badge/Node-%3E%3D20.0-emerald.svg?style=for-the-badge&logo=nodedotjs)](https://nodejs.org)
-[![Tests](https://img.shields.io/badge/Tests-48%2F48_Passing-brightgreen.svg?style=for-the-badge)](tests/)
+[![Tests](https://img.shields.io/badge/Tests-69%2F69_Passing-brightgreen.svg?style=for-the-badge)](tests/)
 
 
 <br />

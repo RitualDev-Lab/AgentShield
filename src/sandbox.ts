@@ -9,18 +9,17 @@ export interface CommandInspectionResult {
  * File basenames or target patterns that contain high-risk secrets.
  */
 const SENSITIVE_TARGET_FILES =
-  /(?:^|[\s'"\/\\=:]|HEAD:)(?:\.env(?:\.[a-zA-Z0-9_\-]+)?|id_rsa|id_ed25519|id_ecdsa|\.aws[\/\\](?:credentials|config)|\.npmrc|\.netrc|\.gnupg[\/\\][a-zA-Z0-9_\-]+)(?:$|['"\s|;&><])/i;
+  /(?:^|[\s'"\/\\=:]|HEAD:)(?:\.e(?:nv|[\?*]v|\.{0,2}nv)(?:\.[a-zA-Z0-9_\-]+)?|id_rsa|id_ed25519|id_ecdsa|\.aws[\/\\](?:credentials|config)|\.npmrc|\.netrc|\.gnupg[\/\\][a-zA-Z0-9_\-]+)(?:$|['"\s|;&><])/i;
 
 /**
- * Direct file-reading utilities or shell builtins.
- * Includes binary dumpers, archival packagers, and copy operations targeting sensitive files.
+ * Direct file-reading utilities, shell builtins, copy/move operations, and archiving tools.
  */
 const FILE_READER_BINARIES =
-  /\b(cat|more|less|tail|head|type|Get-Content|gc|grep|egrep|awk|sed|dd|xargs|nl|fold|paste|tac|strings|base64|xxd|od|hexdump|cp|copy|ln|tar|zip|gzip|git\s+show)\b/i;
+  /\b(cat|more|less|tail|head|type|Get-Content|gc|grep|egrep|awk|sed|dd|xargs|nl|fold|paste|tac|strings|base64|xxd|od|hexdump|cp|copy|mv|move|install|rsync|ln|tar|zip|gzip|git\s+show|openssl\s+enc)\b/i;
 
 /**
  * Normalizes shell command strings by stripping common evasion wrappers
- * (such as `sh -c "..."`, `bash -c '...'`, `$'\t'` escapes, eval $(echo ... | base64 -d), and quote splitting like `.e""nv`).
+ * (such as `sh -c "..."`, `bash -c '...'`, `$'\t'` escapes, eval $(echo ... | base64 -d), quote splitting like `.e""nv`, and globs like `.e?v`).
  */
 export function normalizeShellCommand(cmd: string): string[] {
   let normalized = cmd.trim();
@@ -52,13 +51,21 @@ export function normalizeShellCommand(cmd: string): string[] {
     /(?:^|[|;&]\s*)(?:sh|bash|zsh)\s+-c\s+(['"])(.*?)\1(?:\s*(?:[|;&]|$))/i,
   );
 
-  // 4. Neutralize quote-splitting evasions: cat .e""nv -> cat .env
-  const unquoted = normalized.replace(/([a-zA-Z0-9_.-])["']{2}([a-zA-Z0-9_.-])/g, "$1$2");
+  // 4. Neutralize quote-splitting and glob evasions: cat .e""nv -> cat .env, cat .e?v -> cat .env
+  const unquoted = normalized
+    .replace(/([a-zA-Z0-9_.-])["']{2}([a-zA-Z0-9_.-])/g, "$1$2")
+    .replace(/\.e\?v/g, ".env")
+    .replace(/\.e\*v/g, ".env");
 
   const candidates = [normalized, unquoted];
   if (subshellMatch?.[2]) {
     candidates.push(subshellMatch[2]);
-    candidates.push(subshellMatch[2].replace(/([a-zA-Z0-9_.-])["']{2}([a-zA-Z0-9_.-])/g, "$1$2"));
+    candidates.push(
+      subshellMatch[2]
+        .replace(/([a-zA-Z0-9_.-])["']{2}([a-zA-Z0-9_.-])/g, "$1$2")
+        .replace(/\.e\?v/g, ".env")
+        .replace(/\.e\*v/g, ".env"),
+    );
   }
 
   return Array.from(new Set(candidates));
@@ -107,10 +114,10 @@ const DANGEROUS_COMMAND_PATTERNS = [
     reason: "Blocked inline runtime script inspecting environment variables or sensitive files.",
     category: "env_dump" as const,
   },
-  // 4. Dumping all environment variables (standalone or piped: env | sort, printenv, export)
+  // 4. Dumping all environment variables (standalone or piped: env | sort, printenv, export, compgen -v, declare -p)
   {
     test: (cmd: string) =>
-      /(?:^|[|;&]\s*)(?:printenv|env|export|set|Get-ChildItem\s+Env:)\b(?!\s*[-_a-zA-Z0-9]+=)/i.test(
+      /(?:^|[|;&]\s*)(?:printenv|env|export|set|compgen\s+-v|declare\s+-p|Get-ChildItem\s+Env:)\b(?!\s*[-_a-zA-Z0-9]+=)/i.test(
         cmd,
       ),
     reason: "Blocked attempt to dump full environment variables into agent context.",

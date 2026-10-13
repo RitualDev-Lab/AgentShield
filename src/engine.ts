@@ -151,7 +151,7 @@ export class AgentShieldEngine {
       totalFound: findings.length,
       findings: safeFindings,
       sanitizedText,
-      vaultMap: new Map(this.vaultMap),
+      vaultMap: options.includeRaw ? new Map(this.vaultMap) : new Map(),
     };
   }
 
