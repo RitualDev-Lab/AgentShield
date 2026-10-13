@@ -1,4 +1,4 @@
-name: Security Vulnerability or Secret Bypass
+﻿name: Security Vulnerability or Secret Bypass
 description: Report a sandbox bypass, regex escape, or security hole in AgentShield
 title: "[SECURITY]: "
 labels: ["security", "p0-vulnerability"]
@@ -29,7 +29,7 @@ body:
       label: Bypass Reproduction / Payload
       description: Provide the command or code snippet demonstrating the bypass (USE SYNTHETIC SAMPLES ONLY).
       placeholder: |
-        Command: npx @ritualdev-lab/agentshield exec "your-evasion-command"
+        Command: npx @ritualdev_lab/agentshield exec "your-evasion-command"
         Observed: Command executed without block
     validations:
       required: true

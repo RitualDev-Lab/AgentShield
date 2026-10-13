@@ -1,4 +1,4 @@
-import { execFileSync } from "node:child_process";
+﻿import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { basename, join } from "node:path";
 import { AgentShieldEngine } from "./engine.js";
@@ -155,11 +155,11 @@ ${marker}
 if [ -f "./node_modules/.bin/agentshield" ]; then
   ./node_modules/.bin/agentshield hook check
 elif command -v npx >/dev/null 2>&1; then
-  npx --no-install @ritualdev-lab/agentshield hook check 2>/dev/null || npx @ritualdev-lab/agentshield@${AGENTSHIELD_VERSION} hook check
+  npx --no-install @ritualdev_lab/agentshield hook check 2>/dev/null || npx @ritualdev_lab/agentshield@${AGENTSHIELD_VERSION} hook check
 fi
 
 if [ $? -ne 0 ]; then
-  echo "\\n🚨 [AgentShield] Commit aborted to prevent secret leakage. Run 'npx @ritualdev-lab/agentshield@${AGENTSHIELD_VERSION} redact' or unstage credentials.\\n"
+  echo "\\n🚨 [AgentShield] Commit aborted to prevent secret leakage. Run 'npx @ritualdev_lab/agentshield@${AGENTSHIELD_VERSION} redact' or unstage credentials.\\n"
   exit 1
 fi
 # --- End AgentShield Gate ---

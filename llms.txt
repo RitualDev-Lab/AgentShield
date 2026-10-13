@@ -1,4 +1,4 @@
-# AgentShield
+﻿# AgentShield
 > Enterprise-Grade Zero-Leak Secret Defense & Sandboxing for Autonomous AI Coding Agents
 
 AgentShield is an open-source, local-first runtime security layer designed to prevent autonomous AI coding agents (Claude Code, Cursor, Windsurf, Codex, Antigravity) from reading `.env` files, leaking private cloud credentials into LLM inference contexts, or committing secrets into Git repositories.
@@ -11,16 +11,16 @@ License: Apache-2.0
 ## Quick Start CLI
 ```bash
 # Audit a configuration file for leaked secrets
-npx @ritualdev-lab/agentshield scan .env
+npx @ritualdev_lab/agentshield scan .env
 
 # Install pre-commit hook in local repository
-npx @ritualdev-lab/agentshield hook git-install
+npx @ritualdev_lab/agentshield hook git-install
 
 # Sandbox an agent bash command with real-time output redaction
-npx @ritualdev-lab/agentshield exec "cat .env"
+npx @ritualdev_lab/agentshield exec "cat .env"
 
 # Audit git pull request diff in CI
-npx @ritualdev-lab/agentshield ci --base origin/main
+npx @ritualdev_lab/agentshield ci --base origin/main
 ```
 
 ## Core Security Capabilities

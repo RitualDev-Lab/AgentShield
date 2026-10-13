@@ -1,4 +1,4 @@
-# Enterprise Compliance Attestation 📜
+﻿# Enterprise Compliance Attestation 📜
 
 Autonomous AI tools present unique governance risks for security officers and compliance auditors. AgentShield is architected to satisfy enterprise compliance requirements out of the box with zero cloud data transmission.
 
@@ -20,5 +20,5 @@ Autonomous AI tools present unique governance risks for security officers and co
 Generate an executive compliance attestation bundle for audit reviews:
 
 ```bash
-npx @ritualdev-lab/agentshield audit-compliance --framework soc2,pci-dss --format json > compliance-bundle.json
+npx @ritualdev_lab/agentshield audit-compliance --framework soc2,pci-dss --format json > compliance-bundle.json
 ```

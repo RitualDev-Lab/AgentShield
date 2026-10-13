@@ -1,4 +1,4 @@
-# CI/CD Security Gate & SARIF 2.1.0 🛡️
+﻿# CI/CD Security Gate & SARIF 2.1.0 🛡️
 
 AgentShield integrates into continuous integration pipelines to prevent hardcoded secrets and high-entropy tokens from merging into protected branches.
 
@@ -33,7 +33,7 @@ jobs:
           node-version: 22
 
       - name: Run AgentShield Gate
-        run: npx @ritualdev-lab/agentshield ci --base origin/main --format sarif --out agentshield.sarif
+        run: npx @ritualdev_lab/agentshield ci --base origin/main --format sarif --out agentshield.sarif
 
       - name: Upload SARIF to GitHub Security Tab
         uses: github/codeql-action/upload-sarif@v3

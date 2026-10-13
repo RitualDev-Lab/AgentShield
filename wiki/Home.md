@@ -1,4 +1,4 @@
-# AgentShield Documentation Wiki 🛡️
+﻿# AgentShield Documentation Wiki 🛡️
 
 Welcome to the official **AgentShield Knowledge Base and Technical Architecture Wiki**.
 
@@ -21,4 +21,4 @@ AgentShield is an enterprise-grade, local-first runtime security layer and AST s
 - **Official Website**: [https://agentshield.ritualdev.in](https://agentshield.ritualdev.in)
 - **Ecosystem Hub**: [DevShelf Directory](https://devshelf.ritualdev.in)
 - **Repository**: [RitualDev-Lab/AgentShield](https://github.com/RitualDev-Lab/AgentShield)
-- **npm / GitHub Packages**: `@ritualdev-lab/agentshield`
+- **npm / GitHub Packages**: `@ritualdev_lab/agentshield`

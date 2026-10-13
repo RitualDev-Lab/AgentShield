@@ -1,4 +1,4 @@
----
+﻿---
 name: agent-shield
 description: Enterprise-grade Zero-Leak Secret Defense & Sandbox for AI Coding Assistants. Intercepts credentials, audits git diffs, and prevents .env leakage.
 version: 0.2.0
@@ -19,16 +19,16 @@ When developing, testing, or modifying code:
 2. **Pre-Flight Commit Verification**:
    - Before executing `git commit` or opening a PR, always audit staged files:
      ```bash
-     npx @ritualdev-lab/agentshield hook check
+     npx @ritualdev_lab/agentshield hook check
      ```
    - If secrets or `.env` files are detected, unstage or redact them before proceeding.
 3. **Execution Sandbox**:
    - Wrap sensitive or dynamic script executions with AgentShield:
      ```bash
-     npx @ritualdev-lab/agentshield exec "<command>"
+     npx @ritualdev_lab/agentshield exec "<command>"
      ```
 4. **Stream Redaction**:
    - When inspecting logs that might contain tokens:
      ```bash
-     <command> | npx @ritualdev-lab/agentshield stream
+     <command> | npx @ritualdev_lab/agentshield stream
      ```
