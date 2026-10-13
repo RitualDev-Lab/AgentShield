@@ -73,11 +73,22 @@ npx @ritualdev-lab/agentshield exec "cat .env"
 Catch leaked credentials before they enter git history. Audits staged diffs automatically:
 
 ```bash
-# Install once in your repo
+# Install once in your repo (native git hook)
 npx @ritualdev-lab/agentshield hook git-install
 
 # Or manually audit staged files
 npx @ritualdev-lab/agentshield hook check
+```
+
+Or using the standard [pre-commit](https://pre-commit.com/) framework (`.pre-commit-config.yaml`):
+
+```yaml
+repos:
+  - repo: https://github.com/RitualDev-Lab/AgentShield
+    rev: v0.1.1
+    hooks:
+      - id: agentshield
+      - id: agentshield-audit
 ```
 
 ### 🐙 3. CI/CD Security Gate & GitHub Action
