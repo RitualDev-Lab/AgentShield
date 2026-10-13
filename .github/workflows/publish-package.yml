@@ -55,7 +55,7 @@ jobs:
   publish-npm:
     name: Publish to npm Registry
     runs-on: ubuntu-latest
-    if: false # Enable once NPM_TOKEN secret is added in repository settings
+    if: github.repository == 'RitualDev-Lab/AgentShield'
     permissions:
       contents: read
       id-token: write
