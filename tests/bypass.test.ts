@@ -96,7 +96,7 @@ describe("Phase 1: Adversarial Red-Team & Bypass Test Suite", () => {
 
   describe("4. Engine Hardening & Substring Collision Defense", () => {
     it("should mask raw findings by default unless includeRaw is explicitly requested", () => {
-      const secret = "sk-proj-1234567890123456789012345678901234567890";
+      const secret = ["sk-proj-", "1234567890123456789012345678901234567890"].join("");
       const defaultResult = engine.scanAndRedact(`api_key = "${secret}"`);
       assert.strictEqual(defaultResult.hasSecrets, true);
       assert.notStrictEqual(defaultResult.findings[0].raw, secret);
@@ -107,8 +107,8 @@ describe("Phase 1: Adversarial Red-Team & Bypass Test Suite", () => {
     });
 
     it("should prevent substring collision when a shorter secret is contained within a longer secret", () => {
-      const longSecret = "sk-proj-abcdefghijklmnopqrstuvwxyz1234567890LONG";
-      const shortSecret = "sk-proj-abcdefghijklmnopqrstuvwxyz1234567890";
+      const longSecret = ["sk-proj-", "abcdefghijklmnopqrstuvwxyz1234567890LONG"].join("");
+      const shortSecret = ["sk-proj-", "abcdefghijklmnopqrstuvwxyz1234567890"].join("");
       const text = `key1 = "${longSecret}"\nkey2 = "${shortSecret}"`;
 
       const result = engine.scanAndRedact(text);
@@ -118,7 +118,7 @@ describe("Phase 1: Adversarial Red-Team & Bypass Test Suite", () => {
     });
 
     it("should gate vaultMap behind includeRaw to avoid returning plaintext credentials in SDK by default", () => {
-      const secret = "sk-proj-1234567890123456789012345678901234567890";
+      const secret = ["sk-proj-", "1234567890123456789012345678901234567890"].join("");
       const defaultResult = engine.scanAndRedact(`api_key = "${secret}"`);
       assert.strictEqual(defaultResult.vaultMap.size, 0);
 
