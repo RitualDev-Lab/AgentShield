@@ -19,12 +19,15 @@ Usage:
   npx @ritualdev-lab/agentshield scan <file-path>       Scan a file for leaked secrets
   npx @ritualdev-lab/agentshield redact <file-path>     Redact secrets and print sanitized text
   npx @ritualdev-lab/agentshield stream                 Redact secrets from piped stdin (for terminal hooks)
-  npx @ritualdev-lab/agentshield hook git-install       Install automatic git pre-commit leak shield
-  npx @ritualdev-lab/agentshield hook check             Audit git staged files before commit
   npx @ritualdev-lab/agentshield exec <command>         Safely sandbox & intercept agent bash command
   npx @ritualdev-lab/agentshield run <command>          Run command with real-time streaming stdio secret redaction
+  npx @ritualdev-lab/agentshield hook git-install       Install automatic git pre-commit leak shield
+  npx @ritualdev-lab/agentshield hook check             Audit git staged files before commit
   npx @ritualdev-lab/agentshield ci                     Audit pull request or git diff in CI/CD pipeline
-  npx @ritualdev-lab/agentshield compliance <file-path> Audit credentials for SOC2, PCI-DSS, HIPAA & ISO27001
+  npx @ritualdev-lab/agentshield benchmark              Run sub-millisecond scanning throughput benchmarks
+
+Experimental Labs & Enterprise Controls (--labs / --experimental):
+  npx @ritualdev-lab/agentshield compliance <file>      Audit credentials for SOC2, PCI-DSS, HIPAA & ISO27001
   npx @ritualdev-lab/agentshield audit                  Audit workspace MCP, .claude, and agent permission configs
   npx @ritualdev-lab/agentshield mcp-proxy              Run inline JSON-RPC proxy filter for MCP tool calls
   npx @ritualdev-lab/agentshield ledger verify          Verify cryptographic integrity of audit ledger HMAC chain
@@ -35,6 +38,7 @@ Options:
   --sarif <filePath>                     Export findings in OASIS SARIF 2.1.0 format
   --format <cef|json|syslog>             SIEM log output format
   --style <token|hash|asterisk>          Redaction format (default: token)
+  --labs, --experimental                 Enable experimental labs & enterprise control plane features
   --json                                 Output findings in structured JSON
   --help, -h                             Show this help message
 `);
@@ -63,6 +67,8 @@ async function main() {
       maskStyle = s as "token" | "hash" | "asterisk";
     }
   }
+
+  const isLabs = args.includes("--labs") || args.includes("--experimental");
 
   const scanOptions: ScanOptions = {
     allowlist: config?.allowlist || [],
@@ -233,7 +239,10 @@ async function main() {
     }
     process.exit(0);
   } else if (command === "compliance") {
-    const targetFile = args[1];
+    if (!isLabs) {
+      console.warn("🧪 [AgentShield Labs] 'compliance' is an experimental enterprise control plane feature.");
+    }
+    const targetFile = args.filter((a) => !a.startsWith("--"))[1];
     if (!targetFile) {
       console.error("❌ Error: Please specify a file path to audit for compliance.");
       process.exit(1);
@@ -274,6 +283,9 @@ async function main() {
     }
     process.exit(0);
   } else if (command === "audit") {
+    if (!isLabs) {
+      console.warn("🧪 [AgentShield Labs] 'audit' is an experimental agent configuration static analysis feature.");
+    }
     const { AgentConfigAuditor } = await import("./auditor.js");
     const { SarifFormatter } = await import("./sarif.js");
     const auditor = new AgentConfigAuditor(process.cwd());
@@ -312,6 +324,9 @@ async function main() {
       process.exit(report.passed ? 0 : 1);
     }
   } else if (command === "mcp-proxy") {
+    if (!isLabs) {
+      console.warn("🧪 [AgentShield Labs] 'mcp-proxy' is an experimental stdio protocol interceptor.");
+    }
     // Pipe filter for MCP stdio / JSON-RPC communication
     const { McpProxyInterceptor } = await import("./mcp-proxy.js");
     const proxy = new McpProxyInterceptor(engine);
@@ -342,7 +357,10 @@ async function main() {
       process.exit(0);
     });
   } else if (command === "ledger") {
-    const subCmd = args[1];
+    if (!isLabs) {
+      console.warn("🧪 [AgentShield Labs] 'ledger' is an experimental tamper-evident audit ledger.");
+    }
+    const subCmd = args.filter((a) => !a.startsWith("--"))[1];
     const { TamperEvidentLedger } = await import("./ledger.js");
     const ledger = new TamperEvidentLedger();
 
