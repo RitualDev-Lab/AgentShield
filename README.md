@@ -1,4 +1,4 @@
-﻿<div align="center">
+<div align="center">
 
 # 🛡️ AgentShield
 
@@ -14,7 +14,7 @@
 <br />
 
 
-[⚡ Quick Start](#-instant-30-second-setup) • [📖 Full Guide](GUIDE.md) • [🛡️ Agent Sandbox](#-1-autonomous-agent-shell-sandbox) • [🐙 GitHub Action](#-3-cicd-security-gate--github-action) • [🤖 Agent Skill](#-ai-agent-skill-integration) • [📋 Compliance](#-4-enterprise-compliance-auditor) • [🌐 Website](https://agentshield.ritualdev.in/)
+[⚡ Quick Start](#-instant-30-second-setup) • [📖 Full Guide](GUIDE.md) • [🛡️ Agent Sandbox](#-1-autonomous-agent-shell-sandbox) • [🐙 GitHub Action](#-3-cicd-security-gate--github-action) • [🤖 Agent Skill](#-ai-agent-skill-integration) • [📋 Compliance](#-4-enterprise-compliance-auditor) • [💖 Donate](https://donation.rolenest.in/) • [🌐 Website](https://agentshield.ritualdev.in/)
 
 
 <br/><br/>
