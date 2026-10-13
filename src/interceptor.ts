@@ -134,11 +134,12 @@ export class AgentStdioInterceptor {
           cwd: options.workspaceDir || process.cwd(),
           stdio: ["inherit", "pipe", "pipe"],
         });
-      } catch (err: any) {
+      } catch (err: unknown) {
+        const errorMsg = err instanceof Error ? err.message : String(err);
         resolve({
           exitCode: 1,
           isBlocked: false,
-          blockReason: err.message,
+          blockReason: errorMsg,
           totalSecretsScrubbed: 0,
         });
         return;

@@ -13,9 +13,9 @@ describe("Phase 2: AgentStdioInterceptor & Streaming Redaction", () => {
       scrubbedCount += count;
     });
 
-    const prefix = ["sk", "live"].join("_") + "_";
+    const prefix = `${["sk", "live"].join("_")}_`;
     const body = "MockStripeKey1234567890123456789012345";
-    const expectedSecret = prefix + body;
+    const expectedSecret = `${prefix}${body}`;
 
     const chunks = [
       `Process initialized. Token: ${prefix}`,

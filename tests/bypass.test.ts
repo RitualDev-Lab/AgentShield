@@ -119,8 +119,8 @@ describe("Phase 1: Adversarial Red-Team & Bypass Test Suite", () => {
       ];
       const gate = new GitPreCommitGate();
       // Internal validation check
-      const isPublicBlocked = (gate as any).auditStagedFiles;
-      assert.ok(isPublicBlocked);
+      const auditResult = gate.auditStagedFiles();
+      assert.ok(auditResult);
     });
   });
 });
