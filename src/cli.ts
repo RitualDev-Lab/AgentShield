@@ -41,6 +41,7 @@ Enterprise Team Fleet & Remote Policy:
   npx @ritualdev_lab/agentshield login --org <id> --token <key>   Authenticate machine with enterprise organization
   npx @ritualdev_lab/agentshield logout                           Disconnect machine and clear organization credentials
   npx @ritualdev_lab/agentshield policy sync                      Fetch and synchronize remote enterprise security policy
+  npx @ritualdev_lab/agentshield server [--port <number>]         Run local/self-hosted SaaS Control Plane server MVP
 
 Experimental Labs & Enterprise Controls (--labs / --experimental):
   npx @ritualdev_lab/agentshield compliance <file>      Audit credentials for SOC2, PCI-DSS, HIPAA & ISO27001
@@ -155,6 +156,29 @@ async function main() {
       console.error(`❌ Unknown policy action '${subAction}'. Usage: agentshield policy sync`);
       process.exit(1);
     }
+  }
+
+  if (command === "server") {
+    printBanner();
+    let port = 3000;
+    const portIdx = args.indexOf("--port");
+    if (portIdx !== -1 && args[portIdx + 1]) {
+      const parsedPort = Number.parseInt(args[portIdx + 1], 10);
+      if (!Number.isNaN(parsedPort)) port = parsedPort;
+    }
+
+    const { ControlPlaneServer } = await import("./control-plane-server.js");
+    const serverInstance = new ControlPlaneServer({ port });
+    const actualPort = await serverInstance.start();
+
+    console.log(`🚀 [AgentShield Control Plane Server] Active on port ${actualPort}`);
+    console.log(`   Health Check:    http://localhost:${actualPort}/api/v1/health`);
+    console.log(`   Fleet Overview:  http://localhost:${actualPort}/api/v1/overview`);
+    console.log(`   Incidents Stream: http://localhost:${actualPort}/api/v1/incidents`);
+    console.log("\nPress Ctrl+C to terminate server.\n");
+
+    // Keep server process running
+    return new Promise(() => {});
   }
 
   // Load configuration from local workspace and overlay remote enterprise policy

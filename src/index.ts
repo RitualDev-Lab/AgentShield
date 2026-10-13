@@ -28,3 +28,4 @@ export * from "./canary.js";
 export * from "./control-plane.js";
 export * from "./enterprise-baseline.js";
 export * from "./remote-policy.js";
+export * from "./control-plane-server.js";
