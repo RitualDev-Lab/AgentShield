@@ -150,12 +150,15 @@ export class GitPreCommitGate {
     const marker = "# --- AgentShield Pre-Commit Gate ---";
     const hookSnippet = `
 ${marker}
-if command -v npx >/dev/null 2>&1; then
-  npx agentshield hook check
-  if [ $? -ne 0 ]; then
-    echo "\\n🚨 [AgentShield] Commit aborted to prevent secret leakage. Run 'npx agentshield redact' or unstage credentials.\\n"
-    exit 1
-  fi
+if [ -f "./node_modules/.bin/agentshield" ]; then
+  ./node_modules/.bin/agentshield hook check
+elif command -v npx >/dev/null 2>&1; then
+  npx --no-install @ritualdev-lab/agentshield hook check 2>/dev/null || npx @ritualdev-lab/agentshield hook check
+fi
+
+if [ $? -ne 0 ]; then
+  echo "\\n🚨 [AgentShield] Commit aborted to prevent secret leakage. Run 'npx @ritualdev-lab/agentshield redact' or unstage credentials.\\n"
+  exit 1
 fi
 # --- End AgentShield Gate ---
 `;

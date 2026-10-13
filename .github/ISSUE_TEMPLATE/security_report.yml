@@ -29,7 +29,7 @@ body:
       label: Bypass Reproduction / Payload
       description: Provide the command or code snippet demonstrating the bypass (USE SYNTHETIC SAMPLES ONLY).
       placeholder: |
-        Command: npx agentshield exec "your-evasion-command"
+        Command: npx @ritualdev-lab/agentshield exec "your-evasion-command"
         Observed: Command executed without block
     validations:
       required: true

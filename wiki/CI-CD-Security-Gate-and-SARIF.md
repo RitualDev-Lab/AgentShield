@@ -33,7 +33,7 @@ jobs:
           node-version: 22
 
       - name: Run AgentShield Gate
-        run: npx agentshield ci --base origin/main --format sarif --out agentshield.sarif
+        run: npx @ritualdev-lab/agentshield ci --base origin/main --format sarif --out agentshield.sarif
 
       - name: Upload SARIF to GitHub Security Tab
         uses: github/codeql-action/upload-sarif@v3

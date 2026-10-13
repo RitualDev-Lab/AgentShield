@@ -47,13 +47,13 @@ No account or complicated daemon required. Run instantly with `npx`:
 
 ```bash
 # 1. Audit any directory or config file for credentials
-npx agentshield scan .env
+npx @ritualdev-lab/agentshield scan .env
 
 # 2. Prevent git commits with leaked secrets (installs pre-commit gate)
-npx agentshield hook git-install
+npx @ritualdev-lab/agentshield hook git-install
 
 # 3. Safely wrap agent bash execution
-npx agentshield exec "cat .env"
+npx @ritualdev-lab/agentshield exec "cat .env"
 ```
 
 ---
@@ -64,7 +64,7 @@ npx agentshield exec "cat .env"
 Intercept and sandbox agent terminal execution. If an agent tries to read `.env`, dump shell variables (`printenv`), or send keys to outbound endpoints, AgentShield blocks it on the fly:
 
 ```bash
-npx agentshield exec "cat .env"
+npx @ritualdev-lab/agentshield exec "cat .env"
 # 🚨 [AgentShield Sandbox Block] Blocked attempt to read raw .env or private credential file.
 # Protected credentials from entering agent LLM context window!
 ```
@@ -74,10 +74,10 @@ Catch leaked credentials before they enter git history. Audits staged diffs auto
 
 ```bash
 # Install once in your repo
-npx agentshield hook git-install
+npx @ritualdev-lab/agentshield hook git-install
 
 # Or manually audit staged files
-npx agentshield hook check
+npx @ritualdev-lab/agentshield hook check
 ```
 
 ### 🐙 3. CI/CD Security Gate & GitHub Action
@@ -101,14 +101,14 @@ jobs:
 
 Or run via CLI in any CI container:
 ```bash
-npx agentshield ci --base origin/main --report security-report.md
+npx @ritualdev-lab/agentshield ci --base origin/main --report security-report.md
 ```
 
 ### 📋 4. Enterprise Compliance Auditor
 Audit files and code diffs against industry regulatory controls with ready-to-present scores:
 
 ```bash
-npx agentshield compliance .env
+npx @ritualdev-lab/agentshield compliance .env
 ```
 ```text
 📋 [ENTERPRISE COMPLIANCE AUDIT] Status: COMPLIANT (Score: 100%)

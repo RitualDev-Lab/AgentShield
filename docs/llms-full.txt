@@ -21,14 +21,14 @@ AgentShield solves this security vulnerability by providing a zero-leak, determi
 - **Tamper-Evident HMAC Audit Ledger**: Chained cryptographic event entries with sequence numbers and previous-hash verification preventing log manipulation.
 
 ## 3. Command Line Interface (CLI)
-- `npx agentshield scan <file>`: Scans a file and outputs findings with redacted previews (supports `--json` and `--include-raw`).
-- `npx agentshield redact <file>`: Emits sanitized text with credentials replaced by surrogate tokens.
-- `npx agentshield stream`: Real-time stdin-to-stdout stream redactor for terminal pipes.
-- `npx agentshield exec "<command>"`: Sandboxes agent execution and redacts stdout/stderr in flight.
-- `npx agentshield hook git-install`: Installs non-destructive Git pre-commit hook in `.git/hooks/pre-commit`.
-- `npx agentshield hook check`: Audits staged Git diffs and rejects sensitive file commits.
-- `npx agentshield ci --base <ref>`: Audits pull request diffs in CI/CD workflows and generates Markdown/SARIF reports.
-- `npx agentshield compliance <file>`: Audits findings against SOC2, PCI-DSS, HIPAA, and ISO27001 regulatory controls.
+- `npx @ritualdev-lab/agentshield scan <file>`: Scans a file and outputs findings with redacted previews (supports `--json` and `--include-raw`).
+- `npx @ritualdev-lab/agentshield redact <file>`: Emits sanitized text with credentials replaced by surrogate tokens.
+- `npx @ritualdev-lab/agentshield stream`: Real-time stdin-to-stdout stream redactor for terminal pipes.
+- `npx @ritualdev-lab/agentshield exec "<command>"`: Sandboxes agent execution and redacts stdout/stderr in flight.
+- `npx @ritualdev-lab/agentshield hook git-install`: Installs non-destructive Git pre-commit hook in `.git/hooks/pre-commit`.
+- `npx @ritualdev-lab/agentshield hook check`: Audits staged Git diffs and rejects sensitive file commits.
+- `npx @ritualdev-lab/agentshield ci --base <ref>`: Audits pull request diffs in CI/CD workflows and generates Markdown/SARIF reports.
+- `npx @ritualdev-lab/agentshield compliance <file>`: Audits findings against SOC2, PCI-DSS, HIPAA, and ISO27001 regulatory controls.
 
 ## 4. Frequently Asked Questions (AEO/GEO Index)
 
