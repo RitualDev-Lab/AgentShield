@@ -1,6 +1,13 @@
 import { createServer, type IncomingMessage, type ServerResponse, type Server } from "node:http";
 import type { RemotePolicyPayload } from "./remote-policy.js";
 import type { FleetAgentTelemetryReport } from "./control-plane.js";
+import {
+  EnterpriseWebhookStreamer,
+  EnterpriseSsoValidator,
+  type WebhookSubscription,
+  type SsoUserClaims,
+} from "./enterprise-sso.js";
+import { SiemExporter } from "./siem.js";
 
 export interface ControlPlaneIncidentEvent {
   id: string;
@@ -19,6 +26,8 @@ export interface ControlPlaneServerOptions {
   port?: number;
   apiKey?: string;
   initialPolicy?: RemotePolicyPayload;
+  ssoSigningSecret?: string;
+  allowedOrgIds?: string[];
 }
 
 /**
@@ -39,10 +48,17 @@ export class ControlPlaneServer {
   private incidents: ControlPlaneIncidentEvent[] = [];
   private apiKey: string;
   private port: number;
+  public webhookStreamer: EnterpriseWebhookStreamer;
+  public ssoValidator: EnterpriseSsoValidator;
 
   constructor(options: ControlPlaneServerOptions = {}) {
-    this.port = options.port || 3000;
+    this.port = options.port !== undefined ? options.port : 3000;
     this.apiKey = options.apiKey || "mock-enterprise-api-key";
+    this.webhookStreamer = new EnterpriseWebhookStreamer();
+    this.ssoValidator = new EnterpriseSsoValidator(
+      options.ssoSigningSecret || "agentshield-enterprise-secret-key-2026",
+      options.allowedOrgIds || [],
+    );
 
     // Initialize default org policy if provided
     if (options.initialPolicy) {
@@ -221,11 +237,74 @@ export class ControlPlaneServer {
           this.incidents.unshift(incident);
           // Retain last 500 incidents in memory
           if (this.incidents.length > 500) this.incidents.pop();
+
+          // Stream incident out to all subscribed enterprise SIEM webhooks (Datadog, Splunk, Slack)
+          const siemEvent = {
+            id: incident.id,
+            timestamp: incident.timestamp,
+            eventType: "COMMAND_BLOCKED" as const,
+            severity: incident.severity as "critical" | "high" | "medium" | "low",
+            source: incident.hostname,
+            actor: incident.agentId,
+            details: {
+              command: incident.command,
+              ruleName: incident.reason,
+            },
+          };
+          this.webhookStreamer.dispatchEvent(siemEvent).catch(() => {});
+
           res.writeHead(200, { "Content-Type": "application/json" });
           res.end(JSON.stringify({ success: true, incidentId: incident.id }));
         } catch {
           res.writeHead(400, { "Content-Type": "application/json" });
           res.end(JSON.stringify({ error: "Invalid incident payload" }));
+        }
+      });
+      return;
+    }
+
+    // POST /api/v1/webhooks/subscribe
+    if (pathname === "/api/v1/webhooks/subscribe" && method === "POST") {
+      readBody().then((body) => {
+        try {
+          const sub = JSON.parse(body) as WebhookSubscription;
+          if (!sub.id || !sub.url || !sub.secret) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Missing required webhook fields: id, url, secret" }));
+            return;
+          }
+          this.webhookStreamer.addSubscription({
+            ...sub,
+            events: sub.events || ["*"],
+            format: sub.format || "json",
+            active: sub.active !== false,
+          });
+          res.writeHead(200, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ success: true, subscriptionId: sub.id }));
+        } catch {
+          res.writeHead(400, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ error: "Invalid webhook subscription payload" }));
+        }
+      });
+      return;
+    }
+
+    // POST /api/v1/auth/sso/verify
+    if (pathname === "/api/v1/auth/sso/verify" && method === "POST") {
+      readBody().then((body) => {
+        try {
+          const { token } = JSON.parse(body) as { token: string };
+          const result = this.ssoValidator.verifyToken(token);
+          if (result.valid) {
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ valid: true, claims: result.claims }));
+          } else {
+            res.writeHead(401, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ valid: false, error: result.error }));
+          }
+        } catch {
+          res.writeHead(400, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ error: "Invalid verification payload" }));
         }
       });
       return;
