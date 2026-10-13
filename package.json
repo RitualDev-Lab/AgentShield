@@ -4,12 +4,18 @@
   "description": "Enterprise-grade Zero-Leak Secret Defense & Sandbox for Autonomous AI Coding Agents",
   "type": "module",
   "bin": {
-    "agentshield": "./dist/cli.js",
-    "ashield": "./dist/cli.js"
+    "agentshield": "dist/cli.js",
+    "ashield": "dist/cli.js"
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": ["dist", "README.md", "LICENSE", "SKILL.md", "action.yml"],
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "SKILL.md",
+    "action.yml"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/RitualDev-Lab/AgentShield.git"
@@ -29,7 +35,6 @@
     "format": "biome format --write .",
     "wiki:sync": "node scripts/sync-wiki.cjs"
   },
-
   "keywords": [
     "ai-agent",
     "security",
