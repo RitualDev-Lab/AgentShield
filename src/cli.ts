@@ -22,6 +22,7 @@ Usage:
   npx @ritualdev-lab/agentshield hook git-install       Install automatic git pre-commit leak shield
   npx @ritualdev-lab/agentshield hook check             Audit git staged files before commit
   npx @ritualdev-lab/agentshield exec <command>         Safely sandbox & intercept agent bash command
+  npx @ritualdev-lab/agentshield run <command>          Run command with real-time streaming stdio secret redaction
   npx @ritualdev-lab/agentshield ci                     Audit pull request or git diff in CI/CD pipeline
   npx @ritualdev-lab/agentshield compliance <file-path> Audit credentials for SOC2, PCI-DSS, HIPAA & ISO27001
   npx @ritualdev-lab/agentshield audit                  Audit workspace MCP, .claude, and agent permission configs
@@ -176,48 +177,33 @@ async function main() {
       console.error("❌ Unknown hook action. Use 'git-install' or 'check'.");
       process.exit(1);
     }
-  } else if (command === "exec") {
-    // Intercept agent command execution
-    const rawCmd = args.slice(1).join(" ");
+  } else if (command === "exec" || command === "run") {
+    // Intercept agent command execution using streaming stdio interceptor
+    const rawCmd = args.slice(1).filter((a) => !a.startsWith("--kernel")).join(" ");
     if (!rawCmd) {
       console.error(
-        "❌ Error: No command provided to sandbox. Usage: npx @ritualdev-lab/agentshield exec <command>",
+        `❌ Error: No command provided to sandbox. Usage: npx @ritualdev-lab/agentshield ${command} <command>`,
       );
       process.exit(1);
     }
 
-    const { AgentCommandSandbox } = await import("./sandbox.js");
-    const sandbox = new AgentCommandSandbox();
-    const check = sandbox.inspectCommand(rawCmd);
+    const enableKernel = args.includes("--kernel");
+    const { AgentStdioInterceptor } = await import("./interceptor.js");
+    const interceptor = new AgentStdioInterceptor(engine, process.cwd());
 
-    if (check.isBlocked) {
-      console.error(`\n🚨 [AgentShield Sandbox Block] ${check.reason}\n   Command: '${rawCmd}'\n`);
+    const result = await interceptor.execute(rawCmd, {
+      workspaceDir: process.cwd(),
+      enableKernelSandbox: enableKernel,
+      maskStyle,
+      onBlock: (check) => {
+        console.error(`\n🚨 [AgentShield Sandbox Block] ${check.reason}\n   Command: '${rawCmd}'\n`);
+      },
+    });
+
+    if (result.isBlocked) {
       process.exit(1);
     }
-
-    // Command is safe to execute; spawn child process and scrub stdout/stderr in flight
-    const { spawn } = await import("node:child_process");
-    const child = spawn(rawCmd, {
-      shell: true,
-      stdio: ["inherit", "pipe", "pipe"],
-    });
-
-    child.stdout.on("data", (chunk: Buffer) => {
-      const text = chunk.toString("utf8");
-      const redacted = engine.scanAndRedact(text);
-      process.stdout.write(redacted.sanitizedText);
-    });
-
-    child.stderr.on("data", (chunk: Buffer) => {
-      const text = chunk.toString("utf8");
-      const redacted = engine.scanAndRedact(text);
-      process.stderr.write(redacted.sanitizedText);
-    });
-
-    child.on("close", (code) => {
-      process.exit(code ?? 0);
-    });
-    return;
+    process.exit(result.exitCode);
   } else if (command === "ci") {
     const { CiGateRunner } = await import("./ci.js");
     const runner = new CiGateRunner(process.cwd());
