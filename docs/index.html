@@ -639,6 +639,160 @@
       box-shadow: 0 12px 35px rgba(236, 72, 153, 0.55);
     }
 
+    /* Pricing & Monetization Section (Powered by Dodo Payments) */
+    .pricing-section {
+      background: rgba(13, 17, 23, 0.75);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      border-radius: 20px;
+      padding: 3.5rem 2rem;
+      margin-bottom: 5rem;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 30px rgba(139, 92, 246, 0.15);
+    }
+    .pricing-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+    .pricing-header h2 {
+      font-size: clamp(2rem, 3.8vw, 2.6rem);
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 0.6rem;
+    }
+    .pricing-header p {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      max-width: 650px;
+      margin: 0 auto;
+    }
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+      gap: 1.75rem;
+      align-items: stretch;
+    }
+    .pricing-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-subtle);
+      border-radius: 18px;
+      padding: 2.2rem 1.8rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .pricing-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(139, 92, 246, 0.5);
+      box-shadow: 0 15px 40px rgba(139, 92, 246, 0.2);
+    }
+    .pricing-card.featured {
+      background: linear-gradient(180deg, rgba(139, 92, 246, 0.14), rgba(6, 182, 212, 0.08));
+      border: 1px solid rgba(139, 92, 246, 0.55);
+      box-shadow: 0 12px 35px rgba(139, 92, 246, 0.25);
+    }
+    .pricing-badge {
+      position: absolute;
+      top: -12px;
+      right: 20px;
+      background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+    }
+    .pricing-tier-name {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.5rem;
+    }
+    .pricing-price {
+      font-size: 2.4rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 0.3rem;
+      display: flex;
+      align-items: baseline;
+      gap: 0.3rem;
+    }
+    .pricing-price span {
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+    .pricing-desc {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-bottom: 1.5rem;
+      min-height: 40px;
+    }
+    .pricing-features {
+      list-style: none;
+      margin-bottom: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+    }
+    .pricing-features li {
+      font-size: 0.9rem;
+      color: var(--text);
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+    }
+    .pricing-features li span.check {
+      color: var(--emerald);
+      font-weight: bold;
+    }
+    .btn-pricing {
+      width: 100%;
+      padding: 0.85rem;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      text-align: center;
+      text-decoration: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: all 0.25s;
+    }
+    .btn-pricing-primary {
+      background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+      color: #fff;
+      box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+    }
+    .btn-pricing-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(139, 92, 246, 0.6);
+    }
+    .btn-pricing-secondary {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-subtle);
+      color: #fff;
+    }
+    .btn-pricing-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+    .dodo-secure-badge {
+      text-align: center;
+      margin-top: 2rem;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
     /* Support & Donation Banner Callout */
     .donation-banner {
       background: linear-gradient(135deg, rgba(244, 63, 94, 0.12), rgba(245, 158, 11, 0.12));
@@ -882,6 +1036,9 @@
         </a>
         <a href="https://devshelf.ritualdev.in" target="_blank" rel="noopener noreferrer" class="nav-btn nav-btn-devshelf" title="Browse 100% Verified Free Developer Tools on DevShelf">
           <span>📚 DevShelf Hub</span>
+        </a>
+        <a href="#pricing" class="nav-btn" style="border-color: rgba(139, 92, 246, 0.4); color: #c4b5fd;">
+          <span>💳 Pricing</span>
         </a>
         <a href="https://donation.rolenest.in/" target="_blank" rel="noopener noreferrer" class="nav-btn nav-btn-sponsor" title="Support and Donate to AgentShield Development">
           <span>💖 Support / Donate</span>
@@ -1333,6 +1490,92 @@
       </div>
     </section>
 
+    <!-- Pricing & Monetization Section (Powered by Dodo Payments) -->
+    <section class="pricing-section" id="pricing">
+      <div class="pricing-header">
+        <div class="hero-badge-pill" style="margin-bottom: 1rem;">
+          <span>💳</span> Flexible Plans & Enterprise Licensing
+        </div>
+        <h2>Enterprise Zero-Leak Security at Any Scale</h2>
+        <p>
+          Always 100% free for individual developers & open-source projects. Upgrade to Team or Enterprise for centralized policies, GitHub App gates, and automated compliance attestation.
+        </p>
+      </div>
+
+      <div class="pricing-grid">
+        <!-- Community Tier -->
+        <div class="pricing-card">
+          <div>
+            <div class="pricing-tier-name">Open-Source & Solo</div>
+            <div class="pricing-price">$0 <span>/ forever</span></div>
+            <div class="pricing-desc">For open-source maintainers, indie hackers, and local developers.</div>
+            <ul class="pricing-features">
+              <li><span class="check">✓</span> 100% Local & Air-gapped Core Engine</li>
+              <li><span class="check">✓</span> CLI & Stdio Streaming Interceptor</li>
+              <li><span class="check">✓</span> Claude Code PreToolUse & Cursor Rules</li>
+              <li><span class="check">✓</span> Git Pre-Commit Hook Integration</li>
+              <li><span class="check">✓</span> Unlimited Public Repository Scans</li>
+            </ul>
+          </div>
+          <div>
+            <a href="#guide" class="btn-pricing btn-pricing-secondary">
+              <span>Install Open-Source Free</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Pro / Team Tier -->
+        <div class="pricing-card featured">
+          <div class="pricing-badge">Popular</div>
+          <div>
+            <div class="pricing-tier-name">Team & CI/CD Gate</div>
+            <div class="pricing-price">$19 <span>/ seat / mo</span></div>
+            <div class="pricing-desc">Automated security gate for engineering teams and AI-augmented dev squads.</div>
+            <ul class="pricing-features">
+              <li><span class="check">✓</span> <strong>Everything in Solo, plus:</strong></li>
+              <li><span class="check">✓</span> GitHub Marketplace Action on Private Repos</li>
+              <li><span class="check">✓</span> Sticky PR Review Comments & Inline Annotations</li>
+              <li><span class="check">✓</span> Remote Team Policy Sync & Organization Tokens</li>
+              <li><span class="check">✓</span> Zero-YAML GitHub App Webhook Integration</li>
+              <li><span class="check">✓</span> Priority Discord & Email Support</li>
+            </ul>
+          </div>
+          <div>
+            <a href="https://donation.rolenest.in/" target="_blank" rel="noopener noreferrer" class="btn-pricing btn-pricing-primary">
+              <span>Subscribe with Dodo Payments ➔</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Enterprise Tier -->
+        <div class="pricing-card">
+          <div>
+            <div class="pricing-tier-name">Enterprise Fleet</div>
+            <div class="pricing-price">$49 <span>/ seat / mo</span></div>
+            <div class="pricing-desc">For scale-ups and enterprises requiring SIEM streaming and SOC 2 audits.</div>
+            <ul class="pricing-features">
+              <li><span class="check">✓</span> <strong>Everything in Team, plus:</strong></li>
+              <li><span class="check">✓</span> SaaS Control Plane Server & Heartbeat Telemetry</li>
+              <li><span class="check">✓</span> Splunk / Datadog / Sentinel CEF SIEM Streaming</li>
+              <li><span class="check">✓</span> Enterprise SAML / OIDC SSO & RBAC Validator</li>
+              <li><span class="check">✓</span> Cryptographic SOC 2 & ISO 27001 Attestation Bundle</li>
+              <li><span class="check">✓</span> Custom Honeypot Canary Decoys & Tripwires</li>
+              <li><span class="check">✓</span> Dedicated Security Architecture Review</li>
+            </ul>
+          </div>
+          <div>
+            <a href="https://donation.rolenest.in/" target="_blank" rel="noopener noreferrer" class="btn-pricing btn-pricing-primary">
+              <span>Deploy Enterprise Fleet ➔</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="dodo-secure-badge">
+        <span>🔒 Secure global checkout and recurring billing powered by <strong>Dodo Payments</strong>. Supports Cards, Apple Pay, Google Pay, and UPI.</span>
+      </div>
+    </section>
+
     <!-- Donation & Support Callout Banner -->
     <section class="donation-banner">
       <div class="donation-info">
@@ -1370,6 +1613,7 @@
     <div class="footer-links">
       <a href="https://agentshield.ritualdev.in/">Home</a>
       <a href="#guide">Run Guide</a>
+      <a href="#pricing">Pricing</a>
       <a href="https://github.com/RitualDev-Lab/AgentShield/blob/main/GUIDE.md" target="_blank" rel="noopener noreferrer">GUIDE.md</a>
       <a href="https://donation.rolenest.in/" target="_blank" rel="noopener noreferrer" style="color: #f43f5e; font-weight: 600;">💖 Donate</a>
       <a href="https://devshelf.ritualdev.in" target="_blank" rel="noopener noreferrer">DevShelf</a>

@@ -1,0 +1,65 @@
+name: 🛡️ AgentShield PR Security Gate & Review Bot
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  audit-pr:
+    name: Zero-Leak PR Gate & Review Bot
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify Code Quality & Build
+        run: |
+          pnpm run lint
+          pnpm run build
+          pnpm test
+
+      - name: Run AgentShield Security Gate Action
+        id: gate
+        continue-on-error: true
+        uses: ./
+        with:
+          base_ref: "origin/${{ github.base_ref }}"
+          fail_on_leak: "true"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          post_pr_comment: "true"
+          annotate_diff: "true"
+          sarif_file: ".agentshield.sarif"
+
+      - name: Upload SARIF to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@v3
+        if: always() && hashFiles('.agentshield.sarif') != ''
+        continue-on-error: true
+        with:
+          sarif_file: .agentshield.sarif
+
+      - name: Enforce PR Security Conclusion
+        if: steps.gate.outcome != 'success'
+        run: |
+          echo "❌ [AgentShield Gate] Merging blocked due to exposed credentials in Pull Request."
+          exit 1
