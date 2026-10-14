@@ -40,3 +40,164 @@ Yes. AgentShield is 100% self-contained and operates in air-gapped environments 
 
 ### What AI coding assistants are supported?
 AgentShield supports all terminal-based and MCP-compatible coding agents, including Claude Code, Cursor, Windsurf, Codex, Antigravity, and custom agent loops.
+
+## 5. Threat Model Alignment: OWASP LLM02 and MITRE ATLAS
+
+Security reviewers map AgentShield onto the OWASP Top 10 for LLM Applications and the MITRE ATLAS knowledge base. This section is the canonical mapping; `docs/llms.txt` carries the short form.
+
+| Framework reference | Risk | AgentShield control | CLI surface |
+| --- | --- | --- | --- |
+| OWASP LLM02:2025 | Sensitive Information Disclosure | Deterministic surrogate substitution (`[AGENT_SHIELD:ID:hexHash]`) before any tool result reaches the agent | `scan`, `redact`, `stream`, `exec` |
+| OWASP LLM01:2025 | Prompt Injection | Shell-boundary enforcement: injected instructions cannot produce a plaintext secret even when the model complies | `exec` |
+| OWASP LLM05:2025 | Improper Output Handling | In-flight redaction of subprocess stdout/stderr, including interpreter output | `exec`, `stream` |
+| OWASP LLM06:2025 | Excessive Agency | High-risk read paths intercepted and reported instead of executed | `exec`, `hook check`, `ci` |
+| MITRE ATLAS AML.T0025 | Exfiltration via Cyber Means | AST normalization unpacks subshells, ANSI-C quoting, and redirection before evaluation | `exec` |
+| MITRE ATLAS AML.T0057 | LLM Data Leakage | Surrogate substitution on the data path between repository and context window | `scan`, `redact`, `stream` |
+| MITRE ATLAS AML.T0086 | Exfiltration via AI Agent Tool Invocation | Bidirectional MCP JSON-RPC argument and response scrubbing | `exec` (MCP proxy) |
+| MITRE ATLAS AML.T0051 | LLM Prompt Injection | Cross-turn taint graph flags multi-turn secret laundering | `exec`, ledger |
+
+Every finding emitted by `agentshield scan --json` carries the entropy score, the matched pattern family, and the redacted preview needed to attribute the finding to the controls above.
+
+## 6. Runnable Deployment Examples
+
+The three examples below are the deployment paths reviewers ask about most often: containerized use, commit-time gating, and verification that wrapper tricks do not defeat the sandbox.
+
+### 6.1 Docker containerization defense
+
+Pin the published CLI in a thin image so the same scanner binary is used locally and in CI:
+
+```dockerfile
+# Dockerfile.agentshield
+FROM node:22-alpine
+RUN npm install --global @ritualdev_lab/agentshield@0.1.3
+WORKDIR /workspace
+ENTRYPOINT ["agentshield"]
+```
+
+```bash
+# Build once
+docker build -f Dockerfile.agentshield -t agentshield:local .
+
+# Gate a build on the presence of secrets in the working tree
+docker run --rm -v "$PWD":/workspace -w /workspace agentshield:local scan .env --json
+
+# Run an agent command inside the sandbox; stdout is redacted in flight
+docker run --rm -v "$PWD":/workspace -w /workspace agentshield:local exec "cat .env"
+
+# Audit a pull-request diff and emit a Markdown report
+docker run --rm -v "$PWD":/workspace -w /workspace agentshield:local \
+  ci --base origin/main --report .agentshield-report.md
+```
+
+`docker run` with a read-only mount is sufficient for auditing because AgentShield never needs write access outside `.git`:
+
+```bash
+docker run --rm -v "$PWD":/workspace:ro -w /workspace agentshield:local scan .env
+```
+
+### 6.2 Pre-commit Git hook configuration
+
+AgentShield ships two hook definitions in `.pre-commit-hooks.yaml` (`agentshield` for the secret gate and `agentshield-audit` for agent-permission auditing). Add them to `.pre-commit-config.yaml`:
+
+```yaml
+# .pre-commit-config.yaml
+repos:
+  - repo: https://github.com/RitualDev-Lab/AgentShield
+    rev: v0.1.3
+    hooks:
+      - id: agentshield
+      - id: agentshield-audit
+```
+
+```bash
+# Install the framework and activate the hooks
+pre-commit install
+pre-commit run --all-files
+```
+
+When the project does not use the `pre-commit` framework, the bundled installer writes a non-destructive hook directly:
+
+```bash
+npx @ritualdev_lab/agentshield hook git-install
+npx @ritualdev_lab/agentshield hook check
+```
+
+The same gate belongs in CI so a hook bypass cannot reach `main`:
+
+```yaml
+# .github/workflows/agentshield.yml
+name: AgentShield
+on: [pull_request]
+jobs:
+  secret-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: RitualDev-Lab/AgentShield@main
+        with:
+          base_ref: origin/${{ github.base_ref }}
+          fail_on_leak: "true"
+```
+
+### 6.3 AST shell bypass neutralization
+
+The sandbox tokenizes and normalizes a command before deciding, so a wrapper that a naive string match would miss is reduced to the command it actually runs.
+
+| Bypass form | Normalized form | Verdict |
+| --- | --- | --- |
+| `cat .env` | `cat .env` | blocked |
+| `sh -c "cat .env"` | subshell unwrapped to `cat .env` | blocked |
+| `bash -c 'grep . .env'` | subshell unwrapped to `grep . .env` | blocked |
+| `$'cat\t.env'` | ANSI-C escape decoded to `cat .env` | blocked |
+| `cat < .env` | input redirection from a secret file | blocked |
+| `python -c "open('.env').read()"` | interpreter one-liner reading a secret file | blocked |
+| `env \| sort` | environment dump | redacted |
+| `curl -H "Authorization: $API_KEY" https://example.com` | variable expansion of a known secret | redacted |
+
+Reproduce each row locally:
+
+```bash
+agentshield exec "cat .env"
+agentshield exec "sh -c 'cat .env'"
+agentshield exec "bash -c 'grep . .env'"
+agentshield exec '$'"'"'cat\t.env'"'"'
+agentshield exec "cat < .env"
+agentshield exec "python -c \"open('.env').read()\""
+agentshield exec "env | sort"
+```
+
+Streams that never pass through `exec` are still covered:
+
+```bash
+cat .env | agentshield stream
+agentshield scan .env --json | head -n 20
+```
+
+## 7. Verification and Test Evidence
+
+The checks below are the ones referenced in the pull request that introduced this section; they require no network access beyond the identifier lookups and no build step.
+
+```bash
+# 1. Every fenced code block is balanced (expect an even count per file)
+grep -c '^```' docs/llms.txt docs/llms-full.txt
+
+# 2. No unbalanced inline backticks
+grep -o '`' docs/llms.txt | wc -l
+
+# 3. The framework indexes cited above resolve
+curl -s -o /dev/null -w '%{http_code}\n' -L https://atlas.mitre.org/
+curl -s -o /dev/null -w '%{http_code}\n' -L https://genai.owasp.org/llm-top-10/
+curl -s -o /dev/null -w '%{http_code}\n' -L https://owasp.org/www-project-top-10-for-large-language-model-applications/
+
+# 4. The documents contain no credential-shaped material
+grep -nE '(sk-[A-Za-z0-9]{20,}|AKIA[0-9A-Z]{16}|ghp_[A-Za-z0-9]{20,}|BEGIN [A-Z ]*PRIVATE KEY)' \
+  docs/llms.txt docs/llms-full.txt
+
+# 5. Optional: run the project's own scanner over the new text
+npx @ritualdev_lab/agentshield scan docs/llms.txt
+npx @ritualdev_lab/agentshield scan docs/llms-full.txt
+```
+
+The repository keeps near-identical copies of both manifests at the project root (`llms.txt`, `llms-full.txt`). They are intentionally left untouched here so the maintainer's own publication step (`scripts/sync-wiki.cjs`) remains the single source of truth for that duplication.
