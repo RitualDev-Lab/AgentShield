@@ -1,5 +1,6 @@
 import type { AgentConfigAuditIssue, SarifLog, SarifResult } from "./taxonomy.js";
 import type { DetectedSecret } from "./types.js";
+import { AGENTSHIELD_VERSION } from "./version.js";
 
 /**
  * Generates OASIS SARIF 2.1.0 formatted vulnerability reports
@@ -129,7 +130,7 @@ export class SarifFormatter {
           tool: {
             driver: {
               name: "AgentShield",
-              version: "0.1.0",
+              version: AGENTSHIELD_VERSION,
               informationUri: "https://github.com/RitualDev-Lab/AgentShield",
               rules: Array.from(rulesMap.values()),
             },

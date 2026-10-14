@@ -2,6 +2,8 @@ import { execFileSync } from "node:child_process";
 import { readFileSync, writeFileSync } from "node:fs";
 import { loadConfig, parseCustomPatterns } from "./config.js";
 import { AgentShieldEngine } from "./engine.js";
+import { SarifFormatter } from "./sarif.js";
+import type { SarifLog } from "./taxonomy.js";
 import type { DetectedSecret, ScanOptions } from "./types.js";
 
 export interface CiAuditResult {
@@ -12,6 +14,7 @@ export interface CiAuditResult {
   filesScanned: number;
   findings: Array<DetectedSecret & { file: string }>;
   markdownReport: string;
+  sarifLog?: SarifLog;
 }
 
 export class CiGateRunner {
@@ -134,6 +137,7 @@ export class CiGateRunner {
     }
 
     const markdownReport = reportLines.join("\n");
+    const sarifLog = SarifFormatter.generateSarif(allFindings, []);
 
     return {
       passed,
@@ -143,6 +147,7 @@ export class CiGateRunner {
       filesScanned: diffFiles.length,
       findings: allFindings,
       markdownReport,
+      sarifLog,
     };
   }
 }

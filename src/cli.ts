@@ -469,9 +469,20 @@ async function main() {
       }
     }
 
+    let sarifPath: string | null = null;
+    const sarifIdx = args.indexOf("--sarif");
+    if (sarifIdx !== -1 && args[sarifIdx + 1]) {
+      sarifPath = args[sarifIdx + 1];
+    }
+
     if (reportPath) {
       writeFileSync(reportPath, result.markdownReport, "utf8");
       console.log(`\n📄 [AgentShield] Security report written to ${reportPath}`);
+    }
+
+    if (sarifPath && result.sarifLog) {
+      writeFileSync(sarifPath, JSON.stringify(result.sarifLog, null, 2), "utf8");
+      console.log(`\n📊 [AgentShield] OASIS SARIF 2.1.0 report written to ${sarifPath}`);
     }
 
     if (!result.passed) {

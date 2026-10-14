@@ -23,6 +23,10 @@ inputs:
     description: "Whether to emit GitHub Actions inline workflow command annotations (::error)"
     required: false
     default: "true"
+  sarif_file:
+    description: "Path to export OASIS SARIF 2.1.0 report (for GitHub Code Scanning upload-sarif)"
+    required: false
+    default: ".agentshield.sarif"
 
 runs:
   using: "composite"
@@ -38,6 +42,9 @@ runs:
         fi
         if [ "${{ inputs.post_pr_comment }}" = "true" ]; then
           EXTRA_FLAGS="$EXTRA_FLAGS --post-pr-comment"
+        fi
+        if [ -n "${{ inputs.sarif_file }}" ]; then
+          EXTRA_FLAGS="$EXTRA_FLAGS --sarif ${{ inputs.sarif_file }}"
         fi
 
         EXIT_CODE=0
