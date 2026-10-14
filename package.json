@@ -1,5 +1,5 @@
 {
-  "name": "@ritualdev_lab/agentshield",
+  "name": "@ritualdev-lab/agentshield",
   "version": "0.1.4",
   "description": "Enterprise-grade Zero-Leak Secret Defense & Sandbox for Autonomous AI Coding Agents",
   "type": "module",
@@ -9,7 +9,13 @@
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": ["dist", "README.md", "LICENSE", "SKILL.md", "action.yml"],
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "SKILL.md",
+    "action.yml"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/RitualDev-Lab/AgentShield.git"

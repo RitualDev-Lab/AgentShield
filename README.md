@@ -47,13 +47,13 @@ No account or complicated daemon required. Run instantly with `npx`:
 
 ```bash
 # 1. Audit any directory or config file for credentials
-npx @ritualdev_lab/agentshield scan .env
+npx @ritualdev-lab/agentshield scan .env
 
 # 2. Prevent git commits with leaked secrets (installs pre-commit gate)
-npx @ritualdev_lab/agentshield hook git-install
+npx @ritualdev-lab/agentshield hook git-install
 
 # 3. Safely wrap agent bash execution
-npx @ritualdev_lab/agentshield exec "cat .env"
+npx @ritualdev-lab/agentshield exec "cat .env"
 ```
 
 ---
@@ -64,7 +64,7 @@ npx @ritualdev_lab/agentshield exec "cat .env"
 Intercept and sandbox agent terminal execution. If an agent tries to read `.env`, dump shell variables (`printenv`), or send keys to outbound endpoints, AgentShield blocks it on the fly:
 
 ```bash
-npx @ritualdev_lab/agentshield exec "cat .env"
+npx @ritualdev-lab/agentshield exec "cat .env"
 # 🚨 [AgentShield Sandbox Block] Blocked attempt to read raw .env or private credential file.
 # Protected credentials from entering agent LLM context window!
 ```
@@ -74,10 +74,10 @@ Catch leaked credentials before they enter git history. Audits staged diffs auto
 
 ```bash
 # Install once in your repo (native git hook)
-npx @ritualdev_lab/agentshield hook git-install
+npx @ritualdev-lab/agentshield hook git-install
 
 # Or manually audit staged files
-npx @ritualdev_lab/agentshield hook check
+npx @ritualdev-lab/agentshield hook check
 ```
 
 Or using the standard [pre-commit](https://pre-commit.com/) framework (`.pre-commit-config.yaml`):
@@ -112,14 +112,14 @@ jobs:
 
 Or run via CLI in any CI container:
 ```bash
-npx @ritualdev_lab/agentshield ci --base origin/main --report security-report.md
+npx @ritualdev-lab/agentshield ci --base origin/main --report security-report.md
 ```
 
 ### 📋 4. Enterprise Compliance Auditor
 Audit files and code diffs against industry regulatory controls with ready-to-present scores:
 
 ```bash
-npx @ritualdev_lab/agentshield compliance .env
+npx @ritualdev-lab/agentshield compliance .env
 ```
 ```text
 📋 [ENTERPRISE COMPLIANCE AUDIT] Status: COMPLIANT (Score: 100%)
@@ -144,7 +144,7 @@ AgentShield provides 1-command generators for leading AI coding agent environmen
 ### Claude Code (`PreToolUse` Hook)
 Automatically intercept agent terminal executions before commands touch your environment:
 ```bash
-npx @ritualdev_lab/agentshield init-claude
+npx @ritualdev-lab/agentshield init-claude
 ```
 Generates `.claude/settings.json` configured with:
 ```json
@@ -153,7 +153,7 @@ Generates `.claude/settings.json` configured with:
     "PreToolUse": [
       {
         "matcher": "Bash|Terminal",
-        "command": "npx @ritualdev_lab/agentshield exec $COMMAND"
+        "command": "npx @ritualdev-lab/agentshield exec $COMMAND"
       }
     ]
   }
@@ -162,7 +162,7 @@ Generates `.claude/settings.json` configured with:
 
 ### Cursor & Windsurf Rules
 ```bash
-npx @ritualdev_lab/agentshield init-cursor
+npx @ritualdev-lab/agentshield init-cursor
 ```
 Generates `.cursor/rules.json` with sensitive path boundaries (`.env*`, `*.pem`, `id_rsa*`) and pre-execution command sandboxing.
 
@@ -209,7 +209,7 @@ AgentShield combines high-performance regular expressions with **Shannon Entropy
 Integrate AgentShield directly into your AI workflows, proxy servers, or custom agent frameworks:
 
 ```typescript
-import { AgentShieldEngine, AgentCommandSandbox, AgentStdioInterceptor } from "@ritualdev_lab/agentshield";
+import { AgentShieldEngine, AgentCommandSandbox, AgentStdioInterceptor } from "@ritualdev-lab/agentshield";
 
 const shield = new AgentShieldEngine();
 
