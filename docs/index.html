@@ -1457,6 +1457,20 @@
               <span class="success">✓ Zero setup required</span>
             </div>
           </div>
+
+          <div class="guide-card">
+            <h4><span>🌐</span> DevShelf MCP Server (Claude, Cursor, Antigravity)</h4>
+            <p>Connect your AI assistant to DevShelf's live directory and security audit engine via Model Context Protocol.</p>
+            <div class="code-block">
+              <span class="comment"># Add to claude_desktop_config.json or cursor settings:</span><br>
+              "devshelf": {<br>
+              &nbsp;&nbsp;"command": <span class="cmd">"npx"</span>,<br>
+              &nbsp;&nbsp;"args": [<span class="arg">"-y"</span>, <span class="arg">"devshelf"</span>, <span class="arg">"mcp"</span>]<br>
+              }<br>
+              <span class="comment"># Discover tools &amp; verify zero-leak audits!</span>
+              <button class="copy-btn" onclick="copySnippet('npx -y devshelf mcp')">Copy</button>
+            </div>
+          </div>
         </div>
       </div>
 
