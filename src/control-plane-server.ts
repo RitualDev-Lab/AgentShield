@@ -365,6 +365,43 @@ export class ControlPlaneServer {
       return;
     }
 
+    // POST /api/v1/github/webhook
+    if (pathname === "/api/v1/github/webhook" && method === "POST") {
+      const rawBody = await readBody();
+      const signature = req.headers["x-hub-signature-256"] as string | undefined;
+      const eventType = req.headers["x-github-event"] as string | undefined;
+
+      const { GitHubAppService } = await import("./github-app.js");
+      const appService = new GitHubAppService();
+
+      // Check webhook signature if secret configured
+      const secret = process.env.GITHUB_WEBHOOK_SECRET;
+      if (secret && !appService.verifyWebhookSignature(rawBody, signature, secret)) {
+        res.writeHead(401, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "Invalid webhook HMAC signature" }));
+        return;
+      }
+
+      let payload: unknown = {};
+      try {
+        payload = JSON.parse(rawBody || "{}");
+      } catch {
+        res.writeHead(400, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "Malformed JSON payload" }));
+        return;
+      }
+
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(
+        JSON.stringify({
+          received: true,
+          event: eventType || "unknown",
+          timestamp: new Date().toISOString(),
+        }),
+      );
+      return;
+    }
+
     res.writeHead(404, { "Content-Type": "application/json" });
     res.end(JSON.stringify({ error: "Endpoint not found" }));
   }
