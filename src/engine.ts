@@ -1,5 +1,9 @@
 import { createHash } from "node:crypto";
-import { calculateShannonEntropy, isLikelyFalsePositive } from "./entropy.js";
+import {
+  calculateShannonEntropy,
+  isHighEntropySecret,
+  isLikelyFalsePositive,
+} from "./entropy.js";
 import { BUILTIN_PATTERNS } from "./patterns.js";
 import type { DetectedSecret, ScanOptions, ScanResult, SecretPattern } from "./types.js";
 
@@ -96,9 +100,8 @@ export class AgentShieldEngine {
         !allowlist.has(candidate) &&
         !isLikelyFalsePositive(candidate)
       ) {
-        const entropy = calculateShannonEntropy(candidate);
-        // Shannon entropy threshold (standard 4.5+ bits/char indicates high randomness)
-        if (entropy >= entropyThreshold) {
+        const { isSecret, entropy } = isHighEntropySecret(candidate, entropyThreshold);
+        if (isSecret) {
           detectedSecretsSet.add(candidate);
 
           const preMatch = text.substring(0, tokenMatch.index);

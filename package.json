@@ -24,13 +24,16 @@
   "bugs": {
     "url": "https://github.com/RitualDev-Lab/AgentShield/issues"
   },
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "publishConfig": {
     "access": "public"
   },
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
-    "test": "tsx --test tests/**/*.test.ts",
+    "test": "tsx --test \"tests/**/*.test.ts\"",
     "lint": "biome lint .",
     "format": "biome format --write .",
     "wiki:sync": "node scripts/sync-wiki.cjs"

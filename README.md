@@ -6,9 +6,8 @@
 
 [![GitHub Stars](https://img.shields.io/github/stars/RitualDev-Lab/AgentShield?style=for-the-badge&logo=github&color=8b5cf6)](https://github.com/RitualDev-Lab/AgentShield/stargazers)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg?style=for-the-badge)](LICENSE)
-[![GitHub Action](https://img.shields.io/badge/GitHub_Action-v1-purple.svg?style=for-the-badge&logo=github-actions)](https://github.com/RitualDev-Lab/AgentShield)
+[![CI Status](https://img.shields.io/github/actions/workflow/status/RitualDev-Lab/AgentShield/test.yml?branch=main&style=for-the-badge&logo=github-actions&label=Tests)](https://github.com/RitualDev-Lab/AgentShield/actions/workflows/test.yml)
 [![Node Runtime](https://img.shields.io/badge/Node-%3E%3D20.0-emerald.svg?style=for-the-badge&logo=nodedotjs)](https://nodejs.org)
-[![Tests](https://img.shields.io/badge/Tests-69%2F69_Passing-brightgreen.svg?style=for-the-badge)](tests/)
 
 
 <br />
@@ -153,12 +152,13 @@ Generates `.claude/settings.json` configured with:
     "PreToolUse": [
       {
         "matcher": "Bash|Terminal",
-        "command": "npx @ritualdev-lab/agentshield exec $COMMAND"
+        "command": "npx @ritualdev-lab/agentshield exec --claude-hook"
       }
     ]
   }
 }
 ```
+*Note: Claude Code delivers tool call payloads via stdin JSON. AgentShield inspects the payload in real-time and cleanly returns exit code `2` to halt unauthorized commands before execution.*
 
 ### Cursor & Windsurf Rules
 ```bash

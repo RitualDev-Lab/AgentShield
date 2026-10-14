@@ -398,10 +398,32 @@ async function main() {
     }
   } else if (command === "exec" || command === "run") {
     // Intercept agent command execution using streaming stdio interceptor
-    const rawCmd = args
+    let rawCmd = args
       .slice(1)
-      .filter((a) => !a.startsWith("--kernel"))
+      .filter((a) => !a.startsWith("--kernel") && a !== "--claude-hook")
       .join(" ");
+
+    // Check if called via Claude Code PreToolUse hook (JSON on stdin or empty args)
+    if (!rawCmd && !process.stdin.isTTY) {
+      try {
+        const stdinChunks: Buffer[] = [];
+        for await (const chunk of process.stdin) {
+          stdinChunks.push(typeof chunk === "string" ? Buffer.from(chunk) : chunk);
+        }
+        const stdinStr = Buffer.concat(stdinChunks).toString("utf8").trim();
+        if (stdinStr) {
+          try {
+            const hookPayload = JSON.parse(stdinStr);
+            rawCmd = hookPayload.tool_input?.command || hookPayload.command || stdinStr;
+          } catch {
+            rawCmd = stdinStr;
+          }
+        }
+      } catch {
+        // Fallback
+      }
+    }
+
     if (!rawCmd) {
       console.error(
         `❌ Error: No command provided to sandbox. Usage: npx @ritualdev-lab/agentshield ${command} <command>`,
@@ -410,6 +432,7 @@ async function main() {
     }
 
     const enableKernel = args.includes("--kernel");
+    const isClaudeHook = args.includes("--claude-hook") || process.env.CLAUDE_TOOL_USE !== undefined;
     const { AgentStdioInterceptor } = await import("./interceptor.js");
     const interceptor = new AgentStdioInterceptor(engine, process.cwd());
 
@@ -425,7 +448,8 @@ async function main() {
     });
 
     if (result.isBlocked) {
-      process.exit(1);
+      // Exit code 2 tells Claude Code to abort the tool execution cleanly
+      process.exit(isClaudeHook ? 2 : 1);
     }
     process.exit(result.exitCode);
   } else if (command === "ci") {
@@ -678,7 +702,7 @@ async function main() {
         PreToolUse: [
           {
             matcher: "Bash|Terminal",
-            command: "npx @ritualdev-lab/agentshield exec $COMMAND",
+            command: "npx @ritualdev-lab/agentshield exec --claude-hook",
           },
         ],
       },

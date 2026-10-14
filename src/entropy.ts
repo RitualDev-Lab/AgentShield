@@ -25,6 +25,30 @@ export function calculateShannonEntropy(str: string): number {
 }
 
 /**
+ * Checks if a candidate token exceeds entropy thresholds, adapting for character set:
+ * - Pure hex strings (0-9, a-f) top out at 4.0 bits, so threshold is 3.2 bits (min length 16).
+ * - Base64 and alphanumeric strings use standard 4.3+ bits (min length 12).
+ */
+export function isHighEntropySecret(
+  str: string,
+  baseThreshold = 4.5,
+): { isSecret: boolean; entropy: number } {
+  if (!str || str.length < 12) return { isSecret: false, entropy: 0 };
+
+  const entropy = calculateShannonEntropy(str);
+  const isPureHex = /^[0-9a-fA-F]+$/.test(str);
+
+  if (isPureHex) {
+    // Hex alphabet max entropy is log2(16) = 4.0 bits. Threshold scaled to 3.2 bits.
+    const isSecret = str.length >= 16 && entropy >= 3.2;
+    return { isSecret, entropy };
+  }
+
+  const isSecret = entropy >= baseThreshold;
+  return { isSecret, entropy };
+}
+
+/**
  * Filter out false positives for high entropy strings:
  * - Git commit hashes
  * - UUIDs

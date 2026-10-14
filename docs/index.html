@@ -1309,11 +1309,11 @@
             <p>Run AgentShield directly without modifying your global environment or installing dependencies.</p>
             <div class="code-block">
               <span class="comment"># Audit any file or .env config</span><br>
-              <span class="cmd">npx</span> agentshield scan <span class="arg">.env</span><br><br>
+              <span class="cmd">npx</span> @ritualdev-lab/agentshield scan <span class="arg">.env</span><br><br>
               <span class="comment"># Redact exposed secrets to stdout</span><br>
-              <span class="cmd">npx</span> agentshield redact <span class="arg">server.js</span><br><br>
+              <span class="cmd">npx</span> @ritualdev-lab/agentshield redact <span class="arg">server.js</span><br><br>
               <span class="comment"># Test shell interception</span><br>
-              <span class="cmd">npx</span> agentshield exec <span class="arg">"cat .env"</span>
+              <span class="cmd">npx</span> @ritualdev-lab/agentshield exec <span class="arg">"cat .env"</span>
               <button class="copy-btn" onclick="copySnippet('npx @ritualdev-lab/agentshield scan .env')">Copy</button>
             </div>
           </div>
@@ -1323,12 +1323,12 @@
             <p>Install AgentShield as a development dependency for your engineering team.</p>
             <div class="code-block">
               <span class="comment"># npm</span><br>
-              <span class="cmd">npm</span> install -D <span class="keyword">agentshield</span><br><br>
+              <span class="cmd">npm</span> install -D <span class="keyword">@ritualdev-lab/agentshield</span><br><br>
               <span class="comment"># pnpm</span><br>
-              <span class="cmd">pnpm</span> add -D <span class="keyword">agentshield</span><br><br>
+              <span class="cmd">pnpm</span> add -D <span class="keyword">@ritualdev-lab/agentshield</span><br><br>
               <span class="comment"># yarn</span><br>
-              <span class="cmd">yarn</span> add -D <span class="keyword">agentshield</span>
-              <button class="copy-btn" onclick="copySnippet('npm install -D agentshield')">Copy</button>
+              <span class="cmd">yarn</span> add -D <span class="keyword">@ritualdev-lab/agentshield</span>
+              <button class="copy-btn" onclick="copySnippet('npm install -D @ritualdev-lab/agentshield')">Copy</button>
             </div>
           </div>
 
@@ -1337,11 +1337,11 @@
             <p>Have <code>agentshield</code> and shorthand <code>ashield</code> globally available across all directories.</p>
             <div class="code-block">
               <span class="comment"># Install globally</span><br>
-              <span class="cmd">npm</span> install -g <span class="keyword">agentshield</span><br><br>
+              <span class="cmd">npm</span> install -g <span class="keyword">@ritualdev-lab/agentshield</span><br><br>
               <span class="comment"># Verify installation</span><br>
               <span class="cmd">agentshield</span> <span class="arg">--help</span><br>
               <span class="cmd">ashield</span> <span class="arg">--help</span>
-              <button class="copy-btn" onclick="copySnippet('npm install -g agentshield')">Copy</button>
+              <button class="copy-btn" onclick="copySnippet('npm install -g @ritualdev-lab/agentshield')">Copy</button>
             </div>
           </div>
         </div>
@@ -1482,7 +1482,7 @@
             <p>Run within GitLab CI, CircleCI, Jenkins, or Docker build runners.</p>
             <div class="code-block">
               <span class="comment"># Diff against base branch &amp; export SARIF</span><br>
-              <span class="cmd">npx</span> agentshield ci <span class="keyword">--base</span> <span class="arg">origin/main</span> \<br>
+              <span class="cmd">npx</span> @ritualdev-lab/agentshield ci <span class="keyword">--base</span> <span class="arg">origin/main</span> \<br>
               &nbsp;&nbsp;<span class="keyword">--report</span> <span class="arg">report.md</span> \<br>
               &nbsp;&nbsp;<span class="keyword">--sarif</span> <span class="arg">results.sarif</span>
               <button class="copy-btn" onclick="copySnippet('npx @ritualdev-lab/agentshield ci --base origin/main')">Copy</button>
@@ -1552,7 +1552,7 @@
             <h4><span>🧩</span> Programmatic TypeScript / Node.js API</h4>
             <p>Embed AgentShield redaction and sandboxing directly into custom agent frameworks, Express proxies, or LLM middleware.</p>
             <div class="code-block">
-              <span class="keyword">import</span> { AgentShieldEngine, AgentCommandSandbox } <span class="keyword">from</span> <span class="arg">"agentshield"</span>;<br><br>
+              <span class="keyword">import</span> { AgentShieldEngine, AgentCommandSandbox } <span class="keyword">from</span> <span class="arg">"@ritualdev-lab/agentshield"</span>;<br><br>
               <span class="comment">// 1. Initialize Engine</span><br>
               <span class="keyword">const</span> shield = <span class="keyword">new</span> AgentShieldEngine();<br><br>
               <span class="comment">// 2. Sanitize LLM prompt input</span><br>
@@ -1566,7 +1566,7 @@
               <span class="keyword">const</span> sandbox = <span class="keyword">new</span> AgentCommandSandbox();<br>
               <span class="keyword">const</span> check = sandbox.inspect(<span class="arg">"cat .env"</span>);<br>
               console.log(check.allowed); <span class="comment">// false</span>
-              <button class="copy-btn" onclick="copySnippet('import { AgentShieldEngine } from \'agentshield\';')">Copy</button>
+              <button class="copy-btn" onclick="copySnippet('import { AgentShieldEngine } from \'@ritualdev-lab/agentshield\';')">Copy</button>
             </div>
           </div>
         </div>
@@ -1675,7 +1675,7 @@
           </div>
           <h3>Support Independent Zero-Leak AI Research & Bounties</h3>
           <p>
-            AgentShield is 100% free, local-first, and MIT/Apache-licensed. 100% of community contributions fund independent white-hat security bounties, honeypot canary telemetry, and zero-day LLM jailbreak interception.
+            AgentShield is 100% free, local-first, and Apache-2.0 licensed. 100% of community contributions fund independent white-hat security bounties, honeypot canary telemetry, and zero-day LLM jailbreak interception.
           </p>
         </div>
         <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
@@ -1824,7 +1824,7 @@
           <div style="margin: 1.25rem 0;">
             <img src="https://img.shields.io/badge/Secured%20by-AgentShield%20%E2%98%85%20Sponsor-ec4899?logo=shield&logoColor=white&style=flat-square" alt="Secured by AgentShield Sponsor" style="height: 24px;">
           </div>
-          <div class="pricing-desc">Exclusive badging for tools backed by DevShelf & AgentShield sponsorship.</div>
+          <div class="pricing-desc">Commercial sponsorship badging for tools backed by DevShelf & AgentShield. (Clearly labeled as a paid sponsorship to preserve directory neutrality).</div>
           <div class="code-block" style="margin-top: 1rem; font-size: 0.75rem;">
             [![Secured by AgentShield](https://img.shields.io/badge/Secured%20by-AgentShield%20%E2%98%85%20Sponsor-ec4899?logo=shield&logoColor=white&style=flat-square)](https://agentshield.ritualdev.in/)
             <button class="copy-btn" onclick="copySnippet('[![Secured by AgentShield](https://img.shields.io/badge/Secured%20by-AgentShield%20%E2%98%85%20Sponsor-ec4899?logo=shield&logoColor=white&style=flat-square)](https://agentshield.ritualdev.in/)')">Copy</button>
@@ -1846,7 +1846,7 @@
           </div>
           <div class="pricing-desc">Featured sticky placement in target DevShelf category, SEO spotlight card, and full Verified Sponsor badge.</div>
           <div class="code-block" style="margin-top: 1rem; font-size: 0.75rem;">
-            <span class="cmd">npx</span> agentshield badge <span class="arg">&lt;tool&gt;</span> --tier sponsor
+            <span class="cmd">npx</span> @ritualdev-lab/agentshield badge <span class="arg">&lt;tool&gt;</span> --tier sponsor
             <button class="copy-btn" onclick="copySnippet('npx @ritualdev-lab/agentshield badge MyTool --tier sponsor')">Copy</button>
           </div>
           <div style="margin-top: 1.25rem;">
