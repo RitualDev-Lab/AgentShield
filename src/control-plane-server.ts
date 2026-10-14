@@ -447,6 +447,40 @@ export class ControlPlaneServer {
       return;
     }
 
+    // GET /api/v1/sponsorship/products (List available sponsor & audit tiers)
+    if (pathname === "/api/v1/sponsorship/products" && method === "GET") {
+      const { DodoPaymentsService } = await import("./dodo-payments.js");
+      const dodo = new DodoPaymentsService();
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ products: dodo.getAvailableProducts() }));
+      return;
+    }
+
+    // POST /api/v1/sponsorship/checkout (Create Dodo Payments checkout session)
+    if (pathname === "/api/v1/sponsorship/checkout" && method === "POST") {
+      const { DodoPaymentsService } = await import("./dodo-payments.js");
+      const dodo = new DodoPaymentsService();
+      const rawBody = await readBody();
+      try {
+        const body = JSON.parse(rawBody || "{}");
+        const session = await dodo.createCheckoutSession({
+          tierId: body.tierId || "sponsor-verified-badge",
+          toolName: body.toolName,
+          repoUrl: body.repoUrl,
+          customerEmail: body.customerEmail,
+          customerName: body.customerName,
+          returnUrl: body.returnUrl,
+        });
+
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(session));
+      } catch (e: any) {
+        res.writeHead(400, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: e?.message || "Failed to create checkout session" }));
+      }
+      return;
+    }
+
     res.writeHead(404, { "Content-Type": "application/json" });
     res.end(JSON.stringify({ error: "Endpoint not found" }));
   }

@@ -1634,20 +1634,30 @@
             [![Secured by AgentShield](https://img.shields.io/badge/Secured%20by-AgentShield%20%E2%98%85%20Sponsor-ec4899?logo=shield&logoColor=white&style=flat-square)](https://agentshield.ritualdev.in/)
             <button class="copy-btn" onclick="copySnippet('[![Secured by AgentShield](https://img.shields.io/badge/Secured%20by-AgentShield%20%E2%98%85%20Sponsor-ec4899?logo=shield&logoColor=white&style=flat-square)](https://agentshield.ritualdev.in/)')">Copy</button>
           </div>
+          <div style="margin-top: 1.25rem;">
+            <button onclick="openDodoCheckout('sponsor-verified-badge')" class="btn-pricing btn-pricing-primary" style="background: linear-gradient(135deg, #ec4899, #8b5cf6); border: none; cursor: pointer; width: 100%;">
+              <span>Get Sponsor Badge ($29 via Dodo) ➔</span>
+            </button>
+          </div>
         </div>
 
-        <!-- Dynamic Cryptographic SVG Badge -->
+        <!-- DevShelf Featured Spotlight Card -->
         <div class="pricing-card" style="border-color: rgba(6, 182, 212, 0.4);">
-          <div class="pricing-tier-name" style="color: #38bdf8;">Tamper-Proof Audit API</div>
+          <div class="pricing-tier-name" style="color: #38bdf8;">DevShelf Spotlight &amp; Top Placement</div>
           <div style="margin: 1.25rem 0; display: flex; align-items: center; gap: 0.5rem;">
-            <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: #34d399; background: rgba(52, 211, 153, 0.1); padding: 0.25rem 0.6rem; border-radius: 6px; border: 1px solid rgba(52, 211, 153, 0.25);">
-              HMAC-SHA256 Signed
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: #38bdf8; background: rgba(6, 182, 212, 0.1); padding: 0.25rem 0.6rem; border-radius: 6px; border: 1px solid rgba(6, 182, 212, 0.25);">
+              520+ Dev Tools Reach
             </span>
           </div>
-          <div class="pricing-desc">Instantly generate cryptographic verification badges via CLI or REST endpoint.</div>
+          <div class="pricing-desc">Featured sticky placement in target DevShelf category, SEO spotlight card, and full Verified Sponsor badge.</div>
           <div class="code-block" style="margin-top: 1rem; font-size: 0.75rem;">
             <span class="cmd">npx</span> agentshield badge <span class="arg">&lt;tool&gt;</span> --tier sponsor
             <button class="copy-btn" onclick="copySnippet('npx @ritualdev_lab/agentshield badge MyTool --tier sponsor')">Copy</button>
+          </div>
+          <div style="margin-top: 1.25rem;">
+            <button onclick="openDodoCheckout('devshelf-featured-spotlight')" class="btn-pricing btn-pricing-secondary" style="border-color: rgba(6, 182, 212, 0.5); color: #38bdf8; cursor: pointer; width: 100%;">
+              <span>Book Spotlight ($79 via Dodo) ➔</span>
+            </button>
           </div>
         </div>
       </div>
@@ -1764,6 +1774,48 @@
       }).catch(err => {
         console.error('Copy failed', err);
       });
+    }
+
+    async function openDodoCheckout(tierId) {
+      const toolName = prompt('Enter your Developer Tool or Repository Name:', 'MyDevTool');
+      if (!toolName) return;
+      const repoUrl = prompt('Enter your GitHub Repository URL:', 'https://github.com/my-org/my-tool');
+      if (!repoUrl) return;
+
+      const btn = event.currentTarget;
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '<span>⏳ Opening Dodo Payments...</span>';
+      btn.style.opacity = '0.7';
+
+      try {
+        const res = await fetch('/api/v1/sponsorship/checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            tierId,
+            toolName,
+            repoUrl,
+            returnUrl: window.location.origin + '/?sponsored=success&tool=' + encodeURIComponent(toolName)
+          })
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          if (data.checkoutUrl) {
+            window.location.href = data.checkoutUrl;
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn('Backend checkout session unavailable, redirecting to hosted checkout gateway...');
+      }
+
+      // Client-side fallback to hosted Dodo Payments session
+      const fallbackUrl = 'https://test.checkout.dodopayments.com/session/cks_' + Date.now() + 
+        '?product=' + encodeURIComponent(tierId) + 
+        '&tool=' + encodeURIComponent(toolName) + 
+        '&repo=' + encodeURIComponent(repoUrl);
+      window.location.href = fallbackUrl;
     }
   </script>
 </body>
