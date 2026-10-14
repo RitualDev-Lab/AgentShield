@@ -11,21 +11,43 @@ inputs:
     description: "Whether to fail the CI step if secrets are detected"
     required: false
     default: "true"
+  github_token:
+    description: "GitHub secret token used to post inline annotations and sticky PR comments"
+    required: false
+    default: "${{ github.token }}"
+  post_pr_comment:
+    description: "Whether to post or update a sticky security audit comment on Pull Requests"
+    required: false
+    default: "true"
+  annotate_diff:
+    description: "Whether to emit GitHub Actions inline workflow command annotations (::error)"
+    required: false
+    default: "true"
 
 runs:
   using: "composite"
   steps:
-    - name: Run AgentShield CI Security Audit
+    - name: Run AgentShield CI Security Audit & PR Bot
       shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github_token }}
       run: |
+        EXTRA_FLAGS=""
+        if [ "${{ inputs.annotate_diff }}" = "true" ]; then
+          EXTRA_FLAGS="$EXTRA_FLAGS --annotate"
+        fi
+        if [ "${{ inputs.post_pr_comment }}" = "true" ]; then
+          EXTRA_FLAGS="$EXTRA_FLAGS --post-pr-comment"
+        fi
+
         EXIT_CODE=0
         if [ -f "${{ github.action_path }}/dist/cli.js" ]; then
-          node "${{ github.action_path }}/dist/cli.js" ci --base "${{ inputs.base_ref }}" --report .agentshield-report.md || EXIT_CODE=$?
+          node "${{ github.action_path }}/dist/cli.js" ci --base "${{ inputs.base_ref }}" --report .agentshield-report.md $EXTRA_FLAGS || EXIT_CODE=$?
         elif [ -f "${{ github.action_path }}/package.json" ]; then
           (cd "${{ github.action_path }}" && npm install --silent && npm run build --silent)
-          node "${{ github.action_path }}/dist/cli.js" ci --base "${{ inputs.base_ref }}" --report .agentshield-report.md || EXIT_CODE=$?
+          node "${{ github.action_path }}/dist/cli.js" ci --base "${{ inputs.base_ref }}" --report .agentshield-report.md $EXTRA_FLAGS || EXIT_CODE=$?
         else
-          npx --yes @ritualdev_lab/agentshield@latest ci --base "${{ inputs.base_ref }}" --report .agentshield-report.md || EXIT_CODE=$?
+          npx --yes @ritualdev_lab/agentshield@latest ci --base "${{ inputs.base_ref }}" --report .agentshield-report.md $EXTRA_FLAGS || EXIT_CODE=$?
         fi
         
         if [ -f .agentshield-report.md ]; then
@@ -40,3 +62,4 @@ runs:
 branding:
   icon: "shield"
   color: "purple"
+

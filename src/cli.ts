@@ -443,7 +443,31 @@ async function main() {
     }
 
     const result = runner.auditPullRequest(baseRef);
-    console.log(result.markdownReport);
+
+    if (args.includes("--json")) {
+      console.log(JSON.stringify(result, null, 2));
+    } else {
+      console.log(result.markdownReport);
+    }
+
+    // Emit GitHub Actions inline workflow annotations
+    if (args.includes("--annotate") && result.findings.length > 0) {
+      const { GitHubActionBot } = await import("./github-action.js");
+      GitHubActionBot.emitAnnotations(result.findings);
+    }
+
+    // Post or update sticky Pull Request review comment if requested or in PR workflow
+    if (args.includes("--post-pr-comment")) {
+      const { GitHubActionBot } = await import("./github-action.js");
+      const commentRes = await GitHubActionBot.postOrUpdatePrComment(result, {});
+      if (commentRes.success) {
+        console.log(
+          `\n💬 [AgentShield] PR review comment successfully ${commentRes.action} (id: ${commentRes.commentId})`,
+        );
+      } else if (commentRes.action !== "skipped") {
+        console.warn(`\n⚠️ [AgentShield] PR comment notification warning: ${commentRes.error}`);
+      }
+    }
 
     if (reportPath) {
       writeFileSync(reportPath, result.markdownReport, "utf8");
