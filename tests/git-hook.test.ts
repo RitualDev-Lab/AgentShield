@@ -121,7 +121,7 @@ describe("Phase 1: Local Pre-Commit & Git Hooks Integration", () => {
     const huskyHook = join(huskyDir, "pre-commit");
     assert.strictEqual(existsSync(huskyHook), true);
     const content = readFileSync(huskyHook, "utf8");
-    assert.ok(content.includes("npx @ritualdev_lab/agentshield hook check"));
+    assert.ok(content.includes("npx @ritualdev-lab/agentshield hook check"));
   });
 
   it("should cleanly uninstall git pre-commit hook", () => {
