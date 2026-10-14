@@ -481,6 +481,34 @@ export class ControlPlaneServer {
       return;
     }
 
+    // GET /api/v1/transparency/ledger (Public financial transparency audit ledger)
+    if (pathname === "/api/v1/transparency/ledger" && method === "GET") {
+      const { PublicTransparencyLedger } = await import("./transparency-ledger.js");
+      const ledger = new PublicTransparencyLedger();
+      const summary = ledger.getSummary();
+      const entries = ledger.getEntries();
+
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ summary, entries }, null, 2));
+      return;
+    }
+
+    // GET /api/v1/badges/patron/:username.svg (Dynamic patron backer badge generator)
+    if (pathname.startsWith("/api/v1/badges/patron/") && pathname.endsWith(".svg") && method === "GET") {
+      const { PublicTransparencyLedger } = await import("./transparency-ledger.js");
+      const rawUser = pathname.replace("/api/v1/badges/patron/", "").replace(".svg", "");
+      const username = decodeURIComponent(rawUser);
+      const tier = parsedUrl.searchParams.get("tier") || "Supporter";
+      const svg = PublicTransparencyLedger.generatePatronSvgBadge(username, tier);
+
+      res.writeHead(200, {
+        "Content-Type": "image/svg+xml; charset=utf-8",
+        "Cache-Control": "public, max-age=3600",
+      });
+      res.end(svg);
+      return;
+    }
+
     res.writeHead(404, { "Content-Type": "application/json" });
     res.end(JSON.stringify({ error: "Endpoint not found" }));
   }
