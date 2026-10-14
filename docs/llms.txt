@@ -32,3 +32,23 @@ npx @ritualdev_lab/agentshield ci --base origin/main
 - **Cryptographic Write-Ahead Audit Ledger**: SHA-256 HMAC chained event logs with sequential verification preventing retrospective log tampering.
 - **Cross-Turn Taint Graph & Canary Decoys**: Directional taint propagation tracking multi-turn prompt leakages, coupled with honeypot synthetic decoy tripwires that alert on unauthorized tool access.
 - **Local-First Air-Gapped Architecture**: Zero telemetry, zero external network dependencies, ensuring strict compliance with SOC2 CC6.1, PCI-DSS Req-3.4, HIPAA §164.312, and ISO27001 A.8.28.
+
+## Threat Model Alignment: OWASP LLM02 & MITRE ATLAS
+
+AgentShield controls are indexed against the two frameworks most often cited in AI-agent security review: the OWASP Top 10 for LLM Applications and the MITRE ATLAS knowledge base.
+
+### OWASP Top 10 for LLM Applications
+
+- **LLM02:2025 — Sensitive Information Disclosure.** AgentShield is the disclosure boundary between the repository and the model context window. Credential values are replaced with deterministic `[AGENT_SHIELD:ID:hexHash]` surrogates before a tool result, command output, or MCP response reaches the agent, so `.env` contents, cloud access keys, database URLs, and bearer tokens are never rendered into inference context, agent transcripts, or third-party telemetry.
+- **LLM01:2025 — Prompt Injection.** Instructions that attempt to make the agent read credentials are neutralized at the shell boundary rather than at the prompt layer, so a successful prompt injection still cannot produce a plaintext secret in the transcript.
+- **LLM05:2025 — Improper Output Handling.** Subprocess output is redacted in flight (`agentshield exec`, `agentshield stream`) before it is echoed back to the agent, including output produced by interpreters such as `python -c`.
+- **LLM06:2025 — Excessive Agency.** High-risk read paths (`cat .env`, `grep . .env`, `printenv`, `env | sort`, input redirection from a secret file) are intercepted and reported instead of executed.
+
+### MITRE ATLAS
+
+- **AML.T0025 — Exfiltration via Cyber Means.** The subshell exfiltration pattern — `sh -c "..."`, `bash -c '...'`, ANSI-C quoting such as `$'cat\t.env'`, input redirection (`< .env`), and interpreter one-liners such as `python -c "open('.env')"` — is normalized and unpacked to its AST before evaluation, so wrapper tricks do not defeat the gate.
+- **AML.T0057 — LLM Data Leakage.** Secret material reachable from the agent (files, process environment, MCP tool responses) is substituted with surrogates, so prompts that induce disclosure return tokens that cannot be replayed outside the local machine.
+- **AML.T0086 — Exfiltration via AI Agent Tool Invocation.** MCP JSON-RPC requests and responses are sanitized bidirectionally, covering tool invocation as an exfiltration channel.
+- **AML.T0051 — LLM Prompt Injection.** Tracked through the cross-turn taint graph, which flags multi-turn attempts to launder a secret across successive tool calls.
+
+Machine-readable severity and control attribution is available per finding from `agentshield scan --json`.
