@@ -1,6 +1,6 @@
 import { execFileSync } from "node:child_process";
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
-import { basename, join } from "node:path";
+import { existsSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
+import { basename, join, resolve } from "node:path";
 import { AgentShieldEngine } from "./engine.js";
 import { AGENTSHIELD_VERSION } from "./version.js";
 
@@ -34,7 +34,7 @@ export class GitPreCommitGate {
   /**
    * Scans staged files and diffs in the current Git repository.
    */
-  public auditStagedFiles(): GitPreCommitResult {
+  public auditStagedFiles(repoRoot: string = process.cwd()): GitPreCommitResult {
     const blockedFiles: string[] = [];
     const reportLines: string[] = [];
     let findingsCount = 0;
@@ -42,6 +42,7 @@ export class GitPreCommitGate {
     let stagedFilesStr = "";
     try {
       stagedFilesStr = execFileSync("git", ["diff", "--cached", "--name-only"], {
+        cwd: repoRoot,
         encoding: "utf8",
       }).trim();
     } catch {
@@ -85,6 +86,7 @@ export class GitPreCommitGate {
       // 2. Scan content of staged diff safely via execFileSync
       try {
         const diffContent = execFileSync("git", ["diff", "--cached", "--", file], {
+          cwd: repoRoot,
           encoding: "utf8",
         });
         // Only inspect additions (lines starting with +)
@@ -125,7 +127,7 @@ export class GitPreCommitGate {
   }
 
   /**
-   * Installs the automatic pre-commit hook into the current git repository.
+   * Installs the automatic pre-commit hook into the current git repository (.git/hooks/pre-commit).
    * Resolves common git directory across standard repos and git worktrees.
    */
   public installHook(repoRoot: string = process.cwd()): boolean {
@@ -137,8 +139,11 @@ export class GitPreCommitGate {
         cwd: repoRoot,
         encoding: "utf8",
       }).trim();
-      if (gitDir && existsSync(gitDir)) {
-        hooksDir = gitDir;
+      if (gitDir) {
+        const resolved = resolve(repoRoot, gitDir);
+        if (existsSync(resolved)) {
+          hooksDir = resolved;
+        }
       }
     } catch {
       // Fallback to .git/hooks
@@ -175,6 +180,95 @@ fi
       }
     } else {
       writeFileSync(preCommitPath, `#!/bin/sh${hookSnippet}`, {
+        encoding: "utf8",
+        mode: 0o755,
+      });
+    }
+
+    return true;
+  }
+
+  /**
+   * Uninstalls the AgentShield pre-commit hook from .git/hooks/pre-commit.
+   */
+  public uninstallHook(repoRoot: string = process.cwd()): boolean {
+    let hooksDir = join(repoRoot, ".git", "hooks");
+
+    try {
+      const gitDir = execFileSync("git", ["rev-parse", "--git-path", "hooks"], {
+        cwd: repoRoot,
+        encoding: "utf8",
+      }).trim();
+      if (gitDir) {
+        const resolved = resolve(repoRoot, gitDir);
+        if (existsSync(resolved)) {
+          hooksDir = resolved;
+        }
+      }
+    } catch {
+      // Fallback
+    }
+
+    const preCommitPath = join(hooksDir, "pre-commit");
+    if (!existsSync(preCommitPath)) {
+      return false;
+    }
+
+    const content = readFileSync(preCommitPath, "utf8");
+    const startMarker = "# --- AgentShield Pre-Commit Gate ---";
+    const endMarker = "# --- End AgentShield Gate ---";
+
+    if (!content.includes(startMarker)) {
+      return false;
+    }
+
+    const regex = new RegExp(`\\n?${startMarker}[\\s\\S]*?${endMarker}\\n?`, "g");
+    const cleaned = content.replace(regex, "").trim();
+
+    if (cleaned === "" || cleaned === "#!/bin/sh") {
+      // Safe to remove the hook file entirely if it was solely created by AgentShield
+      try {
+        unlinkSync(preCommitPath);
+      } catch {
+        writeFileSync(preCommitPath, "", "utf8");
+      }
+    } else {
+      writeFileSync(preCommitPath, `${cleaned}\n`, {
+        encoding: "utf8",
+        mode: 0o755,
+      });
+    }
+
+    return true;
+  }
+
+  /**
+   * Installs or configures AgentShield for Husky (.husky/pre-commit).
+   */
+  public installHuskyHook(repoRoot: string = process.cwd()): boolean {
+    const huskyDir = join(repoRoot, ".husky");
+    if (!existsSync(huskyDir)) {
+      return false;
+    }
+
+    const preCommitPath = join(huskyDir, "pre-commit");
+    const marker = "# --- AgentShield Pre-Commit Gate ---";
+    const hookSnippet = `
+${marker}
+npx @ritualdev_lab/agentshield hook check
+# --- End AgentShield Gate ---
+`;
+
+    if (existsSync(preCommitPath)) {
+      const existing = readFileSync(preCommitPath, "utf8");
+      if (!existing.includes(marker)) {
+        writeFileSync(preCommitPath, `${existing.trim()}\n${hookSnippet}`, {
+          encoding: "utf8",
+          mode: 0o755,
+        });
+      }
+    } else {
+      writeFileSync(preCommitPath, `#!/bin/sh\n. "$(dirname "$0")/_/husky.sh"\n${hookSnippet}`, {
         encoding: "utf8",
         mode: 0o755,
       });

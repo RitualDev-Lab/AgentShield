@@ -1,17 +1,8 @@
 - id: agentshield
-  name: AgentShield Secret Gate
-  description: High-assurance AI secret redactor and zero-leak commit shield
-  entry: agentshield hook check
-  language: node
-  additional_dependencies: ["@ritualdev_lab/agentshield@0.1.2"]
-  stages: [pre-commit]
+  name: AgentShield Git Pre-Commit Security Gate
+  description: Zero-leak AI agent credential & secret detection for git repositories
+  entry: npx @ritualdev_lab/agentshield hook check
+  language: system
   pass_filenames: false
-
-- id: agentshield-audit
-  name: AgentShield Agent Configuration Audit
-  description: Static security audit of AI agent permissions (.claude, MCP servers)
-  entry: agentshield audit --labs
-  language: node
-  additional_dependencies: ["@ritualdev_lab/agentshield@0.1.2"]
+  always_run: true
   stages: [pre-commit]
-  pass_filenames: false

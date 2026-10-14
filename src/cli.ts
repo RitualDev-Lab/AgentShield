@@ -29,8 +29,9 @@ Usage:
   npx @ritualdev_lab/agentshield redact <file-path>     Redact secrets and print sanitized text
   npx @ritualdev_lab/agentshield stream                 Redact secrets from piped stdin (for terminal hooks)
   npx @ritualdev_lab/agentshield exec <command>         Safely sandbox & intercept agent bash command
-  npx @ritualdev_lab/agentshield run <command>          Run command with real-time streaming stdio secret redaction
-  npx @ritualdev_lab/agentshield hook git-install       Install automatic git pre-commit leak shield
+  npx @ritualdev_lab/agentshield hook install           Install automatic git pre-commit leak shield (.git/hooks)
+  npx @ritualdev_lab/agentshield hook uninstall         Uninstall automatic git pre-commit leak shield
+  npx @ritualdev_lab/agentshield hook husky             Configure AgentShield for Husky (.husky/pre-commit)
   npx @ritualdev_lab/agentshield hook check             Audit git staged files before commit
   npx @ritualdev_lab/agentshield ci                     Audit pull request or git diff in CI/CD pipeline
   npx @ritualdev_lab/agentshield init-claude            Generate Claude Code PreToolUse hook configuration
@@ -339,30 +340,58 @@ async function main() {
       process.exit(0);
     });
   } else if (command === "hook") {
-    const subAction = args[1];
+    const subAction = args[1] || "check";
     const { GitPreCommitGate } = await import("./gate.js");
     const gate = new GitPreCommitGate(engine);
 
-    if (subAction === "git-install") {
+    if (subAction === "install" || subAction === "git-install") {
       const success = gate.installHook();
       if (success) {
         console.log(
           "✅ [AgentShield] Git pre-commit leak shield successfully installed in .git/hooks/pre-commit",
         );
+        process.exit(0);
       } else {
         console.error(
           "❌ [AgentShield] Could not find .git directory. Run this command inside a Git repository.",
         );
         process.exit(1);
       }
-    } else if (subAction === "check") {
+    } else if (subAction === "uninstall") {
+      const success = gate.uninstallHook();
+      if (success) {
+        console.log("✅ [AgentShield] Pre-commit hook removed from .git/hooks/pre-commit");
+        process.exit(0);
+      } else {
+        console.warn("⚠️ [AgentShield] No AgentShield pre-commit hook found to uninstall.");
+        process.exit(0);
+      }
+    } else if (subAction === "husky") {
+      const success = gate.installHuskyHook();
+      if (success) {
+        console.log(
+          "✅ [AgentShield] Husky pre-commit hook successfully configured in .husky/pre-commit",
+        );
+        process.exit(0);
+      } else {
+        console.error(
+          "❌ [AgentShield] Could not find .husky directory. Please initialize Husky ('npx husky init') first.",
+        );
+        process.exit(1);
+      }
+    } else if (subAction === "check" || subAction === "run") {
       const result = gate.auditStagedFiles();
-      console.log(result.report);
+      if (args.includes("--json")) {
+        console.log(JSON.stringify(result, null, 2));
+      } else {
+        console.log(result.report);
+      }
       if (!result.passed) {
         process.exit(1);
       }
+      process.exit(0);
     } else {
-      console.error("❌ Unknown hook action. Use 'git-install' or 'check'.");
+      console.error("❌ Unknown hook action. Supported: 'install', 'uninstall', 'husky', 'check'.");
       process.exit(1);
     }
   } else if (command === "exec" || command === "run") {
