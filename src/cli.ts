@@ -37,6 +37,7 @@ Usage:
   npx @ritualdev_lab/agentshield init-claude            Generate Claude Code PreToolUse hook configuration
   npx @ritualdev_lab/agentshield init-cursor            Generate Cursor / Windsurf settings.json protection rules
   npx @ritualdev_lab/agentshield benchmark              Run sub-millisecond scanning throughput benchmarks
+  npx @ritualdev_lab/agentshield badge <tool-name>      Generate Secured by AgentShield verified sponsor badge markdown / SVG
 
 Enterprise Team Fleet & Remote Policy:
   npx @ritualdev_lab/agentshield login --org <id> --token <key>   Authenticate machine with enterprise organization
@@ -705,6 +706,49 @@ async function main() {
     printBanner();
     console.log(`✅ [Cursor / Windsurf] Protection rules written to: ${rulesPath}`);
     console.log("   AI agent workspace boundaries and credential paths are protected.\n");
+  } else if (command === "badge") {
+    const toolName = args.filter((a) => !a.startsWith("--"))[1];
+    if (!toolName) {
+      console.error("❌ Error: Please specify tool name. Usage: agentshield badge <tool-name> [--repo <url>] [--tier <verified|sponsor|enterprise>]");
+      process.exit(1);
+    }
+
+    let repoUrl = "";
+    const repoIdx = args.indexOf("--repo");
+    if (repoIdx !== -1 && args[repoIdx + 1]) repoUrl = args[repoIdx + 1];
+
+    let tier: "verified" | "sponsor" | "enterprise" = "verified";
+    const tierIdx = args.indexOf("--tier");
+    if (tierIdx !== -1 && args[tierIdx + 1]) {
+      const val = args[tierIdx + 1].toLowerCase();
+      if (val === "sponsor" || val === "enterprise" || val === "verified") {
+        tier = val;
+      }
+    }
+
+    const { VerifiedBadgeGenerator } = await import("./badge-generator.js");
+    const snippet = VerifiedBadgeGenerator.getMarkdownSnippet(toolName, "https://agentshield.ritualdev.in", tier);
+    const signature = repoUrl ? VerifiedBadgeGenerator.signAuditRecord(toolName, repoUrl, tier) : null;
+
+    if (args.includes("--svg")) {
+      const svg = VerifiedBadgeGenerator.generateSvgBadge(toolName, { tier });
+      console.log(svg);
+      process.exit(0);
+    }
+
+    printBanner();
+    console.log(`🛡️ [Secured by AgentShield] Verified Badge for "${toolName}" (${tier.toUpperCase()} TIER)\n`);
+    console.log("Markdown (for README.md):");
+    console.log(`  ${snippet.markdown}\n`);
+    console.log("HTML (for websites/docs):");
+    console.log(`  ${snippet.html}\n`);
+    console.log("Shields.io Badge URL:");
+    console.log(`  ${snippet.shieldsIoBadgeUrl}\n`);
+    if (signature) {
+      console.log("Cryptographic Verification Signature:");
+      console.log(`  ${signature}`);
+      console.log(`  Verify URL: https://agentshield.ritualdev.in/api/v1/badges/verify?tool=${encodeURIComponent(toolName)}&repo=${encodeURIComponent(repoUrl)}&tier=${tier}&hash=${signature}\n`);
+    }
     process.exit(0);
   } else {
     console.error(`❌ Unknown command '${command}'. Run 'agentshield --help' for usage.`);

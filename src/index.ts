@@ -33,3 +33,4 @@ export * from "./enterprise-sso.js";
 export * from "./enterprise-bundle.js";
 export * from "./github-action.js";
 export * from "./github-app.js";
+export * from "./badge-generator.js";

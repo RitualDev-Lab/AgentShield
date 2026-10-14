@@ -402,6 +402,51 @@ export class ControlPlaneServer {
       return;
     }
 
+    // GET /api/v1/badges/:slug.svg (Dynamic SVG badge generator)
+    if (pathname.startsWith("/api/v1/badges/") && pathname.endsWith(".svg") && method === "GET") {
+      const { VerifiedBadgeGenerator } = await import("./badge-generator.js");
+      const filename = pathname.replace("/api/v1/badges/", "").replace(".svg", "");
+      const toolName = decodeURIComponent(filename).replace(/[-_]/g, " ");
+      const tier = (parsedUrl.searchParams.get("tier") || "verified") as any;
+      const svg = VerifiedBadgeGenerator.generateSvgBadge(toolName, { tier });
+
+      res.writeHead(200, {
+        "Content-Type": "image/svg+xml; charset=utf-8",
+        "Cache-Control": "public, max-age=3600",
+      });
+      res.end(svg);
+      return;
+    }
+
+    // GET /api/v1/badges/verify (Cryptographic verification check)
+    if (pathname === "/api/v1/badges/verify" && method === "GET") {
+      const { VerifiedBadgeGenerator } = await import("./badge-generator.js");
+      const tool = parsedUrl.searchParams.get("tool") || "";
+      const repo = parsedUrl.searchParams.get("repo") || "";
+      const tier = (parsedUrl.searchParams.get("tier") || "verified") as any;
+      const hash = parsedUrl.searchParams.get("hash") || "";
+
+      if (!tool || !repo || !hash) {
+        res.writeHead(400, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "Missing required query parameters: tool, repo, hash" }));
+        return;
+      }
+
+      const isValid = VerifiedBadgeGenerator.verifyAuditRecord(tool, repo, tier, hash);
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(
+        JSON.stringify({
+          valid: isValid,
+          tool,
+          tier,
+          status: isValid ? "VERIFIED_ZERO_LEAK" : "SIGNATURE_MISMATCH",
+          auditedBy: "AgentShield Security Engine",
+          timestamp: new Date().toISOString(),
+        }),
+      );
+      return;
+    }
+
     res.writeHead(404, { "Content-Type": "application/json" });
     res.end(JSON.stringify({ error: "Endpoint not found" }));
   }
