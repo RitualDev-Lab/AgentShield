@@ -14,7 +14,7 @@
 <br />
 
 
-[⚡ Quick Start](#-instant-30-second-setup) • [📖 Full Guide](GUIDE.md) • [🛡️ Agent Sandbox](#-1-autonomous-agent-shell-sandbox) • [🐙 GitHub Action](#-3-cicd-security-gate--github-action) • [🤖 Agent Skill](#-ai-agent-skill-integration) • [📋 Compliance](#-4-enterprise-compliance-auditor) • [💖 Donate](https://donation.rolenest.in/) • [🌐 Website](https://agentshield.ritualdev.in/)
+[⚡ Quick Start](#-instant-30-second-setup) • [📖 Full Guide](GUIDE.md) • [🛡️ Agent Sandbox](#-1-autonomous-agent-shell-sandbox) • [🐙 GitHub Action](#-3-cicd-security-gate--github-action) • [🤖 Agent Skill](#-ai-agent-skill-integration) • [📋 Compliance](#-4-enterprise-compliance-auditor) • [🏆 Bounties](SECURITY.md) • [👥 Contributors](https://github.com/RitualDev-Lab/AgentShield/graphs/contributors) • [💖 Donate](https://donation.rolenest.in/) • [🌐 Website](https://agentshield.ritualdev.in/)
 
 
 <br/><br/>
@@ -227,11 +227,16 @@ const original = shield.rehydrate(result.sanitizedText);
 
 ---
 
-## 🤝 Community & Support
-
-- **Live Documentation**: [https://ritualdev-lab.github.io/AgentShield/](https://ritualdev-lab.github.io/AgentShield/)
-- **Security Policy**: Read our [SECURITY.md](SECURITY.md) for vulnerability disclosure.
+- **Live Documentation**: [https://agentshield.ritualdev.in/](https://agentshield.ritualdev.in/)
+- **Bug Bounty Program**: Read our [SECURITY.md](SECURITY.md) for rewards ($50 – $500).
 - **Contributing**: Check out [CONTRIBUTING.md](CONTRIBUTING.md) to add new secret patterns.
+- **Contributors**: Huge thanks to all our open-source [Contributors](https://github.com/RitualDev-Lab/AgentShield/graphs/contributors)!
+
+<p align="center">
+  <a href="https://github.com/RitualDev-Lab/AgentShield/graphs/contributors">
+    <img src="https://contrib.rocks/image?repo=RitualDev-Lab/AgentShield" alt="AgentShield Contributors" />
+  </a>
+</p>
 
 <div align="center">
   <sub>Maintained with 💜 by <a href="https://github.com/RitualDev-Lab">RitualDev Lab</a> • Licensed under Apache 2.0</sub>

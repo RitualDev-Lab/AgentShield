@@ -38,6 +38,7 @@ Usage:
   npx @ritualdev_lab/agentshield init-cursor            Generate Cursor / Windsurf settings.json protection rules
   npx @ritualdev_lab/agentshield benchmark              Run sub-millisecond scanning throughput benchmarks
   npx @ritualdev_lab/agentshield badge <tool-name>      Generate Secured by AgentShield verified sponsor badge markdown / SVG
+  npx @ritualdev_lab/agentshield bounty-verify <input>  Run local security PoC check against sandbox and secret engine
 
 Enterprise Team Fleet & Remote Policy:
   npx @ritualdev_lab/agentshield login --org <id> --token <key>   Authenticate machine with enterprise organization
@@ -750,6 +751,62 @@ async function main() {
       console.log(`  Verify URL: https://agentshield.ritualdev.in/api/v1/badges/verify?tool=${encodeURIComponent(toolName)}&repo=${encodeURIComponent(repoUrl)}&tier=${tier}&hash=${signature}\n`);
     }
     process.exit(0);
+  } else if (command === "bounty-verify") {
+    printBanner();
+    const target = args.filter((a) => !a.startsWith("--"))[1];
+    if (!target) {
+      console.error("❌ Error: Missing target payload. Usage: agentshield bounty-verify <file-or-command>");
+      process.exit(1);
+    }
+
+    console.log("🧪 [AgentShield Bounty Verification Engine] Evaluating exploit/bypass candidate...\n");
+
+    let isSecretLeak = false;
+    let isCommandBlocked = false;
+    let details = "";
+
+    // 1. Check if target is a file or raw string content
+    const { existsSync, readFileSync } = await import("node:fs");
+    let contentToScan = target;
+    if (existsSync(target)) {
+      contentToScan = readFileSync(target, "utf8");
+      console.log(`  • Input Source: File ('${target}')`);
+    } else {
+      console.log(`  • Input Source: Command / Raw String Payload ('${target}')`);
+    }
+
+    // 2. Run secret scan
+    const scan = engine.scanAndRedact(contentToScan);
+    if (scan.hasSecrets) {
+      isSecretLeak = true;
+      details += `  ✓ Intercepted ${scan.findings.length} secret token(s) [Redacted in-flight]\n`;
+    }
+
+    // 3. Run command sandbox inspect
+    const { AgentCommandSandbox } = await import("./sandbox.js");
+    const sandbox = new AgentCommandSandbox();
+    const sandboxCheck = sandbox.inspectCommand(target);
+    if (sandboxCheck.isBlocked) {
+      isCommandBlocked = true;
+      details += `  ✓ Sandbox intercepted prohibited command: "${sandboxCheck.reason}"\n`;
+    }
+
+    console.log(details || "  ℹ️ No secrets or forbidden commands detected by standard rules.\n");
+
+    if (isSecretLeak || isCommandBlocked) {
+      console.log("🛡️ [VERDICT: MITIGATED]");
+      console.log("   AgentShield successfully caught and neutralized this exploit vector.");
+      console.log("   If you believe you have discovered a novel bypass, submit your PoC at:");
+      console.log("   https://github.com/RitualDev-Lab/AgentShield/security/advisories/new\n");
+      process.exit(0);
+    } else {
+      console.log("⚠️ [VERDICT: UNRESTRICTED / POTENTIAL CANDIDATE]");
+      console.log("   Payload was not blocked by default rules.");
+      console.log("   If this payload extracts production credentials or breaks sandbox isolation,");
+      console.log("   it qualifies for a Community Bug Bounty ($50 - $500).");
+      console.log("   Report privately: https://github.com/RitualDev-Lab/AgentShield/security/advisories/new\n");
+      process.exit(0);
+    }
   } else {
     console.error(`❌ Unknown command '${command}'. Run 'agentshield --help' for usage.`);
     process.exit(1);
