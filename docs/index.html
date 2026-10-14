@@ -850,6 +850,68 @@
       box-shadow: 0 12px 35px rgba(244, 63, 94, 0.6);
     }
 
+    /* Option A: Direct Donation Selector Portal */
+    .donation-selector-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.25rem;
+      margin-top: 1.75rem;
+    }
+    .donation-tier-card {
+      background: rgba(0, 0, 0, 0.45);
+      border: 1px solid rgba(244, 63, 94, 0.3);
+      border-radius: 14px;
+      padding: 1.4rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.25s ease;
+      cursor: pointer;
+    }
+    .donation-tier-card:hover {
+      border-color: #f43f5e;
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(244, 63, 94, 0.25);
+    }
+    .donation-tier-card.selected {
+      border-color: #f59e0b;
+      background: rgba(245, 158, 11, 0.1);
+      box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
+    }
+    .donation-tier-amount {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 0.2rem;
+    }
+    .donation-tier-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #fecdd3;
+      margin-bottom: 0.4rem;
+    }
+    .donation-tier-desc {
+      font-size: 0.82rem;
+      color: #fda4af;
+      line-height: 1.4;
+      margin-bottom: 1rem;
+    }
+    .custom-amount-input {
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(244, 63, 94, 0.4);
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+      color: #fff;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.1rem;
+      width: 100%;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .custom-amount-input:focus {
+      border-color: #f59e0b;
+    }
+
     /* Run Guide Interactive Documentation Section */
     .guide-section {
       background: rgba(13, 17, 23, 0.75);
@@ -1595,18 +1657,84 @@
       </div>
     </section>
 
-    <!-- Donation & Support Callout Banner -->
-    <section class="donation-banner">
-      <div class="donation-info">
-        <h3>💖 Support AgentShield Open-Source Defense</h3>
-        <p>
-          AgentShield is 100% free, local-first, and MIT/Apache-licensed. Your support helps fund independent security research, honeypot telemetry, and continuous zero-day rule maintenance for autonomous AI safety.
-        </p>
+    <!-- Direct Donations, Grants & Bounties (Option A: Direct Checkout / Payment Links) -->
+    <section class="donation-banner" id="donate" style="flex-direction: column; align-items: stretch;">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div class="donation-info">
+          <div class="hero-badge-pill" style="margin-bottom: 0.8rem; background: rgba(244, 63, 94, 0.2); border-color: rgba(244, 63, 94, 0.5); color: #fecdd3;">
+            <span>💖</span> Open-Source Security Defense Fund
+          </div>
+          <h3>Support Independent Zero-Leak AI Research & Bounties</h3>
+          <p>
+            AgentShield is 100% free, local-first, and MIT/Apache-licensed. 100% of community contributions fund independent white-hat security bounties, honeypot canary telemetry, and zero-day LLM jailbreak interception.
+          </p>
+        </div>
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+          <a href="https://github.com/sponsors/RitualDev-Lab" target="_blank" rel="noopener noreferrer" class="btn-pricing btn-pricing-secondary" style="border-color: rgba(244, 63, 94, 0.4); color: #fda4af; padding: 0.7rem 1.2rem; width: auto;">
+            <span>🐙 GitHub Sponsors</span>
+          </a>
+          <a href="https://donation.rolenest.in/" target="_blank" rel="noopener noreferrer" class="btn-donation-big" style="padding: 0.7rem 1.4rem;">
+            <span>RoleNest Portal ➔</span>
+          </a>
+        </div>
       </div>
-      <div>
-        <a href="https://donation.rolenest.in/" target="_blank" rel="noopener noreferrer" class="btn-donation-big">
-          <span>Donate & Sponsor Development ➔</span>
-        </a>
+
+      <!-- Option A: Interactive Quick Tier Selectors -->
+      <div class="donation-selector-grid">
+        <!-- Tier 1: Coffee -->
+        <div class="donation-tier-card" onclick="selectDonationTier(5, this)">
+          <div>
+            <div class="donation-tier-amount">$5</div>
+            <div class="donation-tier-title">☕ Dev Coffee</div>
+            <div class="donation-tier-desc">Fuel late-night zero-day regex pattern updates and entropy research.</div>
+          </div>
+          <button onclick="triggerDonation(5)" class="btn-pricing btn-pricing-secondary" style="border-color: rgba(244, 63, 94, 0.4); color: #fff; font-size: 0.82rem; padding: 0.5rem;">
+            Donate $5
+          </button>
+        </div>
+
+        <!-- Tier 2: Community Contributor -->
+        <div class="donation-tier-card selected" onclick="selectDonationTier(25, this)">
+          <div>
+            <div style="font-size: 0.7rem; font-weight: 800; color: #f59e0b; text-transform: uppercase; margin-bottom: 0.2rem;">MOST POPULAR</div>
+            <div class="donation-tier-amount">$25</div>
+            <div class="donation-tier-title">🛠️ Tool Supporter</div>
+            <div class="donation-tier-desc">Fund continuous CI/CD sandbox fuzzing benchmarks across Cursor & Claude.</div>
+          </div>
+          <button onclick="triggerDonation(25)" class="btn-pricing btn-pricing-primary" style="background: linear-gradient(135deg, #f43f5e, #f59e0b); border: none; font-size: 0.82rem; padding: 0.5rem;">
+            Donate $25
+          </button>
+        </div>
+
+        <!-- Tier 3: Security Patron -->
+        <div class="donation-tier-card" onclick="selectDonationTier(100, this)">
+          <div>
+            <div class="donation-tier-amount">$100</div>
+            <div class="donation-tier-title">🛡️ Security Patron</div>
+            <div class="donation-tier-desc">Sponsors white-hat researcher bounties for novel AI agent jailbreak escapes.</div>
+          </div>
+          <button onclick="triggerDonation(100)" class="btn-pricing btn-pricing-secondary" style="border-color: rgba(244, 63, 94, 0.4); color: #fff; font-size: 0.82rem; padding: 0.5rem;">
+            Donate $100
+          </button>
+        </div>
+
+        <!-- Tier 4: Custom Tier -->
+        <div class="donation-tier-card" onclick="selectDonationTier('custom', this)">
+          <div>
+            <div class="donation-tier-title">✨ Custom Grant</div>
+            <div class="donation-tier-desc">Enter any amount via Dodo Payments global checkout (Cards, UPI, Apple Pay).</div>
+            <div style="margin-bottom: 0.75rem;">
+              <input type="number" id="custom-donation-val" min="1" placeholder="$ USD" class="custom-amount-input" value="50" onclick="event.stopPropagation()">
+            </div>
+          </div>
+          <button onclick="triggerCustomDonation()" class="btn-pricing btn-pricing-secondary" style="border-color: rgba(245, 158, 11, 0.5); color: #f59e0b; font-size: 0.82rem; padding: 0.5rem;">
+            Proceed Custom
+          </button>
+        </div>
+      </div>
+
+      <div style="margin-top: 1.5rem; text-align: center; color: #fca5a5; font-size: 0.82rem;">
+        <span>🔒 Processed via <strong>Dodo Payments</strong> & <strong>RoleNest</strong>. Zero platform fees deducted from researcher bounties.</span>
       </div>
     </section>
 
@@ -1830,6 +1958,30 @@
         '&tool=' + encodeURIComponent(toolName) + 
         '&repo=' + encodeURIComponent(repoUrl);
       window.location.href = fallbackUrl;
+    }
+
+    let currentSelectedTier = 25;
+
+    function selectDonationTier(amount, cardElement) {
+      document.querySelectorAll('.donation-tier-card').forEach(c => c.classList.remove('selected'));
+      cardElement.classList.add('selected');
+      currentSelectedTier = amount;
+      if (amount === 'custom') {
+        document.getElementById('custom-donation-val').focus();
+      }
+    }
+
+    function triggerDonation(amount) {
+      // Option A: Direct hosted payment link / donation portal redirect
+      const portalBase = 'https://donation.rolenest.in/';
+      const returnUrl = encodeURIComponent(window.location.origin + '/?donation=success&tier=' + amount);
+      const targetUrl = portalBase + '?amount=' + amount + '&source=agentshield&return_url=' + returnUrl;
+      window.open(targetUrl, '_blank', 'noopener,noreferrer');
+    }
+
+    function triggerCustomDonation() {
+      const val = parseFloat(document.getElementById('custom-donation-val').value) || 25;
+      triggerDonation(val);
     }
   </script>
 </body>
