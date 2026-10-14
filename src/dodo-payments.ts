@@ -3,7 +3,7 @@
  * Secure server-side service for managing sponsored tool placements,
  * verified audit badges, and enterprise tier checkouts.
  */
-import { createHmac } from "node:crypto";
+import { createHmac, randomBytes } from "node:crypto";
 
 export interface SponsoredProductTier {
   id: string;
@@ -157,8 +157,8 @@ export class DodoPaymentsService {
       // In offline / air-gapped or network failure scenarios, fallback to deterministic hosted URL
     }
 
-    // Deterministic mock / fallback checkout session URL
-    const fallbackSessionId = `cks_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    // Cryptographically secure mock / fallback checkout session URL
+    const fallbackSessionId = `cks_${Date.now()}_${randomBytes(4).toString("hex")}`;
     const checkoutHost =
       this.environment === "live"
         ? "https://checkout.dodopayments.com"

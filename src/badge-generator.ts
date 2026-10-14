@@ -27,6 +27,7 @@ export interface BadgeOptions {
   logo?: boolean;
 }
 
+// biome-ignore lint/complexity/noStaticOnlyClass: utility class for generating verified badges
 export class VerifiedBadgeGenerator {
   private static readonly BADGE_SECRET =
     process.env.AGENTSHIELD_BADGE_SECRET || "agentshield_verified_salt_2026";
@@ -36,7 +37,7 @@ export class VerifiedBadgeGenerator {
    */
   public static signAuditRecord(toolName: string, repoUrl: string, tier: AuditBadgeTier): string {
     const payload = `${toolName.toLowerCase().trim()}|${repoUrl.toLowerCase().trim()}|${tier}`;
-    return createHmac("sha256", this.BADGE_SECRET).update(payload).digest("hex").slice(0, 16);
+    return createHmac("sha256", VerifiedBadgeGenerator.BADGE_SECRET).update(payload).digest("hex").slice(0, 16);
   }
 
   /**
@@ -48,7 +49,7 @@ export class VerifiedBadgeGenerator {
     tier: AuditBadgeTier,
     providedHash: string,
   ): boolean {
-    const expected = this.signAuditRecord(toolName, repoUrl, tier);
+    const expected = VerifiedBadgeGenerator.signAuditRecord(toolName, repoUrl, tier);
     return expected.toLowerCase() === providedHash.toLowerCase();
   }
 
@@ -115,7 +116,7 @@ export class VerifiedBadgeGenerator {
    */
   public static getMarkdownSnippet(
     toolName: string,
-    canonicalDomain: string = "https://agentshield.ritualdev.in",
+    canonicalDomain = "https://agentshield.ritualdev.in",
     tier: AuditBadgeTier = "verified",
   ): { markdown: string; html: string; shieldsIoBadgeUrl: string } {
     const slug = encodeURIComponent(toolName.toLowerCase().replace(/\s+/g, "-"));

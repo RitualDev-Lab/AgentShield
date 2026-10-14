@@ -8,6 +8,7 @@ import {
   type SsoUserClaims,
 } from "./enterprise-sso.js";
 import { SiemExporter } from "./siem.js";
+import type { AuditBadgeTier } from "./badge-generator.js";
 
 export interface ControlPlaneIncidentEvent {
   id: string;
@@ -407,12 +408,14 @@ export class ControlPlaneServer {
       const { VerifiedBadgeGenerator } = await import("./badge-generator.js");
       const filename = pathname.replace("/api/v1/badges/", "").replace(".svg", "");
       const toolName = decodeURIComponent(filename).replace(/[-_]/g, " ");
-      const tier = (parsedUrl.searchParams.get("tier") || "verified") as any;
+      const rawTier = parsedUrl.searchParams.get("tier");
+      const tier: AuditBadgeTier = rawTier === "sponsor" ? "sponsor" : "verified";
       const svg = VerifiedBadgeGenerator.generateSvgBadge(toolName, { tier });
 
       res.writeHead(200, {
         "Content-Type": "image/svg+xml; charset=utf-8",
         "Cache-Control": "public, max-age=3600",
+        "Content-Security-Policy": "default-src 'none'; style-src 'unsafe-inline'",
       });
       res.end(svg);
       return;
@@ -423,7 +426,8 @@ export class ControlPlaneServer {
       const { VerifiedBadgeGenerator } = await import("./badge-generator.js");
       const tool = parsedUrl.searchParams.get("tool") || "";
       const repo = parsedUrl.searchParams.get("repo") || "";
-      const tier = (parsedUrl.searchParams.get("tier") || "verified") as any;
+      const rawTier = parsedUrl.searchParams.get("tier");
+      const tier: AuditBadgeTier = rawTier === "sponsor" ? "sponsor" : "verified";
       const hash = parsedUrl.searchParams.get("hash") || "";
 
       if (!tool || !repo || !hash) {
@@ -474,9 +478,10 @@ export class ControlPlaneServer {
 
         res.writeHead(200, { "Content-Type": "application/json" });
         res.end(JSON.stringify(session));
-      } catch (e: any) {
+      } catch (e: unknown) {
+        const errorMsg = e instanceof Error ? e.message : "Failed to create checkout session";
         res.writeHead(400, { "Content-Type": "application/json" });
-        res.end(JSON.stringify({ error: e?.message || "Failed to create checkout session" }));
+        res.end(JSON.stringify({ error: errorMsg }));
       }
       return;
     }
@@ -498,12 +503,22 @@ export class ControlPlaneServer {
       const { PublicTransparencyLedger } = await import("./transparency-ledger.js");
       const rawUser = pathname.replace("/api/v1/badges/patron/", "").replace(".svg", "");
       const username = decodeURIComponent(rawUser);
-      const tier = parsedUrl.searchParams.get("tier") || "Supporter";
+
+      // Strict validation for username to prevent parameter injection / reflected attacks
+      if (!/^[a-zA-Z0-9_\-\.]{1,40}$/.test(username)) {
+        res.writeHead(400, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "Invalid username format" }));
+        return;
+      }
+
+      const rawTier = parsedUrl.searchParams.get("tier") || "Supporter";
+      const tier = /^[a-zA-Z0-9_\-\s]{1,30}$/.test(rawTier) ? rawTier : "Supporter";
       const svg = PublicTransparencyLedger.generatePatronSvgBadge(username, tier);
 
       res.writeHead(200, {
         "Content-Type": "image/svg+xml; charset=utf-8",
         "Cache-Control": "public, max-age=3600",
+        "Content-Security-Policy": "default-src 'none'; style-src 'unsafe-inline'",
       });
       res.end(svg);
       return;

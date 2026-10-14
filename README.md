@@ -232,12 +232,84 @@ const original = shield.rehydrate(result.sanitizedText);
 - **Open Governance Charter**: Read our [GOVERNANCE.md](GOVERNANCE.md) for project stewardship.
 - **Grant Applications**: Review our [GRANTS.md](GRANTS.md) dossier for NLnet, OpenSSF & Mozilla.
 - **Contributing**: Check out [CONTRIBUTING.md](CONTRIBUTING.md) to add new secret patterns.
-- **Contributors**: Huge thanks to all our open-source [Contributors](https://github.com/RitualDev-Lab/AgentShield/graphs/contributors)!
+
+---
+
+## 👥 Team & Contributors
+
+AgentShield is initiated and maintained by the team at [RitualDev Lab](https://github.com/RitualDev-Lab) and protected by the global AI security research community.
+
+### 🛡️ Core Team & Maintainers
+
+<table align="center">
+  <tr>
+    <td align="center" width="180">
+      <a href="https://github.com/divyanshujethi">
+        <img src="https://github.com/divyanshujethi.png" width="80" style="border-radius: 50%;" alt="Divyanshu Jethi"/><br />
+        <sub><b>Divyanshu Jethi</b></sub>
+      </a><br />
+      <sub>🚀 Founder & Lead</sub>
+    </td>
+    <td align="center" width="180">
+      <a href="https://github.com/Sakshisharma1616">
+        <img src="https://github.com/Sakshisharma1616.png" width="80" style="border-radius: 50%;" alt="Sakshi Sharma"/><br />
+        <sub><b>Sakshi Sharma</b></sub>
+      </a><br />
+      <sub>🎨 Core Maintainer & Product</sub>
+    </td>
+    <td align="center" width="180">
+      <a href="https://github.com/Ritual-Dev-Git">
+        <img src="https://github.com/Ritual-Dev-Git.png" width="80" style="border-radius: 50%;" alt="RitualDev"/><br />
+        <sub><b>RitualDev</b></sub>
+      </a><br />
+      <sub>⚙️ Core Maintainer & Infra</sub>
+    </td>
+    <td align="center" width="180">
+      <a href="https://github.com/Divyanshu-hub-dotcom">
+        <img src="https://github.com/Divyanshu-hub-dotcom.png" width="80" style="border-radius: 50%;" alt="Divyanshu-hub-dotcom"/><br />
+        <sub><b>Divyanshu-hub-dotcom</b></sub>
+      </a><br />
+      <sub>🛠️ Core Member</sub>
+    </td>
+    <td align="center" width="180">
+      <a href="https://github.com/ayushxx01">
+        <img src="https://github.com/ayushxx01.png" width="80" style="border-radius: 50%;" alt="Ayush"/><br />
+        <sub><b>Ayush</b></sub>
+      </a><br />
+      <sub>🛡️ Core Maintainer & Triage</sub>
+    </td>
+  </tr>
+</table>
+
+### 🌟 Community Contributors & Security Researchers
+
+<table align="center">
+  <tr>
+    <td align="center" width="180">
+      <a href="https://github.com/ciperx">
+        <img src="https://github.com/ciperx.png" width="70" style="border-radius: 50%;" alt="ciperx"/><br />
+        <sub><b>ciperx</b></sub>
+      </a><br />
+      <sub>📜 OWASP ATLAS & AEO (PR #8)</sub>
+    </td>
+    <td align="center" width="180">
+      <a href="https://github.com/Voyagerroc-Lab">
+        <img src="https://github.com/Voyagerroc-Lab.png" width="70" style="border-radius: 50%;" alt="Voyagerroc-Lab"/><br />
+        <sub><b>Voyagerroc-Lab</b></sub>
+      </a><br />
+      <sub>🔒 Security & Rules Contributor</sub>
+    </td>
+  </tr>
+</table>
 
 <p align="center">
   <a href="https://github.com/RitualDev-Lab/AgentShield/graphs/contributors">
     <img src="https://contrib.rocks/image?repo=RitualDev-Lab/AgentShield" alt="AgentShield Contributors" />
   </a>
+</p>
+
+<p align="center">
+  Huge thanks to all our open-source <a href="https://github.com/RitualDev-Lab/AgentShield/graphs/contributors">Contributors</a>!
 </p>
 
 <div align="center">

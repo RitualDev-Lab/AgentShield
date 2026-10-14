@@ -44,7 +44,11 @@ describe("Phase 2: Secured by AgentShield Verified Sponsor Badge Suite", () => {
       "verified",
     );
     assert.ok(snippet.markdown.startsWith("[![Secured by AgentShield]("));
-    assert.ok(snippet.markdown.includes("https://agentshield.ritualdev.in/verify/superfile"));
+    const targetUrlMatch = snippet.markdown.match(/\((https:\/\/[^)]+)\)$/);
+    assert.ok(targetUrlMatch, "Markdown snippet must contain target verify URL");
+    const targetUrl = new URL(targetUrlMatch[1]);
+    assert.strictEqual(targetUrl.origin, "https://agentshield.ritualdev.in");
+    assert.strictEqual(targetUrl.pathname, "/verify/superfile");
     assert.ok(snippet.shieldsIoBadgeUrl.includes("Secured%20by"));
     assert.ok(snippet.html.includes("<img src="));
   });

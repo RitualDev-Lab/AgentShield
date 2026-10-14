@@ -30,7 +30,12 @@ describe("Phase 3: Dodo Payments Sponsored Placements & Self-Serve Checkout Suit
     });
 
     assert.ok(result.sessionId.startsWith("cks_"));
-    assert.ok(result.checkoutUrl.includes("checkout.dodopayments.com"));
+    const parsedCheckoutUrl = new URL(result.checkoutUrl);
+    assert.ok(
+      parsedCheckoutUrl.hostname === "test.checkout.dodopayments.com" ||
+        parsedCheckoutUrl.hostname === "checkout.dodopayments.com",
+      "Checkout host must strictly match official Dodo Payments domain",
+    );
     assert.strictEqual(result.product.id, "pdt_agentshield_verified_badge");
     assert.strictEqual(result.mode, "test");
   });

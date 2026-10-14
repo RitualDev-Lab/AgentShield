@@ -184,15 +184,29 @@ export class PublicTransparencyLedger {
   }
 
   /**
+   * Escape XML/HTML special characters to prevent Reflected XSS in SVG
+   */
+  public static escapeXml(text: string): string {
+    return text
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&apos;");
+  }
+
+  /**
    * Generates a dynamic Patron / Backer SVG badge for GitHub profiles
    */
   public static generatePatronSvgBadge(
     username: string,
-    tierName: string = "Supporter",
-    color: string = "#f43f5e",
+    tierName = "Supporter",
+    color = "#f43f5e",
   ): string {
+    const safeUser = PublicTransparencyLedger.escapeXml(username.slice(0, 40));
+    const safeTier = PublicTransparencyLedger.escapeXml(tierName.slice(0, 30));
     const leftText = "AGENTSHIELD PATRON";
-    const rightText = `${username} • ${tierName} 💖`;
+    const rightText = `${safeUser} • ${safeTier} 💖`;
 
     const leftWidth = leftText.length * 7 + 16;
     const rightWidth = rightText.length * 7 + 22;
@@ -202,11 +216,13 @@ export class PublicTransparencyLedger {
     const leftCenter = leftWidth / 2;
     const rightCenter = leftWidth + rightWidth / 2;
 
+    const safeColor = /^[#a-zA-Z0-9_-]+$/.test(color) ? color : "#f43f5e";
+
     return `
 <svg xmlns="http://www.w3.org/2000/svg" width="${totalWidth}" height="${height}" viewBox="0 0 ${totalWidth} ${height}" role="img" aria-label="${leftText}: ${rightText}">
   <title>${leftText}: ${rightText}</title>
   <linearGradient id="patron-glow" x1="0%" y1="0%" x2="100%" y2="100%">
-    <stop offset="0%" stop-color="${color}" stop-opacity="0.95"/>
+    <stop offset="0%" stop-color="${safeColor}" stop-opacity="0.95"/>
     <stop offset="100%" stop-color="#f59e0b" stop-opacity="1"/>
   </linearGradient>
   <clipPath id="patron-round">
