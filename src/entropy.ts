@@ -76,5 +76,15 @@ export function isLikelyFalsePositive(token: string): boolean {
     return true;
   }
 
+  // Base64 Data URIs (SVGs, images, fonts, data:image/...)
+  if (/^(data:image\/|data:application\/|data:font\/)/i.test(trimmed) || trimmed.startsWith("PHN2Zy") || trimmed.startsWith("data:")) {
+    return true;
+  }
+
+  // Common minified CSS / Webpack chunk artifact identifiers
+  if (/^(\.webpack|__webpack_|css-[a-z0-9]+|tw-[a-z0-9]+)/i.test(trimmed)) {
+    return true;
+  }
+
   return false;
 }
