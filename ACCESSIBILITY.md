@@ -7,7 +7,7 @@ AgentShield is committed to ensuring digital accessibility for all developers, s
 ## 💻 CLI & Terminal Accessibility
 
 The AgentShield CLI is designed with the following accessibility standards in mind:
-
+ 
 1. **High Contrast Terminal Output:**
    - Color outputs are accompanied by clear text-based prefixes (`[ALERT]`, `[CLEAN]`, `[PASSED]`, `[FAILED]`, `[CRITICAL]`) so users with color-vision deficiencies (protanopia, deuteranopia, tritanopia) are never reliant on color alone to discern threat severity.
 
