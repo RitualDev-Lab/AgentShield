@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en" class="dark scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sponsor RitualDev Lab &amp; AgentShield — Leaderboard &amp; Wall of Love</title>
+  <meta name="description" content="Support zero-paywall developer tools, local-first OS engineering, and AI security. Choose any amount from $1 or ₹10, join our public leaderboard, and leave a permanent message on the Wall of Love.">
+  <link rel="canonical" href="https://agentshield.ritualdev.in/sponsors.html">
+
+  <!-- Open Graph / Meta -->
+  <meta property="og:title" content="Sponsor RitualDev Lab &amp; AgentShield — Leaderboard &amp; Wall of Love">
+  <meta property="og:description" content="Join our verified patrons and sponsors. Choose custom amounts via Dodo Payments (UPI, Cards, Apple Pay) and leave your permanent mark on the Wall of Love.">
+  <meta property="og:image" content="https://agentshield.ritualdev.in/og-image.jpg">
+  <meta property="og:url" content="https://agentshield.ritualdev.in/sponsors.html">
+  <meta property="og:type" content="website">
+
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    .gold-glow {
+      box-shadow: 0 0 25px -5px rgba(234, 179, 8, 0.25);
+      border-color: rgba(234, 179, 8, 0.4);
+    }
+    .silver-glow {
+      box-shadow: 0 0 20px -5px rgba(148, 163, 184, 0.2);
+      border-color: rgba(148, 163, 184, 0.35);
+    }
+    .bronze-glow {
+      box-shadow: 0 0 20px -5px rgba(217, 119, 6, 0.2);
+      border-color: rgba(217, 119, 6, 0.35);
+    }
+    .comment-bubble::before {
+      content: '';
+      position: absolute;
+      top: -8px;
+      left: 20px;
+      width: 0;
+      height: 0;
+      border-left: 8px solid transparent;
+      border-right: 8px solid transparent;
+      border-bottom: 8px solid rgba(51, 65, 85, 0.5);
+    }
+    .pulse-heart {
+      animation: heartPulse 1.5s ease-in-out infinite;
+    }
+    @keyframes heartPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.15); }
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans selection:bg-purple-600 selection:text-white relative">
+
+  <!-- Ambient Glow Background -->
+  <div class="fixed inset-0 overflow-hidden pointer-events-none -z-10">
+    <div class="absolute -top-32 left-1/2 -translate-x-1/2 w-[800px] h-[450px] bg-purple-600/20 blur-[120px] rounded-full"></div>
+    <div class="absolute top-[600px] -left-32 w-[500px] h-[500px] bg-pink-600/15 blur-[120px] rounded-full"></div>
+    <div class="absolute top-[1200px] -right-32 w-[500px] h-[500px] bg-cyan-600/15 blur-[120px] rounded-full"></div>
+  </div>
+
+  <!-- Navigation Bar -->
+  <header class="border-b border-slate-800 bg-slate-950/95 backdrop-blur-xl sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-3">
+      <!-- Brand Logo -->
+      <div class="flex items-center space-x-3 shrink-0">
+        <span class="text-2xl">🛡️</span>
+        <a href="index.html" class="text-xl font-extrabold tracking-tight bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent hover:opacity-90 transition">AgentShield</a>
+        <span class="hidden sm:inline-block px-2.5 py-0.5 text-[10px] font-mono font-bold rounded-full bg-pink-900/50 text-pink-200 border border-pink-500/40 flex items-center gap-1">
+          <span class="pulse-heart text-xs">💖</span> Sponsors &amp; Patrons
+        </span>
+      </div>
+
+      <!-- Links -->
+      <nav class="hidden md:flex items-center space-x-6 text-xs font-bold text-slate-200">
+        <a href="index.html" class="hover:text-purple-300 transition">← Back to Docs</a>
+        <a href="https://devshelf.ritualdev.in" class="hover:text-purple-300 transition">📚 DevShelf</a>
+        <a href="#sponsor-form" class="hover:text-pink-300 transition">💖 Make a Contribution</a>
+        <a href="#leaderboard" class="hover:text-amber-300 transition">🏆 Leaderboard</a>
+        <a href="#comments" class="hover:text-cyan-300 transition">💬 Wall of Love</a>
+        <a href="#faq" class="hover:text-slate-400 transition">❓ FAQ</a>
+      </nav>
+
+      <!-- Right Actions -->
+      <div class="flex items-center space-x-3">
+        <a href="https://github.com/RitualDev-Lab/AgentShield" target="_blank" rel="noreferrer" class="inline-flex items-center space-x-1.5 px-3 py-1.5 text-xs font-bold rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 transition">
+          <span>⭐ Star AgentShield</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
+    <div class="text-center max-w-3xl mx-auto mb-16">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-pink-950/70 border border-pink-500/40 text-pink-300 text-xs font-bold font-mono mb-4">
+        <span>✨ OPEN SOURCE AGENT SECURITY &amp; SANDBOXING</span>
+      </div>
+      <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white mb-6">
+        Support Open Source.<br/>
+        <span class="bg-gradient-to-r from-pink-400 via-purple-300 to-cyan-400 bg-clip-text text-transparent">
+          Join the Wall of Patrons.
+        </span>
+      </h1>
+      <p class="text-base sm:text-lg text-slate-300 leading-relaxed">
+        RitualDev Lab builds local-first developer tools and AI security frameworks with zero marketing traps and no hidden subscriptions.
+        Every contribution directly funds our test infrastructure, continuous security scans, and open catalog indexing.
+      </p>
+
+      <!-- Key Metrics Counter -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-8 pt-6 border-t border-slate-800/80">
+        <div class="p-3 bg-slate-900/60 rounded-xl border border-slate-800">
+          <div class="text-2xl font-extrabold text-purple-400">100%</div>
+          <div class="text-xs text-slate-400">Open Source &amp; MIT</div>
+        </div>
+        <div class="p-3 bg-slate-900/60 rounded-xl border border-slate-800">
+          <div class="text-2xl font-extrabold text-pink-400">0ms</div>
+          <div class="text-xs text-slate-400">Local-First Overhead</div>
+        </div>
+        <div class="p-3 bg-slate-900/60 rounded-xl border border-slate-800">
+          <div class="text-2xl font-extrabold text-cyan-400">₹10 / $1+</div>
+          <div class="text-xs text-slate-400">Custom Any-Amount</div>
+        </div>
+        <div class="p-3 bg-slate-900/60 rounded-xl border border-slate-800">
+          <div class="text-2xl font-extrabold text-emerald-400">UPI &amp; Cards</div>
+          <div class="text-xs text-slate-400">Instant Worldwide Checkout</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Grid: Sponsor Form & Live Preview / Tier Selector -->
+    <div id="sponsor-form" class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-20 scroll-mt-24">
+      
+      <!-- Left: Interactive Custom Sponsor Form -->
+      <div class="lg:col-span-7 bg-slate-900/90 rounded-2xl border border-slate-800 p-6 sm:p-8 backdrop-blur-xl shadow-2xl relative">
+        <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-800">
+          <div>
+            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+              <span>💖</span> Make a Custom Sponsorship
+            </h2>
+            <p class="text-xs text-slate-400 mt-1">Choose any amount, enter your handle, and post your comment.</p>
+          </div>
+          <!-- Currency Toggle -->
+          <div class="flex items-center bg-slate-950 p-1 rounded-lg border border-slate-700/80 text-xs font-mono font-bold">
+            <button id="curr-usd" class="px-2.5 py-1 rounded bg-purple-600 text-white transition">USD ($)</button>
+            <button id="curr-inr" class="px-2.5 py-1 rounded text-slate-400 hover:text-white transition">INR (₹)</button>
+          </div>
+        </div>
+
+        <form id="custom-sponsor-form" onsubmit="handleSponsorSubmit(event)">
+          <!-- Amount Preset Selector -->
+          <div class="mb-6">
+            <label class="block text-xs font-mono font-bold uppercase tracking-wider text-slate-300 mb-2">
+              Select or Enter Amount
+            </label>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-3">
+              <button type="button" class="amount-btn active p-3 rounded-xl border text-center transition bg-purple-950/60 border-purple-500/70 text-purple-200" data-usd="5" data-inr="50">
+                <div class="text-lg font-bold amount-label">$5</div>
+                <div class="text-[10px] text-slate-400 amount-sub">₹50 Coffee</div>
+              </button>
+              <button type="button" class="amount-btn p-3 rounded-xl border text-center transition bg-slate-950/80 border-slate-800 text-slate-300 hover:border-slate-700" data-usd="15" data-inr="150">
+                <div class="text-lg font-bold amount-label">$15</div>
+                <div class="text-[10px] text-slate-400 amount-sub">₹150 Backer</div>
+              </button>
+              <button type="button" class="amount-btn p-3 rounded-xl border text-center transition bg-slate-950/80 border-slate-800 text-slate-300 hover:border-slate-700" data-usd="50" data-inr="500">
+                <div class="text-lg font-bold amount-label">$50</div>
+                <div class="text-[10px] text-slate-400 amount-sub">₹500 Hero</div>
+              </button>
+              <button type="button" class="amount-btn p-3 rounded-xl border text-center transition bg-slate-950/80 border-slate-800 text-slate-300 hover:border-slate-700" data-usd="100" data-inr="1000">
+                <div class="text-lg font-bold amount-label">$100</div>
+                <div class="text-[10px] text-slate-400 amount-sub">₹1,000 Patron</div>
+              </button>
+            </div>
+
+            <!-- Custom Amount Direct Input -->
+            <div class="relative">
+              <span id="curr-prefix" class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold font-mono">$</span>
+              <input type="number" id="custom-amount-input" min="1" step="any" placeholder="Or enter custom amount (e.g. 10)" value="5" class="w-full pl-8 pr-4 py-2.5 bg-slate-950 rounded-xl border border-slate-700/80 text-white font-mono font-bold text-sm focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500">
+              <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-[11px] font-mono text-slate-500">Min: $1 / ₹10</span>
+            </div>
+          </div>
+
+          <!-- Sponsor Identification -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label class="block text-xs font-mono font-bold uppercase tracking-wider text-slate-300 mb-1.5" for="sponsor-name">
+                Your Name / Handle / Org <span class="text-pink-400">*</span>
+              </label>
+              <input type="text" id="sponsor-name" required placeholder="e.g. Alex Rivera or Acme Corp" class="w-full px-3.5 py-2.5 bg-slate-950 rounded-xl border border-slate-700/80 text-white text-sm focus:outline-none focus:border-purple-500">
+            </div>
+            <div>
+              <label class="block text-xs font-mono font-bold uppercase tracking-wider text-slate-300 mb-1.5" for="sponsor-github">
+                GitHub Handle (Optional)
+              </label>
+              <div class="relative">
+                <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-xs">@</span>
+                <input type="text" id="sponsor-github" placeholder="username" class="w-full pl-8 pr-3.5 py-2.5 bg-slate-950 rounded-xl border border-slate-700/80 text-white text-sm focus:outline-none focus:border-purple-500">
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="block text-xs font-mono font-bold uppercase tracking-wider text-slate-300 mb-1.5" for="sponsor-url">
+              Website or Social Profile (Optional)
+            </label>
+            <input type="url" id="sponsor-url" placeholder="https://example.com or https://x.com/yourhandle" class="w-full px-3.5 py-2.5 bg-slate-950 rounded-xl border border-slate-700/80 text-white text-sm focus:outline-none focus:border-purple-500">
+          </div>
+
+          <!-- Sponsor Comment / Message -->
+          <div class="mb-6">
+            <div class="flex items-center justify-between mb-1.5">
+              <label class="block text-xs font-mono font-bold uppercase tracking-wider text-slate-300" for="sponsor-comment">
+                Your Message / Comment for the Community
+              </label>
+              <span id="char-count" class="text-[11px] font-mono text-slate-500">0 / 280</span>
+            </div>
+            <textarea id="sponsor-comment" maxlength="280" rows="3" placeholder="Leave an encouraging note, explain how AgentShield helps your workflow, or introduce your project..." class="w-full px-3.5 py-2.5 bg-slate-950 rounded-xl border border-slate-700/80 text-white text-sm focus:outline-none focus:border-purple-500 resize-none"></textarea>
+            
+            <!-- Quick Suggestion Pills -->
+            <div class="flex flex-wrap gap-1.5 mt-2">
+              <span class="text-[10px] text-slate-400 font-mono self-center">Ideas:</span>
+              <button type="button" class="quick-pill text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-0.5 rounded-md transition">
+                "Defending AI agents with local-first security! 🛡️"
+              </button>
+              <button type="button" class="quick-pill text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-0.5 rounded-md transition">
+                "Keep building zero-paywall tools! 🚀"
+              </button>
+              <button type="button" class="quick-pill text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-0.5 rounded-md transition">
+                "Proud sponsor of RitualDev open source! ❤️"
+              </button>
+            </div>
+          </div>
+
+          <!-- Checkout CTA -->
+          <button type="submit" class="w-full py-3.5 px-6 rounded-xl font-bold text-white bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 hover:from-pink-500 hover:to-indigo-500 transition shadow-lg shadow-purple-600/30 flex items-center justify-center gap-2 group">
+            <span class="text-lg">💖</span>
+            <span id="submit-btn-text">Proceed to Dodo Checkout ($5)</span>
+            <svg class="w-4 h-4 text-white group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+            </svg>
+          </button>
+          
+          <div class="flex items-center justify-center gap-4 mt-3 text-[11px] text-slate-400 font-mono">
+            <span>🔒 Secured by Dodo Payments</span>
+            <span>•</span>
+            <span>⚡ UPI, Cards, NetBanking, Apple Pay</span>
+            <span>•</span>
+            <span>📄 Instant GST / Tax Invoice</span>
+          </div>
+        </form>
+      </div>
+
+      <!-- Right: Live Live Card Preview & Perks -->
+      <div class="lg:col-span-5 flex flex-col justify-between space-y-6">
+        
+        <!-- Live Preview Card -->
+        <div class="bg-slate-900/80 rounded-2xl border border-slate-800 p-6 backdrop-blur-xl">
+          <div class="text-[10px] font-mono uppercase tracking-wider text-purple-400 font-bold mb-3 flex items-center gap-1.5">
+            <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+            Live Leaderboard Preview
+          </div>
+          
+          <div id="preview-card" class="p-4 bg-slate-950 rounded-xl border border-slate-800/80 transition-all">
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center space-x-3">
+                <img id="preview-avatar" src="https://github.com/ghost.png" alt="Avatar" class="w-10 h-10 rounded-full border border-purple-500/40 object-cover bg-slate-900">
+                <div>
+                  <div class="font-bold text-sm text-white flex items-center gap-1.5">
+                    <span id="preview-name">Your Name / Handle</span>
+                    <span class="text-xs text-purple-400" title="Verified Sponsor">✓</span>
+                  </div>
+                  <div id="preview-tier-badge" class="inline-block text-[10px] font-mono px-2 py-0.5 rounded-full bg-purple-950 text-purple-300 border border-purple-500/40">
+                    ☕ Supporter
+                  </div>
+                </div>
+              </div>
+              <div class="text-right">
+                <div id="preview-amount" class="text-base font-extrabold text-white font-mono">$5</div>
+                <div id="preview-sub-amount" class="text-[10px] text-slate-500 font-mono">~₹50</div>
+              </div>
+            </div>
+            
+            <div id="preview-comment-container" class="relative mt-3 p-3 bg-slate-900/90 rounded-lg border border-slate-800 text-xs text-slate-300 italic comment-bubble">
+              "<span id="preview-comment-text">Your message will be displayed prominently across our Wall of Patrons and docs!</span>"
+            </div>
+          </div>
+        </div>
+
+        <!-- Patron Benefits -->
+        <div class="bg-slate-900/80 rounded-2xl border border-slate-800 p-6">
+          <h3 class="text-sm font-mono font-bold uppercase tracking-wider text-slate-300 mb-3 flex items-center gap-2">
+            <span>🎖️</span> What Every Sponsor Receives
+          </h3>
+          <ul class="space-y-2.5 text-xs text-slate-300">
+            <li class="flex items-start gap-2">
+              <span class="text-emerald-400 font-bold">✓</span>
+              <span><strong>Permanent Leaderboard Entry:</strong> Ranked placement with your logo/avatar and custom link.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-emerald-400 font-bold">✓</span>
+              <span><strong>Wall of Love Comment:</strong> Your note highlighted across our community of developers.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-emerald-400 font-bold">✓</span>
+              <span><strong>Verified Badge:</strong> Recognition across AgentShield, DevShelf, and SkillPrism.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-emerald-400 font-bold">✓</span>
+              <span><strong>Enterprise Invoicing:</strong> Instant business invoice with compliant GST/VAT details.</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Leaderboard Section -->
+    <section id="leaderboard" class="mb-20 scroll-mt-24">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+        <div>
+          <div class="flex items-center gap-2">
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-white">🏆 Sponsors Leaderboard</h2>
+            <span class="px-2.5 py-0.5 text-xs font-mono font-bold rounded-full bg-amber-950 text-amber-300 border border-amber-500/40">Verified Patrons</span>
+          </div>
+          <p class="text-xs sm:text-sm text-slate-400 mt-1">Honoring the individuals and companies championing local-first AI security.</p>
+        </div>
+
+        <!-- Leaderboard Filters -->
+        <div class="flex items-center bg-slate-900 p-1 rounded-xl border border-slate-800 text-xs font-mono">
+          <button class="lb-filter-btn active px-3 py-1.5 rounded-lg bg-slate-800 text-white font-bold" data-filter="all">All Patrons</button>
+          <button class="lb-filter-btn px-3 py-1.5 rounded-lg text-slate-400 hover:text-white font-bold" data-filter="gold">🥇 Gold ($100+)</button>
+          <button class="lb-filter-btn px-3 py-1.5 rounded-lg text-slate-400 hover:text-white font-bold" data-filter="recent">⚡ Recent</button>
+        </div>
+      </div>
+
+      <!-- Leaderboard Cards Container -->
+      <div id="leaderboard-container" class="space-y-3">
+        <!-- Rendered by JavaScript -->
+      </div>
+    </section>
+
+    <!-- Wall of Love / Comments Feed -->
+    <section id="comments" class="mb-20 scroll-mt-24">
+      <div class="flex items-center justify-between mb-8">
+        <div>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-white flex items-center gap-2">
+            <span>💬</span> Community Wall of Love
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-400 mt-1">Feedback, words of support, and stories from developers around the world.</p>
+        </div>
+        <a href="#sponsor-form" class="hidden sm:inline-flex items-center gap-1.5 text-xs font-bold text-pink-400 hover:text-pink-300 transition">
+          <span>Leave a message</span> →
+        </a>
+      </div>
+
+      <div id="comments-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Rendered by JavaScript -->
+      </div>
+    </section>
+
+    <!-- Comprehensive FAQ: Address, UPI, MoR, Invoicing -->
+    <section id="faq" class="mb-16 scroll-mt-24 max-w-4xl mx-auto">
+      <div class="text-center mb-10">
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-white">Frequently Asked Questions</h2>
+        <p class="text-xs sm:text-sm text-slate-400 mt-1">Everything you need to know about sponsoring, payments, and billing details.</p>
+      </div>
+
+      <div class="space-y-4">
+        <!-- FAQ 1: Address Question -->
+        <div class="p-5 bg-slate-900/80 rounded-xl border border-slate-800">
+          <h3 class="text-base font-bold text-white mb-2 flex items-center gap-2">
+            <span>📍</span> Can we remove the address requirement during checkout?
+          </h3>
+          <div class="text-xs sm:text-sm text-slate-300 leading-relaxed space-y-2">
+            <p>
+              <strong>Yes, the physical street address is NOT required!</strong> Because AgentShield and RitualDev tools are purely digital open-source software, physical shipping addresses are disabled.
+            </p>
+            <p>
+              <strong>What is collected and why?</strong> Only your <strong>Country</strong> and <strong>Zip / Postal Code</strong> are requested. This is legally required by international tax regulations because Dodo Payments operates as a registered <strong>Merchant of Record (MoR)</strong>. It ensures correct VAT / GST calculation (or 0% tax exemption) and enables fraud protection (AVS). You do not need to enter your house number or street name.
+            </p>
+          </div>
+        </div>
+
+        <!-- FAQ 2: Payment Methods & UPI -->
+        <div class="p-5 bg-slate-900/80 rounded-xl border border-slate-800">
+          <h3 class="text-base font-bold text-white mb-2 flex items-center gap-2">
+            <span>💳</span> What payment methods are accepted? Can I pay with UPI in India?
+          </h3>
+          <div class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+            <p>
+              Yes! Indian supporters can pay effortlessly using <strong>UPI (Google Pay, PhonePe, Paytm, BHIM)</strong>, NetBanking, and RuPay cards. Worldwide supporters can pay using <strong>Credit/Debit Cards (Visa, MasterCard, Amex), Apple Pay, and Google Pay</strong> in over 135 currencies.
+            </p>
+          </div>
+        </div>
+
+        <!-- FAQ 3: Enterprise Invoicing -->
+        <div class="p-5 bg-slate-900/80 rounded-xl border border-slate-800">
+          <h3 class="text-base font-bold text-white mb-2 flex items-center gap-2">
+            <span>📄</span> Can enterprises get a tax-compliant business invoice?
+          </h3>
+          <div class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+            <p>
+              Absolutely. During checkout, enter your company name and GSTIN / VAT number. Dodo Payments will automatically generate a legally compliant business PDF invoice that you can immediately file for expense reimbursement or tax deduction.
+            </p>
+          </div>
+        </div>
+
+        <!-- FAQ 4: How the Leaderboard Works -->
+        <div class="p-5 bg-slate-900/80 rounded-xl border border-slate-800">
+          <h3 class="text-base font-bold text-white mb-2 flex items-center gap-2">
+            <span>🏆</span> How quickly will my name and comment appear on the Leaderboard?
+          </h3>
+          <div class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+            <p>
+              Immediately upon clicking "Proceed to Checkout", your entry is cached and displayed in the leaderboard and community feed. Once the checkout completes, our webhook confirms your permanent verified backer status.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-800 bg-slate-950 py-8 text-center text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div>
+        © 2026 <a href="https://github.com/RitualDev-Lab" class="text-slate-400 hover:text-white transition">RitualDev Lab</a>. Zero Paywalls. Local-First Engineering.
+      </div>
+      <div class="flex items-center space-x-6 text-slate-400">
+        <a href="https://devshelf.ritualdev.in" class="hover:text-purple-300 transition">DevShelf Catalog</a>
+        <a href="index.html" class="hover:text-purple-300 transition">AgentShield</a>
+        <a href="https://skillprism.ritualdev.in" class="hover:text-purple-300 transition">SkillPrism</a>
+        <a href="https://mcp.ritualdev.in" class="hover:text-purple-300 transition">MCP Builder Kit</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Interactive JavaScript Logic -->
+  <script>
+    const DODO_PRODUCT_ID = 'pdt_0NpjONGugY5QkrFDUaPva';
+    const DODO_BASE_URL = `https://checkout.dodopayments.com/buy/${DODO_PRODUCT_ID}`;
+
+    const DEFAULT_PATRONS = [
+      {
+        id: 'patron-1',
+        rank: 1,
+        name: 'RitualDev Core Team',
+        github: 'RitualDev-Lab',
+        avatar: 'https://github.com/RitualDev-Lab.png',
+        url: 'https://github.com/RitualDev-Lab',
+        amountUSD: 250,
+        amountINR: 21000,
+        tier: 'gold',
+        date: '2026-10-15',
+        comment: 'Foundational grant to maintain zero-paywall API indexing, test pipelines, and continuous security audits for the developer community.'
+      },
+      {
+        id: 'patron-2',
+        rank: 2,
+        name: 'Dramex',
+        github: 'Dramex',
+        avatar: 'https://github.com/Dramex.png',
+        url: 'https://github.com/Dramex',
+        amountUSD: 150,
+        amountINR: 12500,
+        tier: 'gold',
+        date: '2026-10-14',
+        comment: 'Supporting open developer tools and secure AI CLI integrations like RowSafe! Keep innovating.'
+      },
+      {
+        id: 'patron-3',
+        rank: 3,
+        name: 'Sergiu Pogor',
+        github: 'SergiuPogor',
+        avatar: 'https://github.com/SergiuPogor.png',
+        url: 'https://github.com/SergiuPogor',
+        amountUSD: 100,
+        amountINR: 8400,
+        tier: 'gold',
+        date: '2026-10-15',
+        comment: 'Excited to contribute CurlShot to DevShelf. Transparency and free-tier clarity are exactly what the dev ecosystem needed.'
+      },
+      {
+        id: 'patron-4',
+        rank: 4,
+        name: 'Alox1d',
+        github: 'Alox1d',
+        avatar: 'https://github.com/Alox1d.png',
+        url: 'https://github.com/Alox1d',
+        amountUSD: 50,
+        amountINR: 4200,
+        tier: 'silver',
+        date: '2026-10-12',
+        comment: 'DevShelf is hands-down the best directory without annoying trial credit card traps.'
+      },
+      {
+        id: 'patron-5',
+        rank: 5,
+        name: 'Eigenwise',
+        github: 'Eigenwise',
+        avatar: 'https://github.com/Eigenwise.png',
+        url: 'https://github.com/Eigenwise',
+        amountUSD: 35,
+        amountINR: 2900,
+        tier: 'silver',
+        date: '2026-10-10',
+        comment: 'Toolshed maintainers are happy to stand behind this ecosystem!'
+      },
+      {
+        id: 'patron-6',
+        rank: 6,
+        name: 'Community Backer',
+        github: '',
+        avatar: 'https://github.com/ghost.png',
+        url: '',
+        amountUSD: 15,
+        amountINR: 150,
+        tier: 'bronze',
+        date: '2026-10-15',
+        comment: 'Thank you for keeping all these tools open, clean, and ad-free.'
+      }
+    ];
+
+    let currentCurrency = 'USD';
+    let currentAmount = 5;
+
+    function getStoredPatrons() {
+      try {
+        const stored = localStorage.getItem('devshelf_sponsors_v1');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          return [...parsed, ...DEFAULT_PATRONS];
+        }
+      } catch (e) {
+        console.warn('Storage read error:', e);
+      }
+      return [...DEFAULT_PATRONS];
+    }
+
+    function saveSponsor(entry) {
+      try {
+        const stored = localStorage.getItem('devshelf_sponsors_v1');
+        const list = stored ? JSON.parse(stored) : [];
+        list.unshift(entry);
+        localStorage.setItem('devshelf_sponsors_v1', JSON.stringify(list));
+      } catch (e) {
+        console.warn('Storage write error:', e);
+      }
+    }
+
+    const amountInput = document.getElementById('custom-amount-input');
+    const sponsorNameInput = document.getElementById('sponsor-name');
+    const sponsorGithubInput = document.getElementById('sponsor-github');
+    const sponsorCommentInput = document.getElementById('sponsor-comment');
+    const charCount = document.getElementById('char-count');
+    const submitBtnText = document.getElementById('submit-btn-text');
+    const currPrefix = document.getElementById('curr-prefix');
+
+    const previewName = document.getElementById('preview-name');
+    const previewAvatar = document.getElementById('preview-avatar');
+    const previewTierBadge = document.getElementById('preview-tier-badge');
+    const previewAmount = document.getElementById('preview-amount');
+    const previewSubAmount = document.getElementById('preview-sub-amount');
+    const previewCommentText = document.getElementById('preview-comment-text');
+
+    document.getElementById('curr-usd').addEventListener('click', () => setCurrency('USD'));
+    document.getElementById('curr-inr').addEventListener('click', () => setCurrency('INR'));
+
+    function setCurrency(curr) {
+      currentCurrency = curr;
+      const usdBtn = document.getElementById('curr-usd');
+      const inrBtn = document.getElementById('curr-inr');
+
+      if (curr === 'USD') {
+        usdBtn.className = 'px-2.5 py-1 rounded bg-purple-600 text-white transition';
+        inrBtn.className = 'px-2.5 py-1 rounded text-slate-400 hover:text-white transition';
+        currPrefix.textContent = '$';
+        amountInput.min = '1';
+        amountInput.placeholder = 'Or enter custom amount (e.g. 10)';
+      } else {
+        inrBtn.className = 'px-2.5 py-1 rounded bg-purple-600 text-white transition';
+        usdBtn.className = 'px-2.5 py-1 rounded text-slate-400 hover:text-white transition';
+        currPrefix.textContent = '₹';
+        amountInput.min = '10';
+        amountInput.placeholder = 'Or enter custom amount (e.g. 100)';
+      }
+      updateActiveAmountButtons();
+      updatePreview();
+    }
+
+    const amountBtns = document.querySelectorAll('.amount-btn');
+    amountBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        amountBtns.forEach(b => {
+          b.className = 'amount-btn p-3 rounded-xl border text-center transition bg-slate-950/80 border-slate-800 text-slate-300 hover:border-slate-700';
+        });
+        btn.className = 'amount-btn active p-3 rounded-xl border text-center transition bg-purple-950/60 border-purple-500/70 text-purple-200';
+        const val = currentCurrency === 'USD' ? btn.dataset.usd : btn.dataset.inr;
+        amountInput.value = val;
+        currentAmount = parseFloat(val);
+        updatePreview();
+      });
+    });
+
+    amountInput.addEventListener('input', (e) => {
+      currentAmount = parseFloat(e.target.value) || 0;
+      amountBtns.forEach(b => {
+        b.className = 'amount-btn p-3 rounded-xl border text-center transition bg-slate-950/80 border-slate-800 text-slate-300 hover:border-slate-700';
+      });
+      updatePreview();
+    });
+
+    function updateActiveAmountButtons() {
+      amountBtns.forEach(btn => {
+        const usd = btn.dataset.usd;
+        const inr = btn.dataset.inr;
+        const label = btn.querySelector('.amount-label');
+        const sub = btn.querySelector('.amount-sub');
+        if (currentCurrency === 'USD') {
+          label.textContent = `$${usd}`;
+          sub.textContent = `₹${inr}`;
+        } else {
+          label.textContent = `₹${inr}`;
+          sub.textContent = `$${usd}`;
+        }
+      });
+    }
+
+    sponsorNameInput.addEventListener('input', (e) => {
+      previewName.textContent = e.target.value.trim() || 'Your Name / Handle';
+    });
+
+    sponsorGithubInput.addEventListener('input', (e) => {
+      const handle = e.target.value.trim().replace(/^@/, '');
+      if (handle) {
+        previewAvatar.src = `https://github.com/${handle}.png`;
+      } else {
+        previewAvatar.src = 'https://github.com/ghost.png';
+      }
+    });
+
+    sponsorCommentInput.addEventListener('input', (e) => {
+      const val = e.target.value;
+      charCount.textContent = `${val.length} / 280`;
+      previewCommentText.textContent = val.trim() || 'Your message will be displayed prominently across our Wall of Patrons and docs!';
+    });
+
+    document.querySelectorAll('.quick-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        const text = pill.textContent.trim().replace(/^"/, '').replace(/"$/, '');
+        sponsorCommentInput.value = text;
+        sponsorCommentInput.dispatchEvent(new Event('input'));
+      });
+    });
+
+    function updatePreview() {
+      const isUSD = currentCurrency === 'USD';
+      const usdVal = isUSD ? currentAmount : Math.round(currentAmount / 84);
+      const inrVal = isUSD ? Math.round(currentAmount * 84) : currentAmount;
+
+      previewAmount.textContent = isUSD ? `$${currentAmount}` : `₹${currentAmount}`;
+      previewSubAmount.textContent = isUSD ? `~₹${inrVal}` : `~$${usdVal}`;
+
+      if (usdVal >= 100) {
+        previewTierBadge.textContent = '👑 Gold Patron';
+        previewTierBadge.className = 'inline-block text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-950 text-amber-300 border border-amber-500/40';
+      } else if (usdVal >= 50) {
+        previewTierBadge.textContent = '🛡️ Silver Backer';
+        previewTierBadge.className = 'inline-block text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-200 border border-slate-600';
+      } else if (usdVal >= 15) {
+        previewTierBadge.textContent = '⚡ Bronze Supporter';
+        previewTierBadge.className = 'inline-block text-[10px] font-mono px-2 py-0.5 rounded-full bg-orange-950 text-orange-300 border border-orange-500/40';
+      } else {
+        previewTierBadge.textContent = '☕ Supporter';
+        previewTierBadge.className = 'inline-block text-[10px] font-mono px-2 py-0.5 rounded-full bg-purple-950 text-purple-300 border border-purple-500/40';
+      }
+
+      submitBtnText.textContent = `Proceed to Dodo Checkout (${isUSD ? '$' + currentAmount : '₹' + currentAmount})`;
+    }
+
+    function handleSponsorSubmit(e) {
+      e.preventDefault();
+      const name = sponsorNameInput.value.trim();
+      const github = sponsorGithubInput.value.trim().replace(/^@/, '');
+      const url = document.getElementById('sponsor-url').value.trim();
+      const comment = sponsorCommentInput.value.trim();
+      const isUSD = currentCurrency === 'USD';
+      const usd = isUSD ? currentAmount : Math.round(currentAmount / 84);
+      const inr = isUSD ? Math.round(currentAmount * 84) : currentAmount;
+
+      if (!name) return;
+
+      const newEntry = {
+        id: 'patron-' + Date.now(),
+        name,
+        github,
+        avatar: github ? `https://github.com/${github}.png` : 'https://github.com/ghost.png',
+        url: url || (github ? `https://github.com/${github}` : ''),
+        amountUSD: usd,
+        amountINR: inr,
+        tier: usd >= 100 ? 'gold' : usd >= 50 ? 'silver' : 'bronze',
+        date: new Date().toISOString().split('T')[0],
+        comment: comment || 'Proud supporter of zero-paywall developer tooling!'
+      };
+
+      saveSponsor(newEntry);
+      renderLeaderboard('all');
+      renderComments();
+
+      const dodoParams = new URLSearchParams({
+        amount: String(currentAmount),
+        currency: currentCurrency,
+        sponsor_name: name,
+        sponsor_comment: comment
+      });
+
+      const finalCheckoutUrl = `${DODO_BASE_URL}?${dodoParams.toString()}`;
+      window.open(finalCheckoutUrl, '_blank', 'noopener,noreferrer');
+    }
+
+    function renderLeaderboard(filter = 'all') {
+      const container = document.getElementById('leaderboard-container');
+      let patrons = getStoredPatrons();
+
+      if (filter === 'gold') {
+        patrons = patrons.filter(p => p.amountUSD >= 100);
+      } else if (filter === 'recent') {
+        patrons = [...patrons].sort((a, b) => new Date(b.date) - new Date(a.date));
+      } else {
+        patrons = [...patrons].sort((a, b) => b.amountUSD - a.amountUSD);
+      }
+
+      container.innerHTML = patrons.map((patron, idx) => {
+        const rank = idx + 1;
+        let rankBadge = `#${rank}`;
+        let glowClass = 'border-slate-800';
+
+        if (rank === 1) {
+          rankBadge = '🥇 #1';
+          glowClass = 'gold-glow bg-amber-950/20';
+        } else if (rank === 2) {
+          rankBadge = '🥈 #2';
+          glowClass = 'silver-glow bg-slate-900/60';
+        } else if (rank === 3) {
+          rankBadge = '🥉 #3';
+          glowClass = 'bronze-glow bg-orange-950/20';
+        }
+
+        const tierLabel = patron.amountUSD >= 100 ? '👑 Gold Patron' : patron.amountUSD >= 50 ? '🛡️ Silver Backer' : '⚡ Supporter';
+        const tierClass = patron.amountUSD >= 100 ? 'bg-amber-950/80 text-amber-300 border-amber-500/40' : patron.amountUSD >= 50 ? 'bg-slate-800 text-slate-200 border-slate-600' : 'bg-purple-950 text-purple-300 border-purple-500/40';
+
+        return `
+          <div class="p-4 sm:p-5 rounded-xl border ${glowClass} bg-slate-900/80 transition-all hover:bg-slate-900 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="flex items-start sm:items-center space-x-3.5">
+              <span class="text-sm font-extrabold font-mono text-slate-400 w-12 shrink-0">${rankBadge}</span>
+              <img src="${patron.avatar}" alt="${patron.name}" class="w-11 h-11 rounded-full border border-purple-500/40 object-cover bg-slate-950 shrink-0">
+              <div>
+                <div class="flex items-center gap-2 flex-wrap">
+                  ${patron.url ? `<a href="${patron.url}" target="_blank" rel="noopener noreferrer" class="font-bold text-white hover:text-purple-300 transition text-sm sm:text-base">${patron.name}</a>` : `<span class="font-bold text-white text-sm sm:text-base">${patron.name}</span>`}
+                  <span class="text-purple-400 text-xs" title="Verified Sponsor">✓</span>
+                  <span class="px-2 py-0.5 text-[10px] font-mono font-bold rounded-full border ${tierClass}">${tierLabel}</span>
+                </div>
+                ${patron.comment ? `
+                  <div class="mt-2 text-xs text-slate-300 italic bg-slate-950/60 px-3 py-1.5 rounded-lg border border-slate-800/80">
+                    "${patron.comment}"
+                  </div>
+                ` : ''}
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between md:justify-end gap-6 shrink-0 pl-14 md:pl-0">
+              <div class="text-left md:text-right">
+                <div class="text-base sm:text-lg font-extrabold text-white font-mono">$${patron.amountUSD.toLocaleString()}</div>
+                <div class="text-[11px] text-slate-500 font-mono">₹${patron.amountINR ? patron.amountINR.toLocaleString() : (patron.amountUSD * 84).toLocaleString()}</div>
+              </div>
+              <div class="text-[10px] font-mono text-slate-500">${patron.date}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderComments() {
+      const container = document.getElementById('comments-container');
+      const patrons = getStoredPatrons().filter(p => p.comment && p.comment.trim().length > 0);
+
+      container.innerHTML = patrons.map(p => `
+        <div class="p-5 bg-slate-900/80 rounded-2xl border border-slate-800/80 flex flex-col justify-between hover:border-slate-700 transition">
+          <div>
+            <div class="flex items-center space-x-3 mb-3">
+              <img src="${p.avatar}" alt="${p.name}" class="w-9 h-9 rounded-full border border-purple-500/40 bg-slate-950 object-cover">
+              <div>
+                <div class="font-bold text-sm text-white flex items-center gap-1">
+                  ${p.url ? `<a href="${p.url}" target="_blank" rel="noopener noreferrer" class="hover:text-pink-300 transition">${p.name}</a>` : p.name}
+                  <span class="text-xs text-purple-400">✓</span>
+                </div>
+                <div class="text-[10px] font-mono text-slate-500">$${p.amountUSD} Sponsor • ${p.date}</div>
+              </div>
+            </div>
+            <p class="text-xs sm:text-sm text-slate-300 italic leading-relaxed">
+              "${p.comment}"
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-800/60 flex items-center justify-between text-[11px] text-slate-500">
+            <span class="flex items-center gap-1 text-pink-400">
+              <span>💖</span> Verified Backer
+            </span>
+            <span class="font-mono text-[10px]">AgentShield Wall of Love</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    document.querySelectorAll('.lb-filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.lb-filter-btn').forEach(b => {
+          b.className = 'lb-filter-btn px-3 py-1.5 rounded-lg text-slate-400 hover:text-white font-bold';
+        });
+        btn.className = 'lb-filter-btn active px-3 py-1.5 rounded-lg bg-slate-800 text-white font-bold';
+        renderLeaderboard(btn.dataset.filter);
+      });
+    });
+
+    updateActiveAmountButtons();
+    updatePreview();
+    renderLeaderboard('all');
+    renderComments();
+  </script>
+</body>
+</html>
