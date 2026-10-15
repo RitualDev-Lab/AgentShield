@@ -239,7 +239,7 @@ const original = shield.rehydrate(result.sanitizedText);
 
 AgentShield is initiated and maintained by the team at [RitualDev Lab](https://github.com/RitualDev-Lab) and protected by the global AI security research community.
 
-### 🛡️ Core Team & Maintainers
+### 🛡️ Core Team & Direct Access Admins
 
 <table align="center">
   <tr>
@@ -248,21 +248,24 @@ AgentShield is initiated and maintained by the team at [RitualDev Lab](https://g
         <img src="https://github.com/divyanshujethi.png" width="80" style="border-radius: 50%;" alt="Divyanshu Jethi"/><br />
         <sub><b>Divyanshu Jethi</b></sub>
       </a><br />
-      <sub>🚀 Founder & Lead</sub>
+      <sub>🚀 Founder &amp; Lead</sub><br />
+      <sub>🔑 <b>Direct Access Admin</b></sub>
     </td>
     <td align="center" width="180">
       <a href="https://github.com/Sakshisharma1616">
         <img src="https://github.com/Sakshisharma1616.png" width="80" style="border-radius: 50%;" alt="Sakshi Sharma"/><br />
         <sub><b>Sakshi Sharma</b></sub>
       </a><br />
-      <sub>🎨 Core Maintainer & Product</sub>
+      <sub>🎨 Core Maintainer &amp; Product</sub><br />
+      <sub>🔑 <b>Direct Access Admin</b></sub>
     </td>
     <td align="center" width="180">
       <a href="https://github.com/Ritual-Dev-Git">
         <img src="https://github.com/Ritual-Dev-Git.png" width="80" style="border-radius: 50%;" alt="RitualDev"/><br />
         <sub><b>RitualDev</b></sub>
       </a><br />
-      <sub>⚙️ Core Maintainer & Infra</sub>
+      <sub>⚙️ Core Maintainer &amp; Infra</sub><br />
+      <sub>🔑 <b>Direct Access Admin</b></sub>
     </td>
     <td align="center" width="180">
       <a href="https://github.com/Divyanshu-hub-dotcom">
@@ -276,7 +279,7 @@ AgentShield is initiated and maintained by the team at [RitualDev Lab](https://g
         <img src="https://github.com/ayushxx01.png" width="80" style="border-radius: 50%;" alt="Ayush"/><br />
         <sub><b>Ayush</b></sub>
       </a><br />
-      <sub>🛡️ Core Maintainer & Triage</sub>
+      <sub>🛡️ Core Maintainer &amp; Triage</sub>
     </td>
   </tr>
 </table>
