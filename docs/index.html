@@ -1354,8 +1354,8 @@
             <h4><span>🔍</span> Secret Scanner</h4>
             <p>Deep scan targeting regular expression headers and Shannon entropy ($H \ge 4.5$).</p>
             <div class="code-block">
-              <span class="cmd">npx</span> agentshield scan <span class="arg">.env</span><br>
-              <span class="cmd">npx</span> agentshield scan <span class="arg">config.json</span> <span class="keyword">--json</span>
+              <span class="cmd">npx</span> @ritualdev-lab/agentshield scan <span class="arg">.env</span><br>
+              <span class="cmd">npx</span> @ritualdev-lab/agentshield scan <span class="arg">config.json</span> <span class="keyword">--json</span>
               <button class="copy-btn" onclick="copySnippet('npx @ritualdev-lab/agentshield scan .env')">Copy</button>
             </div>
           </div>
@@ -1364,8 +1364,8 @@
             <h4><span>✂️</span> In-Flight Redactor</h4>
             <p>Substitute leaked credentials with deterministic SHA-256 surrogate tokens.</p>
             <div class="code-block">
-              <span class="cmd">npx</span> agentshield redact <span class="arg">app.ts</span><br>
-              <span class="cmd">npx</span> agentshield redact <span class="arg">app.ts</span> <span class="keyword">--style</span> <span class="arg">hash</span>
+              <span class="cmd">npx</span> @ritualdev-lab/agentshield redact <span class="arg">app.ts</span><br>
+              <span class="cmd">npx</span> @ritualdev-lab/agentshield redact <span class="arg">app.ts</span> <span class="keyword">--style</span> <span class="arg">hash</span>
               <button class="copy-btn" onclick="copySnippet('npx @ritualdev-lab/agentshield redact app.ts')">Copy</button>
             </div>
           </div>
@@ -1374,8 +1374,8 @@
             <h4><span>🌊</span> Real-Time Stream Pipe</h4>
             <p>Stream logs or process outputs through redactor filter.</p>
             <div class="code-block">
-              <span class="cmd">env</span> | <span class="cmd">npx</span> agentshield stream<br>
-              <span class="cmd">cat</span> build.log | <span class="cmd">npx</span> agentshield stream
+              <span class="cmd">env</span> | <span class="cmd">npx</span> @ritualdev-lab/agentshield stream<br>
+              <span class="cmd">cat</span> build.log | <span class="cmd">npx</span> @ritualdev-lab/agentshield stream
               <button class="copy-btn" onclick="copySnippet('env | npx @ritualdev-lab/agentshield stream')">Copy</button>
             </div>
           </div>
@@ -1384,7 +1384,7 @@
             <h4><span>📋</span> Regulatory Compliance</h4>
             <p>Score credentials against SOC2 CC6.1, PCI-DSS 3.4, HIPAA §164.312, and ISO27001.</p>
             <div class="code-block">
-              <span class="cmd">npx</span> agentshield compliance <span class="arg">.env</span>
+              <span class="cmd">npx</span> @ritualdev-lab/agentshield compliance <span class="arg">.env</span>
               <button class="copy-btn" onclick="copySnippet('npx @ritualdev-lab/agentshield compliance .env')">Copy</button>
             </div>
           </div>
@@ -1393,7 +1393,7 @@
             <h4><span>🔒</span> MCP Protocol Proxy</h4>
             <p>Filter JSON-RPC tool calls for agents using Model Context Protocol.</p>
             <div class="code-block">
-              <span class="cmd">npx</span> agentshield mcp-proxy
+              <span class="cmd">npx</span> @ritualdev-lab/agentshield mcp-proxy
               <button class="copy-btn" onclick="copySnippet('npx @ritualdev-lab/agentshield mcp-proxy')">Copy</button>
             </div>
           </div>
@@ -1402,7 +1402,7 @@
             <h4><span>📜</span> Cryptographic Ledger</h4>
             <p>Verify tamper-evident HMAC audit log for incident forensics.</p>
             <div class="code-block">
-              <span class="cmd">npx</span> agentshield ledger verify
+              <span class="cmd">npx</span> @ritualdev-lab/agentshield ledger verify
               <button class="copy-btn" onclick="copySnippet('npx @ritualdev-lab/agentshield ledger verify')">Copy</button>
             </div>
           </div>
@@ -1416,7 +1416,7 @@
             <h4><span>🛑</span> Direct File Read Interception</h4>
             <p>Neutralizes attempts by autonomous agents to read production keys into context.</p>
             <div class="code-block">
-              <span class="cmd">npx</span> agentshield exec <span class="arg">"cat .env"</span><br><br>
+              <span class="cmd">npx</span> @ritualdev-lab/agentshield exec <span class="arg">"cat .env"</span><br><br>
               <span class="block">🚨 [AgentShield Sandbox Block]</span><br>
               <span class="comment">Blocked attempt to read raw .env file!</span>
             </div>
@@ -1426,7 +1426,7 @@
             <h4><span>🎭</span> ANSI-C & Tab Obfuscation Defense</h4>
             <p>De-obfuscates escape strings and command substitution tricks before evaluation.</p>
             <div class="code-block">
-              <span class="cmd">npx</span> agentshield exec <span class="arg">"sh -c $'cat\\t.env'"</span><br><br>
+              <span class="cmd">npx</span> @ritualdev-lab/agentshield exec <span class="arg">"sh -c $'cat\\t.env'"</span><br><br>
               <span class="block">🚨 [AgentShield Sandbox Block]</span><br>
               <span class="comment">De-obfuscated AST: 'cat .env' &rarr; Blocked!</span>
             </div>
@@ -1436,8 +1436,8 @@
             <h4><span>✅</span> Transparent Developer Passthrough</h4>
             <p>Safe commands execute cleanly without overhead or interference.</p>
             <div class="code-block">
-              <span class="cmd">npx</span> agentshield exec <span class="arg">"npm test"</span><br>
-              <span class="cmd">npx</span> agentshield exec <span class="arg">"git status"</span><br><br>
+              <span class="cmd">npx</span> @ritualdev-lab/agentshield exec <span class="arg">"npm test"</span><br>
+              <span class="cmd">npx</span> @ritualdev-lab/agentshield exec <span class="arg">"git status"</span><br><br>
               <span class="success">✅ Allowed &amp; executed transparently</span>
             </div>
           </div>
@@ -1452,9 +1452,9 @@
             <p>One command protects your entire team from accidentally committing secrets.</p>
             <div class="code-block">
               <span class="comment"># Install in .git/hooks/pre-commit</span><br>
-              <span class="cmd">npx</span> agentshield hook git-install<br><br>
+              <span class="cmd">npx</span> @ritualdev-lab/agentshield hook git-install<br><br>
               <span class="comment"># Manually audit staged files</span><br>
-              <span class="cmd">npx</span> agentshield hook check
+              <span class="cmd">npx</span> @ritualdev-lab/agentshield hook check
               <button class="copy-btn" onclick="copySnippet('npx @ritualdev-lab/agentshield hook git-install')">Copy</button>
             </div>
           </div>
@@ -1496,13 +1496,22 @@
         <div class="guide-grid">
           <div class="guide-card">
             <h4><span>🟣</span> Claude Code Setup</h4>
-            <p>Instruct Claude Code to route shell commands through AgentShield sandbox.</p>
+            <p>Automatically intercept agent terminal executions before commands touch your environment.</p>
             <div class="code-block">
-              <span class="comment"># In Claude Code session:</span><br>
-              "Prepend all bash commands with:<br>
-              <span class="cmd">npx @ritualdev-lab/agentshield exec \"&lt;cmd&gt;\"</span>"<br><br>
-              <span class="comment"># Or place in .claude/skills/agentshield/</span><br>
-              <span class="cmd">cp</span> SKILL.md .claude/skills/agentshield/
+              <span class="comment"># 1-click init or add to .claude/settings.json:</span><br>
+              <span class="cmd">npx</span> @ritualdev-lab/agentshield init-claude<br><br>
+              <span class="comment"># .claude/settings.json hooks array:</span><br>
+              {<br>
+              &nbsp;&nbsp;"hooks": {<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;"PreToolUse": [<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"matcher": "Bash|Terminal",<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"command": "npx @ritualdev-lab/agentshield exec --claude-hook"<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;]<br>
+              &nbsp;&nbsp;}<br>
+              }
+              <button class="copy-btn" onclick="copySnippet('npx @ritualdev-lab/agentshield init-claude')">Copy</button>
             </div>
           </div>
 
