@@ -1111,8 +1111,8 @@
         <a href="https://devshelf.ritualdev.in" target="_blank" rel="noopener noreferrer" class="nav-btn nav-btn-devshelf" title="Browse 100% Verified Free Developer Tools on DevShelf">
           <span>📚 DevShelf</span>
         </a>
-        <a href="https://donation.rolenest.in/" target="_blank" rel="noopener noreferrer" class="nav-btn nav-btn-sponsor" title="Support and Donate to AgentShield Development">
-          <span>💖 Donate</span>
+        <a href="https://checkout.dodopayments.com/buy/pdt_0NpjONGugY5QkrFDUaPva" target="_blank" rel="noopener noreferrer" class="nav-btn nav-btn-sponsor" title="Sponsor AgentShield via Dodo Payments">
+          <span>💖 Sponsor (Dodo)</span>
         </a>
         <a href="https://github.com/RitualDev-Lab/AgentShield/stargazers" target="_blank" rel="noopener" class="nav-btn">
           <span>⭐ Star</span>
@@ -1154,8 +1154,8 @@
         <a href="#guide" class="btn-lg btn-glass" style="border-color: rgba(6, 182, 212, 0.4); color: #e0f2fe;">
           <span>📖 Full Run Guide</span>
         </a>
-        <a href="https://donation.rolenest.in/" target="_blank" rel="noopener noreferrer" class="btn-lg btn-glass" style="border-color: rgba(244, 63, 94, 0.5); color: #fecdd3; background: rgba(244, 63, 94, 0.12);">
-          <span>💖 Sponsor / Donate ➔</span>
+        <a href="https://checkout.dodopayments.com/buy/pdt_0NpjONGugY5QkrFDUaPva" target="_blank" rel="noopener noreferrer" class="btn-lg btn-glass" style="border-color: rgba(244, 63, 94, 0.5); color: #fecdd3; background: rgba(244, 63, 94, 0.12);">
+          <span>💖 Sponsor via Dodo ➔</span>
         </a>
         <a href="https://devshelf.ritualdev.in/?category=AI%20%26%20LLMs" target="_blank" rel="noopener noreferrer" class="btn-lg btn-glass">
           <span>📚 DevShelf AI Catalog ➔</span>
@@ -1691,8 +1691,8 @@
           <a href="https://github.com/sponsors/RitualDev-Lab" target="_blank" rel="noopener noreferrer" class="btn-pricing btn-pricing-secondary" style="border-color: rgba(244, 63, 94, 0.4); color: #fda4af; padding: 0.7rem 1.2rem; width: auto;">
             <span>🐙 GitHub Sponsors</span>
           </a>
-          <a href="https://donation.rolenest.in/" target="_blank" rel="noopener noreferrer" class="btn-donation-big" style="padding: 0.7rem 1.4rem;">
-            <span>RoleNest Portal ➔</span>
+          <a href="https://checkout.dodopayments.com/buy/pdt_0NpjONGugY5QkrFDUaPva" target="_blank" rel="noopener noreferrer" class="btn-donation-big" style="padding: 0.7rem 1.4rem;">
+            <span>Dodo Payments Sponsor ➔</span>
           </a>
         </div>
       </div>
@@ -1891,7 +1891,7 @@
       <a href="#guide">Run Guide</a>
       <a href="#pricing">Pricing</a>
       <a href="https://github.com/RitualDev-Lab/AgentShield/blob/main/GUIDE.md" target="_blank" rel="noopener noreferrer">GUIDE.md</a>
-      <a href="https://donation.rolenest.in/" target="_blank" rel="noopener noreferrer" style="color: #f43f5e; font-weight: 600;">💖 Donate</a>
+      <a href="https://checkout.dodopayments.com/buy/pdt_0NpjONGugY5QkrFDUaPva" target="_blank" rel="noopener noreferrer" style="color: #f43f5e; font-weight: 600;">💖 Sponsor (Dodo)</a>
       <a href="https://devshelf.ritualdev.in" target="_blank" rel="noopener noreferrer">DevShelf</a>
       <a href="https://github.com/RitualDev-Lab/AgentShield" target="_blank" rel="noopener">GitHub</a>
       <a href="https://github.com/RitualDev-Lab/AgentShield/discussions" target="_blank" rel="noopener">Discussions</a>
@@ -2034,10 +2034,7 @@
     }
 
     function triggerDonation(amount) {
-      // Option A: Direct hosted payment link / donation portal redirect
-      const portalBase = 'https://donation.rolenest.in/';
-      const returnUrl = encodeURIComponent(window.location.origin + '/?donation=success&tier=' + amount);
-      const targetUrl = portalBase + '?amount=' + amount + '&source=agentshield&return_url=' + returnUrl;
+      const targetUrl = 'https://checkout.dodopayments.com/buy/pdt_0NpjONGugY5QkrFDUaPva?amount=' + amount;
       window.open(targetUrl, '_blank', 'noopener,noreferrer');
     }
 
