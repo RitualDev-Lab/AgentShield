@@ -119,7 +119,10 @@ export class CiGateRunner {
     if (passed) {
       reportLines.push("### ✅ 0 Leaked Secrets Detected");
       reportLines.push(`- **Files Audited**: ${diffFiles.length}`);
-      reportLines.push("- **Result**: Clean — Safe to merge!");
+      reportLines.push("- **Result**: Clean — Safe to merge!\n");
+      reportLines.push(
+        "[![AgentShield: OWASP LLM06 Compliant](https://img.shields.io/badge/AgentShield-OWASP%20LLM06%20Compliant-10b981?logo=shield&logoColor=white&style=flat-square)](https://agentshield.ritualdev.in/compliance)\n",
+      );
     } else {
       reportLines.push(`### 🚨 ${allFindings.length} Exposed Secret(s) Detected in Diff!\n`);
       reportLines.push("| File | Finding | Severity | Redacted Preview |");

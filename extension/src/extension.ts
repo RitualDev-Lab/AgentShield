@@ -96,7 +96,52 @@ export function activate(context: vscode.ExtensionContext) {
     }
   });
 
-  context.subscriptions.push(scanCmd, redactCmd, complianceCmd, onSave);
+  // Real-time Paste & Prompt Redaction Interceptor:
+  // Detects when large text blocks or newly inserted text contain raw API keys or tokens
+  const onTextChange = vscode.workspace.onDidChangeTextDocument(async (event) => {
+    const config = vscode.workspace.getConfiguration("agentshield");
+    if (config.get("realTimeRedact") === false) return;
+
+    for (const change of event.contentChanges) {
+      // Check if inserted text looks like a paste or token addition (length >= 16 chars)
+      if (change.text && change.text.length >= 16) {
+        const scan = engine.scanAndRedact(change.text);
+        if (scan.hasSecrets) {
+          const firstSecret = scan.findings[0];
+          statusBarItem.text = "$(alert) Secret Detected!";
+          
+          const action = await vscode.window.showWarningMessage(
+            `🚨 [AgentShield Zero-Leak Warning] Detected real ${firstSecret.patternName} pasted into ${event.document.fileName.split(/[\\/]/).pop()}!`,
+            "Auto-Redact Now",
+            "Dismiss",
+          );
+
+          if (action === "Auto-Redact Now") {
+            const editor = vscode.window.activeTextEditor;
+            if (editor && editor.document.uri.toString() === event.document.uri.toString()) {
+              const fullText = editor.document.getText();
+              const fullScan = engine.scanAndRedact(fullText);
+              if (fullScan.hasSecrets) {
+                const fullRange = new vscode.Range(
+                  editor.document.positionAt(0),
+                  editor.document.positionAt(fullText.length),
+                );
+                await editor.edit((editBuilder) => {
+                  editBuilder.replace(fullRange, fullScan.sanitizedText);
+                });
+                vscode.window.showInformationMessage(
+                  `🛡️ AgentShield: Redacted ${fullScan.totalFound} secret(s) with secure tokens.`,
+                );
+                statusBarItem.text = "$(shield) AgentShield: Clean";
+              }
+            }
+          }
+        }
+      }
+    }
+  });
+
+  context.subscriptions.push(scanCmd, redactCmd, complianceCmd, onSave, onTextChange);
 }
 
 export function deactivate() {

@@ -96,6 +96,10 @@ export class GitHubActionBot {
       lines.push(
         "- **Status**: Diff is clean. Zero-leak credential policy verified for autonomous AI & developer tools.",
       );
+      lines.push("");
+      lines.push(
+        "[![AgentShield: OWASP LLM06 Compliant](https://img.shields.io/badge/AgentShield-OWASP%20LLM06%20Compliant-10b981?logo=shield&logoColor=white&style=flat-square)](https://agentshield.ritualdev.in/compliance)",
+      );
     } else {
       lines.push(
         `### 🚨 **Security Gate Failed** — ${result.totalSecrets} Exposed Secret(s) Detected!`,

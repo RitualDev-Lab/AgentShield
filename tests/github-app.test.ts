@@ -186,5 +186,53 @@ describe("Phase 4: GitHub App Service & Multi-Tenant Checks API Suite", () => {
         await server.stop();
       }
     });
+
+    it("should acknowledge private security advisory and invite researcher to bounty harness", async () => {
+      const server = new ControlPlaneServer({ port: 0 });
+      const port = await server.start();
+
+      try {
+        const payload = JSON.stringify({
+          action: "published",
+          repository_advisory: {
+            ghsa_id: "GHSA-1234-abcd-efgh",
+            summary: "Potential sandbox bypass in docker exec inspection",
+            severity: "critical",
+          },
+          repository: { full_name: "RitualDev-Lab/AgentShield" },
+        });
+
+        const webhookSecret = "test-webhook-secret-999";
+        process.env.GITHUB_WEBHOOK_SECRET = webhookSecret;
+        const signature = `sha256=${createHmac("sha256", webhookSecret).update(payload).digest("hex")}`;
+
+        const res = await fetch(`http://localhost:${port}/api/v1/github/webhook`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-GitHub-Event": "repository_advisory",
+            "X-Hub-Signature-256": signature,
+          },
+          body: payload,
+        });
+
+        assert.strictEqual(res.status, 200);
+        const data = (await res.json()) as {
+          received: boolean;
+          event: string;
+          advisoryAcknowledged: boolean;
+          advisoryReply?: { title: string; body: string; bountyHarnessCommand: string };
+        };
+
+        assert.strictEqual(data.received, true);
+        assert.strictEqual(data.advisoryAcknowledged, true);
+        assert.ok(data.advisoryReply);
+        assert.ok(data.advisoryReply.title.includes("GHSA-1234-abcd-efgh"));
+        assert.ok(data.advisoryReply.body.includes("bounty-verify"));
+        assert.ok(data.advisoryReply.bountyHarnessCommand.includes("bounty-verify"));
+      } finally {
+        await server.stop();
+      }
+    });
   });
 });

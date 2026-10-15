@@ -392,11 +392,27 @@ export class ControlPlaneServer {
         return;
       }
 
+      // Handle GitHub Security Advisory / repository_advisory event
+      let advisoryReply: ReturnType<typeof GitHubAppService.buildSecurityAdvisoryAcknowledgement> | undefined;
+      const ghPayload = payload as import("./github-app.js").GitHubAppWebhookPayload;
+      const isAdvisoryEvent =
+        eventType === "repository_advisory" ||
+        eventType === "security_advisory" ||
+        Boolean(ghPayload?.repository_advisory || ghPayload?.security_advisory);
+
+      if (isAdvisoryEvent) {
+        const advData = ghPayload?.repository_advisory || ghPayload?.security_advisory || {};
+        const repoFullName = ghPayload?.repository?.full_name || "RitualDev-Lab/AgentShield";
+        advisoryReply = GitHubAppService.buildSecurityAdvisoryAcknowledgement(advData, repoFullName);
+      }
+
       res.writeHead(200, { "Content-Type": "application/json" });
       res.end(
         JSON.stringify({
           received: true,
           event: eventType || "unknown",
+          advisoryAcknowledged: Boolean(advisoryReply),
+          advisoryReply,
           timestamp: new Date().toISOString(),
         }),
       );
@@ -409,7 +425,14 @@ export class ControlPlaneServer {
       const filename = pathname.replace("/api/v1/badges/", "").replace(".svg", "");
       const toolName = decodeURIComponent(filename).replace(/[-_]/g, " ");
       const rawTier = parsedUrl.searchParams.get("tier");
-      const tier: AuditBadgeTier = rawTier === "sponsor" ? "sponsor" : "verified";
+      const tier: AuditBadgeTier =
+        rawTier === "sponsor"
+          ? "sponsor"
+          : rawTier === "enterprise"
+            ? "enterprise"
+            : rawTier === "owasp-llm06"
+              ? "owasp-llm06"
+              : "verified";
       const svg = VerifiedBadgeGenerator.generateSvgBadge(toolName, { tier });
 
       res.writeHead(200, {

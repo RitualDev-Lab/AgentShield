@@ -41,6 +41,11 @@
           "type": "boolean",
           "default": true,
           "description": "Automatically audit files for leaked credentials when saved."
+        },
+        "agentshield.realTimeRedact": {
+          "type": "boolean",
+          "default": true,
+          "description": "Warn and offer 1-click auto-redaction when a real API key or token is pasted into editor or prompt box."
         }
       }
     }

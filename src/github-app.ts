@@ -33,6 +33,22 @@ export interface GitHubAppWebhookPayload {
     status: string;
     conclusion?: string;
   };
+  security_advisory?: {
+    ghsa_id?: string;
+    cve_id?: string;
+    summary?: string;
+    description?: string;
+    severity?: string;
+    state?: string;
+  };
+  repository_advisory?: {
+    ghsa_id?: string;
+    cve_id?: string;
+    summary?: string;
+    description?: string;
+    severity?: string;
+    state?: string;
+  };
 }
 
 export interface GitHubCheckRunPayload {
@@ -207,5 +223,51 @@ export class GitHubAppService {
         error: err instanceof Error ? err.message : String(err),
       };
     }
+  }
+
+  /**
+   * Generates an automated security advisory acknowledgement message and invites
+   * the researcher to the automated AgentShield bug bounty verification test harness.
+   */
+  public static buildSecurityAdvisoryAcknowledgement(
+    advisory: { ghsa_id?: string; summary?: string; severity?: string },
+    repoFullName = "RitualDev-Lab/AgentShield",
+  ): {
+    title: string;
+    body: string;
+    bountyHarnessCommand: string;
+  } {
+    const ghsaId = advisory.ghsa_id || "GHSA-PENDING";
+    const bountyHarnessCommand = `npx @ritualdev-lab/agentshield bounty-verify "<exploit-payload>"`;
+
+    const body = `### 🛡️ AgentShield Automated Security Advisory Triage Bot
+
+Thank you for reporting this vulnerability to the **AgentShield Security Team** through GitHub Private Vulnerability Reporting.
+
+- **Advisory ID**: \`${ghsaId}\`
+- **Report Summary**: ${advisory.summary || "Security Vulnerability Report"}
+- **Reported Severity**: \`${(advisory.severity || "high").toUpperCase()}\`
+- **Target Repository**: [${repoFullName}](https://github.com/${repoFullName})
+
+---
+
+### ⚡ Instant Proof-of-Concept Verification Harness
+We provide an automated, zero-install local verification test harness for security researchers. You can verify whether your proof-of-concept payload bypasses the active defense sandbox or secret redaction engine by running:
+
+\`\`\`bash
+${bountyHarnessCommand}
+\`\`\`
+
+- **Bounty Verification**: Confirmed reproducible zero-day bypasses and secret leak exploits are eligible for bounties funded via our **Community Security Bounty Fund**.
+- **Transparency**: Once verified and patched, disclosures are recorded on the [AgentShield Public Transparency Ledger](https://agentshield.ritualdev.in/transparency) with full credit attributed to the researcher.
+- **SLA**: Our security triage team reviews private advisories within 24 hours.
+
+*AgentShield Security Operations — Zero-Leak Defense for AI Coding Agents*`;
+
+    return {
+      title: `AgentShield Triage: ${ghsaId} Acknowledged`,
+      body,
+      bountyHarnessCommand,
+    };
   }
 }

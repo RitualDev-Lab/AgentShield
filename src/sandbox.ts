@@ -91,7 +91,24 @@ export function tokenizeCommand(cmd: string): string[] {
  * Commands that dump raw environment secrets or read private credential stores directly.
  */
 const DANGEROUS_COMMAND_PATTERNS = [
-  // 1. Reading .env or credential stores directly via reader commands, copy, link or archive
+  // 1. Container boundary detection: docker/podman exec or run passing sensitive environment variables or injecting live env
+  {
+    test: (cmd: string) =>
+      /\b(docker|podman|nerdctl|crictl)\s+(?:exec|run)\b/i.test(cmd) &&
+      (/(?:-e|--env)\s+(?:[A-Z0-9_]*(?:KEY|SECRET|TOKEN|PASSWORD|APIKEY|AUTH|CREDENTIAL|PRIVATE)[A-Z0-9_]*=|(?:[A-Z0-9_]*(?:KEY|SECRET|TOKEN|PASSWORD|APIKEY|AUTH|CREDENTIAL|PRIVATE)[A-Z0-9_]*\b(?![-_a-zA-Z0-9=])))/i.test(
+        cmd,
+      ) ||
+        /(?:--env-file)\s+(?:[^\s|;&]*[\/\\])?(?:\.env|\.aws[\/\\]credentials|id_rsa)/i.test(
+          cmd,
+        ) ||
+        /(?:-e|--env)\s+[A-Z0-9_]+=\$(?:[A-Z0-9_]*(?:KEY|SECRET|TOKEN|PASSWORD|APIKEY|AUTH)[A-Z0-9_]*)/i.test(
+          cmd,
+        )),
+    reason:
+      "Blocked container boundary breach: docker/podman exec -e with sensitive environment variables or secret injection.",
+    category: "dangerous_mutation" as const,
+  },
+  // 2. Reading .env or credential stores directly via reader commands, copy, link or archive
   {
     test: (cmd: string) =>
       (FILE_READER_BINARIES.test(cmd) && SENSITIVE_TARGET_FILES.test(cmd)) ||
@@ -100,14 +117,14 @@ const DANGEROUS_COMMAND_PATTERNS = [
       "Blocked attempt to read raw .env or private credential file directly into agent terminal context.",
     category: "env_dump" as const,
   },
-  // 2. Reading .env via shell redirection: `< .env` or `while read ... < .env`
+  // 3. Reading .env via shell redirection: `< .env` or `while read ... < .env`
   {
     test: (cmd: string) =>
       /<\s*(?:[^\s|;&]*[\/\\])?(?:\.env|\.aws[\/\\]credentials|id_rsa)/i.test(cmd),
     reason: "Blocked attempt to read sensitive file via input redirection into agent context.",
     category: "env_dump" as const,
   },
-  // 3. Inline scripts reading sensitive files or dumping runtime process.env
+  // 4. Inline scripts reading sensitive files or dumping runtime process.env
   {
     test: (cmd: string) =>
       /\b(python|python3|node|perl|ruby|php|bash|sh|zsh|deno|bun)\b/i.test(cmd) &&
@@ -116,7 +133,7 @@ const DANGEROUS_COMMAND_PATTERNS = [
     reason: "Blocked inline runtime script inspecting environment variables or sensitive files.",
     category: "env_dump" as const,
   },
-  // 4. Dumping all environment variables (standalone or piped: env | sort, printenv, export, compgen -v, declare -p)
+  // 5. Dumping all environment variables (standalone or piped: env | sort, printenv, export, compgen -v, declare -p)
   {
     test: (cmd: string) =>
       /(?:^|[|;&]\s*)(?:printenv|env|export|set|compgen\s+-v|declare\s+-p|Get-ChildItem\s+Env:)\b(?!\s*[-_a-zA-Z0-9]+=)/i.test(
@@ -125,7 +142,7 @@ const DANGEROUS_COMMAND_PATTERNS = [
     reason: "Blocked attempt to dump full environment variables into agent context.",
     category: "env_dump" as const,
   },
-  // 5. Exfiltrating secrets via curl/wget/POST/webhook or external network call with env variables
+  // 6. Exfiltrating secrets via curl/wget/POST/webhook or external network call with env variables
   {
     test: (cmd: string) =>
       /\b(curl|wget|invoke-webrequest|irm|iwr|nc|ncat|netcat|socat)\b/i.test(cmd) &&

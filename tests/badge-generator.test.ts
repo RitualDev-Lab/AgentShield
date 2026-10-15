@@ -35,6 +35,10 @@ describe("Phase 2: Secured by AgentShield Verified Sponsor Badge Suite", () => {
     const sponsorSvg = VerifiedBadgeGenerator.generateSvgBadge(toolName, { tier: "sponsor" });
     assert.ok(sponsorSvg.includes("AgentShield ★ Sponsor"), "Sponsor badge must include sponsor star");
     assert.ok(sponsorSvg.includes("#ec4899"), "Sponsor tier should use hot pink accent");
+
+    const owaspSvg = VerifiedBadgeGenerator.generateSvgBadge(toolName, { tier: "owasp-llm06" });
+    assert.ok(owaspSvg.includes("OWASP LLM06 Compliant"), "OWASP badge must include OWASP LLM06 text");
+    assert.ok(owaspSvg.includes("#10b981"), "OWASP badge should use emerald accent");
   });
 
   test("generates valid markdown and html badge snippets for README.md", () => {
@@ -51,5 +55,14 @@ describe("Phase 2: Secured by AgentShield Verified Sponsor Badge Suite", () => {
     assert.strictEqual(targetUrl.pathname, "/verify/superfile");
     assert.ok(snippet.shieldsIoBadgeUrl.includes("Secured%20by"));
     assert.ok(snippet.html.includes("<img src="));
+
+    // Test OWASP LLM06 markdown snippet
+    const owaspSnippet = VerifiedBadgeGenerator.getMarkdownSnippet(
+      toolName,
+      "https://agentshield.ritualdev.in",
+      "owasp-llm06",
+    );
+    assert.ok(owaspSnippet.markdown.includes("OWASP%20LLM06%20Compliant"));
+    assert.ok(owaspSnippet.shieldsIoBadgeUrl.includes("10b981"));
   });
 });

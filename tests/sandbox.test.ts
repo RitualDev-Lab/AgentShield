@@ -59,11 +59,30 @@ describe("AgentShield Command Sandbox", () => {
       "npm run build",
       "cargo check",
       "docker compose up -d",
+      "docker exec -it my-container bash",
+      "podman run -d -p 8080:8080 nginx",
     ];
 
     for (const cmd of safeCommands) {
       const res = sandbox.inspectCommand(cmd);
       assert.strictEqual(res.isBlocked, false);
+    }
+  });
+
+  test("blocks container boundary breach (docker/podman exec -e with sensitive keys)", () => {
+    const containerBreachCommands = [
+      "docker exec -e OPENAI_API_KEY=sk-test123456789 container_id sh",
+      "docker exec -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY app bash",
+      "podman exec -e GITHUB_TOKEN my_agent /bin/sh",
+      "docker run -e ANTHROPIC_API_KEY=sk-ant-test alpine env",
+      "docker exec --env-file .env container_name sh",
+      "podman run --env-file backend/.env ubuntu bash",
+    ];
+
+    for (const cmd of containerBreachCommands) {
+      const res = sandbox.inspectCommand(cmd);
+      assert.strictEqual(res.isBlocked, true, `Expected container command to be blocked: '${cmd}'`);
+      assert.strictEqual(res.category, "dangerous_mutation");
     }
   });
 });

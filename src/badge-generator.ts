@@ -6,7 +6,7 @@
 import { createHmac } from "node:crypto";
 import { AGENTSHIELD_VERSION } from "./version.js";
 
-export type AuditBadgeTier = "verified" | "sponsor" | "enterprise";
+export type AuditBadgeTier = "verified" | "sponsor" | "enterprise" | "owasp-llm06";
 
 export interface SponsorAuditRecord {
   toolName: string;
@@ -58,7 +58,7 @@ export class VerifiedBadgeGenerator {
    */
   public static generateSvgBadge(toolName: string, options: BadgeOptions = {}): string {
     const tier = options.tier || "verified";
-    const label = options.label || "Secured by";
+    const label = options.label || (tier === "owasp-llm06" ? "AgentShield" : "Secured by");
     let message = options.message;
 
     if (!message) {
@@ -66,12 +66,21 @@ export class VerifiedBadgeGenerator {
         message = "AgentShield ★ Sponsor";
       } else if (tier === "enterprise") {
         message = "AgentShield Enterprise";
+      } else if (tier === "owasp-llm06") {
+        message = "OWASP LLM06 Compliant";
       } else {
         message = "AgentShield Zero-Leak";
       }
     }
 
-    const primaryColor = tier === "sponsor" ? "#ec4899" : tier === "enterprise" ? "#06b6d4" : "#8b5cf6";
+    const primaryColor =
+      tier === "sponsor"
+        ? "#ec4899"
+        : tier === "enterprise"
+          ? "#06b6d4"
+          : tier === "owasp-llm06"
+            ? "#10b981"
+            : "#8b5cf6";
     const leftText = label.toUpperCase();
     const rightText = message;
 
@@ -123,13 +132,24 @@ export class VerifiedBadgeGenerator {
     const badgeSvgUrl = `${canonicalDomain}/api/v1/badges/${slug}.svg?tier=${tier}`;
     const auditVerifyUrl = `${canonicalDomain}/verify/${slug}`;
 
-    const label = "Secured by";
-    const status = tier === "sponsor" ? "AgentShield ★ Sponsor" : "AgentShield Zero--Leak";
-    const color = tier === "sponsor" ? "ec4899" : "8b5cf6";
+    const label = tier === "owasp-llm06" ? "AgentShield" : "Secured by";
+    let status = "AgentShield Zero--Leak";
+    let color = "8b5cf6";
+    if (tier === "sponsor") {
+      status = "AgentShield ★ Sponsor";
+      color = "ec4899";
+    } else if (tier === "enterprise") {
+      status = "AgentShield Enterprise";
+      color = "06b6d4";
+    } else if (tier === "owasp-llm06") {
+      status = "OWASP LLM06 Compliant";
+      color = "10b981";
+    }
     const shieldsIoBadgeUrl = `https://img.shields.io/badge/${encodeURIComponent(label)}-${encodeURIComponent(status)}-${color}?logo=shield&logoColor=white&style=flat-square`;
 
-    const markdown = `[![Secured by AgentShield](${shieldsIoBadgeUrl})](${auditVerifyUrl})`;
-    const html = `<a href="${auditVerifyUrl}" target="_blank" rel="noopener noreferrer"><img src="${shieldsIoBadgeUrl}" alt="Secured by AgentShield" /></a>`;
+    const altText = tier === "owasp-llm06" ? "AgentShield: OWASP LLM06 Compliant" : "Secured by AgentShield";
+    const markdown = `[![${altText}](${shieldsIoBadgeUrl})](${auditVerifyUrl})`;
+    const html = `<a href="${auditVerifyUrl}" target="_blank" rel="noopener noreferrer"><img src="${shieldsIoBadgeUrl}" alt="${altText}" /></a>`;
 
     return {
       markdown,
