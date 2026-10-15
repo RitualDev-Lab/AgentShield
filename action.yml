@@ -12,9 +12,9 @@ inputs:
     required: false
     default: "true"
   github_token:
-    description: "GitHub secret token used to post inline annotations and sticky PR comments"
+    description: "GitHub secret token used to post inline annotations and sticky PR comments (defaults to github.token)"
     required: false
-    default: "${{ github.token }}"
+    default: ""
   post_pr_comment:
     description: "Whether to post or update a sticky security audit comment on Pull Requests"
     required: false
@@ -34,7 +34,7 @@ runs:
     - name: Run AgentShield CI Security Audit & PR Bot
       shell: bash
       env:
-        GITHUB_TOKEN: ${{ inputs.github_token }}
+        GITHUB_TOKEN: ${{ inputs.github_token || github.token }}
       run: |
         EXTRA_FLAGS=""
         if [ "${{ inputs.annotate_diff }}" = "true" ]; then
