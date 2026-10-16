@@ -1,0 +1,15 @@
+[package]
+name = "agentshield"
+version = "0.1.4"
+edition = "2021"
+description = "Zero-Leak Secret Defense & Shell Command Sandbox for Autonomous AI Agents in Rust"
+license = "MIT"
+authors = ["RitualDev Lab <security@ritualdev.in>"]
+repository = "https://github.com/RitualDev-Lab/AgentShield"
+homepage = "https://agentshield.ritualdev.in/"
+keywords = ["security", "ai-agents", "secret-scanning", "redaction", "sandbox"]
+categories = ["development-tools", "command-line-utilities"]
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"

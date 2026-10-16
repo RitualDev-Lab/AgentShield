@@ -9,6 +9,7 @@ export * from "./gate.js";
 export * from "./config.js";
 export * from "./ci.js";
 export * from "./version.js";
+export * from "./sidecar.js";
 
 // --- Enterprise & Labs Experimental Modules ---
 export * from "./siem.js";

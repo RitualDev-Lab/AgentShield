@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agentshield"
+version = "0.1.4"
+description = "Zero-Leak Secret Defense & Shell Sandbox for Autonomous AI Agents in Python"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [
+    { name = "RitualDev Lab", email = "security@ritualdev.in" }
+]
+keywords = ["security", "ai-agents", "secret-scanning", "redaction", "langchain", "sandbox"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Topic :: Security",
+]
+
+[project.urls]
+Homepage = "https://agentshield.ritualdev.in/"
+Repository = "https://github.com/RitualDev-Lab/AgentShield"
+Issues = "https://github.com/RitualDev-Lab/AgentShield/issues"

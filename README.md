@@ -247,6 +247,72 @@ AgentShield combines high-performance regular expressions with **Shannon Entropy
 
 ---
 
+## 🌐 Multi-Language Ecosystem Support (Python, Go, Rust, Agnostic)
+
+AgentShield provides first-class, idiomatic SDKs across multiple languages:
+
+| Language / Platform | Package / Location | Supported Runtimes & Frameworks | Integration Pattern |
+| :--- | :--- | :--- | :--- |
+| **Node.js / TypeScript** | `@ritualdev-lab/agentshield` | Node 20+, Cursor, Claude Code, MCP | In-process native TypeScript |
+| **Python** | `agentshield` (`sdks/python`) | Python 3.9+, LangChain, LangGraph, CrewAI, AutoGen | In-process standalone + Sidecar |
+| **Go** | `sdks/go` | Go 1.21+, `net/http` middleware, Gin, Chi | JSON-RPC 2.0 Stdio Sidecar |
+| **Rust** | `sdks/rust` | Rust 2021 edition | JSON-RPC 2.0 Stdio Sidecar |
+| **Any Language / Shell** | `agentshield sidecar` | Ruby, Elixir, PHP, C++, Bash | Stdio Line-Delimited JSON-RPC 2.0 |
+
+### 🐍 Python SDK (`sdks/python`)
+
+Works in pure-Python without requiring Node.js, with built-in LangChain/LangGraph callbacks:
+
+```python
+from agentshield import AgentShieldEngine, AgentShieldCallbackHandler
+from langchain_openai import ChatOpenAI
+
+shield = AgentShieldEngine()
+redacted = shield.scan_and_redact("Query database with sk-proj-placeholder-token")
+print(redacted["sanitizedText"])
+# "Query database with [AGENT_SHIELD:AI:7b3a4f1c]"
+
+# Attach to LangChain to protect prompt inputs automatically:
+llm = ChatOpenAI(callbacks=[AgentShieldCallbackHandler()])
+```
+
+### 🦫 Go SDK (`sdks/go`)
+
+```go
+import "github.com/RitualDev-Lab/agentshield/sdks/go"
+
+client, _ := agentshield.NewClient(ctx)
+defer client.Close()
+
+res, _ := client.ScanAndRedact(ctx, "Stripe secret sk_live_placeholder_token")
+fmt.Println(res.SanitizedText)
+```
+
+### 🦀 Rust SDK (`sdks/rust`)
+
+```rust
+use agentshield::AgentShieldClient;
+
+let client = AgentShieldClient::new()?;
+let res = client.scan_and_redact("My token is ghp_placeholder_token")?;
+println!("Sanitized: {}", res.sanitized_text);
+```
+
+### ⚡ Language-Agnostic Stdio Sidecar Daemon
+Any language can interact with AgentShield via line-delimited JSON-RPC 2.0:
+```bash
+npx @ritualdev-lab/agentshield sidecar
+```
+```json
+{"jsonrpc": "2.0", "id": 1, "method": "shield.scanAndRedact", "params": {"text": "My API key is sk-proj-placeholder"}}
+```
+Response:
+```json
+{"jsonrpc":"2.0","id":1,"result":{"hasSecrets":true,"sanitizedText":"My API key is [AGENT_SHIELD:AI:...]","findings":[...]}}
+```
+
+---
+
 ## 🧩 Programmatic TypeScript SDK
 
 Integrate AgentShield directly into your AI workflows, proxy servers, or custom agent frameworks:

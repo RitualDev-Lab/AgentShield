@@ -857,6 +857,13 @@ async function main() {
       console.log("   Report privately: https://github.com/RitualDev-Lab/AgentShield/security/advisories/new\n");
       process.exit(0);
     }
+  } else if (command === "sidecar" || command === "daemon") {
+    const { AgentShieldSidecar } = await import("./sidecar.js");
+    const sidecar = new AgentShieldSidecar(engine);
+    sidecar.startStdioServer(process.stdin, process.stdout);
+    process.stdin.on("end", () => {
+      process.exit(0);
+    });
   } else {
     console.error(`❌ Unknown command '${command}'. Run 'agentshield --help' for usage.`);
     process.exit(1);

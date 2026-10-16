@@ -17,6 +17,20 @@ export class AgentShieldEngine {
   }
 
   /**
+   * Returns active secret patterns.
+   */
+  public getPatterns(): SecretPattern[] {
+    return [...this.patterns];
+  }
+
+  /**
+   * Scans text and returns detected secrets list.
+   */
+  public scan(text: string, options: ScanOptions = {}): DetectedSecret[] {
+    return this.scanAndRedact(text, options).findings;
+  }
+
+  /**
    * Scans text content, detects known and unknown high-entropy secrets, and redacts them safely.
    */
   public scanAndRedact(text: string, options: ScanOptions = {}): ScanResult {
