@@ -7,6 +7,7 @@ import {
   clearCredentials,
   cacheRemotePolicy,
   getCachedRemotePolicy,
+  clearCachedPolicy,
   mergeRemotePolicyIntoConfig,
   fetchRemotePolicy,
   type RemotePolicyPayload,
@@ -139,9 +140,46 @@ describe("Phase 1: Remote Team Config & Organization Tokens", () => {
     );
   });
 
-  it("should gracefully clear credentials on logout", () => {
+  it("should gracefully clear credentials and purge cached policy on logout", () => {
+    cacheRemotePolicy({
+      policyVersion: "2026.3.0",
+      orgId: "org_enterprise_acme_2026",
+      updatedAt: new Date().toISOString(),
+    });
+    assert.strictEqual(existsSync(CACHED_POLICY_FILE), true);
+
     clearCredentials();
     const loaded = loadCredentials();
     assert.strictEqual(!loaded || Object.keys(loaded).length === 0, true);
+    // Cached policy must be purged upon logout to prevent de-authenticated privilege leakage
+    assert.strictEqual(existsSync(CACHED_POLICY_FILE), false);
+  });
+
+  it("should invalidate and evict stale cached policy when maxAgeMs is exceeded", () => {
+    const staleDate = new Date(Date.now() - 60000).toISOString(); // 60s ago
+    cacheRemotePolicy({
+      policyVersion: "2026.3.0",
+      orgId: "org_enterprise_acme_2026",
+      updatedAt: staleDate,
+    });
+    assert.strictEqual(existsSync(CACHED_POLICY_FILE), true);
+
+    // With 10s maxAge, 60s old policy must be evicted and return null
+    const staleCached = getCachedRemotePolicy(10000);
+    assert.strictEqual(staleCached, null);
+    assert.strictEqual(existsSync(CACHED_POLICY_FILE), false);
+  });
+
+  it("should explicitly purge policy cache via clearCachedPolicy", () => {
+    cacheRemotePolicy({
+      policyVersion: "2026.3.0",
+      orgId: "org_enterprise_acme_2026",
+      updatedAt: new Date().toISOString(),
+    });
+    assert.strictEqual(existsSync(CACHED_POLICY_FILE), true);
+
+    const cleared = clearCachedPolicy();
+    assert.strictEqual(cleared, true);
+    assert.strictEqual(existsSync(CACHED_POLICY_FILE), false);
   });
 });

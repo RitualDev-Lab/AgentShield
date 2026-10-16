@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import type { AgentShieldConfig } from "./config.js";
@@ -89,18 +89,36 @@ export function loadCredentials(): RemotePolicyCredentials | null {
 }
 
 /**
- * Clears saved organization credentials on logout
+ * Invalidates and purges the local persistent remote policy cache from disk
  */
-export function clearCredentials(): boolean {
-  if (existsSync(CREDENTIALS_FILE)) {
+export function clearCachedPolicy(): boolean {
+  if (existsSync(CACHED_POLICY_FILE)) {
     try {
-      writeFileSync(CREDENTIALS_FILE, "{}", "utf8");
+      unlinkSync(CACHED_POLICY_FILE);
       return true;
     } catch {
       return false;
     }
   }
   return false;
+}
+
+/**
+ * Clears saved organization credentials on logout and purges the cached policy
+ */
+export function clearCredentials(): boolean {
+  let cleared = false;
+  if (existsSync(CREDENTIALS_FILE)) {
+    try {
+      writeFileSync(CREDENTIALS_FILE, "{}", "utf8");
+      cleared = true;
+    } catch {
+      cleared = false;
+    }
+  }
+  // Invalidate cached enterprise policy on logout to prevent de-authenticated privilege leakage
+  clearCachedPolicy();
+  return cleared;
 }
 
 /**
@@ -117,13 +135,22 @@ export function cacheRemotePolicy(policy: RemotePolicyPayload): void {
 }
 
 /**
- * Reads cached remote policy from local disk if remote fetch is unreachable
+ * Reads cached remote policy from local disk if remote fetch is unreachable.
+ * If maxAgeMs is specified, validates freshness and evicts stale cached policies.
  */
-export function getCachedRemotePolicy(): RemotePolicyPayload | null {
+export function getCachedRemotePolicy(maxAgeMs?: number): RemotePolicyPayload | null {
   if (existsSync(CACHED_POLICY_FILE)) {
     try {
       const raw = readFileSync(CACHED_POLICY_FILE, "utf8");
-      return JSON.parse(raw);
+      const parsed = JSON.parse(raw) as RemotePolicyPayload;
+      if (maxAgeMs !== undefined && maxAgeMs > 0) {
+        const updateTime = parsed.updatedAt ? new Date(parsed.updatedAt).getTime() : 0;
+        if (updateTime > 0 && Date.now() - updateTime > maxAgeMs) {
+          clearCachedPolicy();
+          return null;
+        }
+      }
+      return parsed;
     } catch {
       return null;
     }
