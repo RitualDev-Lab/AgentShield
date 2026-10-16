@@ -266,5 +266,62 @@ describe("A1 Regression: Boundary-Safe Streaming Redaction & Multiline Windowing
       );
       assert.ok(output.includes("[AGENT_SHIELD:STRIPE_SECRET_KEY:"));
     });
+
+    it("split-canary boundary regression test: 'x'.repeat(300) + 'CANARY_SECRET' + 'y'.repeat(120) with arbitrary chunk boundaries", async () => {
+      const canarySecret = "CANARY_SECRET";
+      const payload = "x".repeat(300) + canarySecret + "y".repeat(120);
+
+      const canaryEngine = new AgentShieldEngine([
+        {
+          id: "CANARY_DETECTOR",
+          name: "Canary Secret Detector",
+          category: "generic",
+          severity: "critical",
+          regex: /CANARY_SECRET/g,
+        },
+      ]);
+
+      // 1. Exhaustive 2-chunk boundary splits: test across every split point around and through the canary
+      const canaryStart = 300;
+      const canaryEnd = canaryStart + canarySecret.length;
+      for (let split = canaryStart - 25; split <= canaryEnd + 25; split++) {
+        const chunk1 = Buffer.from(payload.slice(0, split), "utf8");
+        const chunk2 = Buffer.from(payload.slice(split), "utf8");
+
+        const transform = createRedactingStream(canaryEngine, "token");
+        const output = await streamToString(Readable.from([chunk1, chunk2]).pipe(transform));
+
+        assert.strictEqual(
+          output.includes(canarySecret),
+          false,
+          `Canary secret leaked when split at character index ${split}! Output: ${output}`,
+        );
+        assert.ok(
+          output.includes("[AGENT_SHIELD:CANARY_DETECTOR:"),
+          `Missing canary redaction token when split at index ${split}`,
+        );
+      }
+
+      // 2. Arbitrary chunk sizes (from 1 byte up to 128 bytes)
+      for (const chunkSize of [1, 13, 27, 42, 64, 128]) {
+        const chunks: Buffer[] = [];
+        for (let i = 0; i < payload.length; i += chunkSize) {
+          chunks.push(Buffer.from(payload.slice(i, i + chunkSize), "utf8"));
+        }
+
+        const transform = createRedactingStream(canaryEngine, "token");
+        const output = await streamToString(Readable.from(chunks).pipe(transform));
+
+        assert.strictEqual(
+          output.includes(canarySecret),
+          false,
+          `Canary secret leaked with chunk size ${chunkSize}!`,
+        );
+        assert.ok(
+          output.includes("[AGENT_SHIELD:CANARY_DETECTOR:"),
+          `Missing canary redaction token with chunk size ${chunkSize}`,
+        );
+      }
+    });
   });
 });
