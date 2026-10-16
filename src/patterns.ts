@@ -96,8 +96,8 @@ export const BUILTIN_PATTERNS: SecretPattern[] = [
     category: "crypto",
     severity: "critical",
     regex:
-      /-----BEGIN (?:RSA|DSA|EC|OPENSSH|PGP|PRIVATE) KEY-----[\s\S]+?-----END (?:RSA|DSA|EC|OPENSSH|PGP|PRIVATE) KEY-----/g,
-    description: "PEM-encoded RSA, OpenSSH, or private TLS key block",
+      /-----BEGIN (?:RSA |DSA |EC |OPENSSH |PGP |ENCRYPTED )?(?:PRIVATE )?KEY(?: BLOCK)?-----[\s\S]+?-----END (?:RSA |DSA |EC |OPENSSH |PGP |ENCRYPTED )?(?:PRIVATE )?KEY(?: BLOCK)?-----/g,
+    description: "PEM-encoded RSA, OpenSSH, PGP, or private TLS key block",
   },
 
   // 5. Generic Sensitive Assignments (ENV files)
