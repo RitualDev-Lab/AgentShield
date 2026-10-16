@@ -1,8 +1,10 @@
 # Security Policy & Community Bug Bounty Program
 
-## 🛡️ Commitment to Security
+## 🛡️ Commitment to Security & Formal Threat Model
 
-As an enterprise security and zero-leak defense layer for autonomous AI agents, **AgentShield** treats the security of our regex engine, Shannon entropy tokenizer, AST sandbox, and kernel isolation with the highest priority.
+**AgentShield** provides boundary-safe secret defense, in-memory surrogate token rehydration, and command sandboxing for autonomous AI agents. We treat the security of our regex engine, streaming boundary windowing, Shannon entropy tokenizer, AST sandbox, and kernel isolation with the highest priority.
+
+For an exhaustive analysis of trust boundaries, in-scope threat vectors, out-of-scope non-goals, and verifiable mathematical invariants, please consult our formal **[Threat Model & Verifiable Claims](THREAT_MODEL.md)**.
 
 We actively reward ethical security researchers, white-hat hackers, and community developers who discover bypasses, jailbreaks, or sandbox escapes through our **Community Vulnerability & Bug Bounty Program**.
 

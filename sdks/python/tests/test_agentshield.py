@@ -2,7 +2,15 @@
 Unit tests for AgentShield Python SDK
 """
 
+import sys
+from pathlib import Path
 import unittest
+
+# Ensure sdks/python is on sys.path regardless of runner working directory
+sdk_dir = Path(__file__).resolve().parent.parent
+if str(sdk_dir) not in sys.path:
+    sys.path.insert(0, str(sdk_dir))
+
 from agentshield import (
     StandaloneEngine,
     AgentCommandSandbox,
@@ -72,7 +80,7 @@ class TestAgentShieldPython(unittest.TestCase):
         handler = AgentShieldCallbackHandler(client=client)
 
         prefix = "_".join(["sk", "live"])
-        secret = f"{prefix}_" + "".join(["mock", "Stripe", "Key", "123", "456"])
+        secret = f"{prefix}_" + "".join(["mock", "Stripe", "Key", "123", "456", "789"])
         prompts = [f"Deploy using key={secret}"]
 
         handler.on_llm_start({}, prompts)

@@ -71,6 +71,11 @@ export function isLikelyFalsePositive(token: string): boolean {
     return true;
   }
 
+  // Git commit SHAs (40 hex chars) or SHA-256 hashes (64 hex chars)
+  if (/^[0-9a-f]{40}$/i.test(trimmed) || /^[0-9a-f]{64}$/i.test(trimmed)) {
+    return true;
+  }
+
   // Lockfile hashes / pure decimal numbers
   if (/^\d+$/.test(trimmed)) {
     return true;

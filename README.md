@@ -2,7 +2,7 @@
 
 # 🛡️ AgentShield
 
-### **Zero-Leak Secret Defense & Shell Sandbox for Autonomous AI Coding Agents**
+### **Boundary-Safe Secret Defense & Shell Sandbox for Autonomous AI Coding Agents**
 
 [![GitHub Stars](https://img.shields.io/github/stars/RitualDev-Lab/AgentShield?style=for-the-badge&logo=github&color=8b5cf6)](https://github.com/RitualDev-Lab/AgentShield/stargazers)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg?style=for-the-badge)](LICENSE)
@@ -13,7 +13,7 @@
 <br />
 
 
-[⚡ Quick Start](#-instant-30-second-setup) • [📖 Full Guide](GUIDE.md) • [🛡️ Agent Sandbox](#-1-autonomous-agent-shell-sandbox) • [🐙 GitHub Action](#-3-cicd-security-gate--github-action) • [🤖 Agent Skill](#-ai-agent-skill-integration) • [📋 Compliance](#-4-enterprise-compliance-auditor) • [🏆 Bounties](SECURITY.md) • [🏛️ Governance](GOVERNANCE.md) • [📜 Grants](GRANTS.md) • [👥 Contributors](https://github.com/RitualDev-Lab/AgentShield/graphs/contributors) • [💖 Sponsor (Dodo)](https://checkout.dodopayments.com/buy/pdt_0NpjONGugY5QkrFDUaPva) • [🌐 Website](https://agentshield.ritualdev.in/)
+[⚡ Quick Start](#-instant-30-second-setup) • [📖 Full Guide](GUIDE.md) • [🎯 Threat Model](THREAT_MODEL.md) • [🛡️ Agent Sandbox](#-1-autonomous-agent-shell-sandbox--os-isolation-boundary) • [🐙 GitHub Action](#-3-cicd-security-gate--github-action) • [🤖 Agent Skill](#-ai-agent-skill-integration) • [📋 Compliance](#-4-scope-honest-secret-control-assessment) • [🏆 Bounties](SECURITY.md) • [🏛️ Governance](GOVERNANCE.md) • [📜 Grants](GRANTS.md) • [👥 Contributors](https://github.com/RitualDev-Lab/AgentShield/graphs/contributors) • [💖 Sponsor (Dodo)](https://checkout.dodopayments.com/buy/pdt_0NpjONGugY5QkrFDUaPva) • [🌐 Website](https://agentshield.ritualdev.in/)
 
 
 <br/><br/>
@@ -36,7 +36,7 @@ Autonomous coding agents (**Claude Code**, **Cursor**, **Windsurf**, **Codex**, 
 | **Accidental Exfiltration** | Agent runs `curl` or shell scripts with exported tokens. | Ephemeral tokens dumped into terminal logs & CI artifacts. |
 | **Git Contamination** | Agent writes tests or code with live test credentials. | Secrets committed permanently into Git history and pull requests. |
 
-**AgentShield** acts as a deterministic, local-first zero-leak defense layer that intercepts, audits, and redacts credentials before they ever escape your machine.
+**AgentShield** acts as a deterministic, local-first defense layer that intercepts, audits, and redacts credentials before they ever escape your machine. Grounded in our verifiable **[Threat Model](THREAT_MODEL.md)**, it replaces unprovable marketing claims with mathematically testable streaming invariants.
 
 ---
 

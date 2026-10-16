@@ -50,6 +50,14 @@ jobs:
       - name: Run Test Suite
         run: pnpm test
 
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run Python SDK Tests
+        run: python -m unittest discover -s sdks/python/tests
+
       - name: Run Performance Benchmark
         run: pnpm run benchmark
 
