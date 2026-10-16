@@ -3,19 +3,19 @@ import { homedir, platform } from "node:os";
 import { Transform } from "node:stream";
 import { StringDecoder } from "node:string_decoder";
 import { AgentShieldEngine } from "./engine.js";
-import { KernelSandboxConfinement } from "./kernel.js";
+import { KernelSandboxConfinement, type IsolationMechanism } from "./kernel.js";
 import { AgentCommandSandbox, type CommandInspectionResult } from "./sandbox.js";
 
 export interface StdioInterceptorOptions {
   workspaceDir?: string;
   enableKernelSandbox?: boolean;
+  requireIsolation?: boolean;
   maskStyle?: "token" | "hash" | "asterisk";
   onBlock?: (inspection: CommandInspectionResult) => void;
+  targetPlatform?: NodeJS.Platform;
 }
 
-export type IsolationMechanism =
-  | "macos_sandbox_exec"
-  | "process_level_firewall";
+export type { IsolationMechanism } from "./kernel.js";
 
 export interface InterceptedExecutionResult {
   exitCode: number;
@@ -24,6 +24,7 @@ export interface InterceptedExecutionResult {
   totalSecretsScrubbed: number;
   isolationMechanism: IsolationMechanism;
   isolationNotice: string;
+  downgradedIsolation?: boolean;
 }
 
 export interface RedactingStreamOptions {
@@ -300,6 +301,7 @@ export class AgentStdioInterceptor {
         totalSecretsScrubbed: 0,
         isolationMechanism: "process_level_firewall",
         isolationNotice: "Command blocked by AST pre-flight policy firewall before OS execution.",
+        downgradedIsolation: false,
       };
     }
 
@@ -319,35 +321,71 @@ export class AgentStdioInterceptor {
         totalSecretsScrubbed: 0,
         isolationMechanism: "process_level_firewall",
         isolationNotice: "Command blocked by kernel path containment verification.",
+        downgradedIsolation: false,
       };
     }
 
-    // 3. Execution with Real-Time Stdio Redaction Stream
+    // 3. Strict Isolation and Kernel Confinement Verification (Defect A2)
+    const targetOs = options.targetPlatform || platform();
+    const isolationCheck = this.kernel.checkIsolationSupport(targetOs);
+    const requestedKernelSandbox = Boolean(options.enableKernelSandbox);
+    const requireStrictIsolation = Boolean(options.requireIsolation);
+
+    // Fail-closed refusal: If caller explicitly requires isolation and host cannot enforce kernel sandbox
+    if (requireStrictIsolation && !isolationCheck.supported) {
+      const blockReason = `Execution refused: requireIsolation is enabled, but OS-level kernel isolation is unavailable on host (${targetOs}). Refusing to silently downgrade to process-level firewall.`;
+      const refusalRes: CommandInspectionResult = {
+        isBlocked: true,
+        reason: blockReason,
+        category: "dangerous_mutation",
+      };
+      if (options.onBlock) options.onBlock(refusalRes);
+      return {
+        exitCode: 1,
+        isBlocked: true,
+        blockReason,
+        totalSecretsScrubbed: 0,
+        isolationMechanism: "isolated_refusal",
+        isolationNotice:
+          "Execution refused by strict isolation policy. Command inspection is defense-in-depth and does not constitute an OS kernel security boundary.",
+        downgradedIsolation: false,
+      };
+    }
+
+    // 4. Execution with Real-Time Stdio Redaction Stream
     let totalScrubbed = 0;
     const maskStyle = options.maskStyle || "token";
 
     return new Promise((resolve) => {
       let child: ChildProcess;
-      const osType = platform();
       let isolationMechanism: IsolationMechanism = "process_level_firewall";
       let isolationNotice = "";
+      let downgradedIsolation = false;
 
       // Wrap in OS-level sandbox if requested and supported
       let execCmd = command;
-      if (options.enableKernelSandbox && osType === "darwin") {
+      if (
+        (requestedKernelSandbox || requireStrictIsolation) &&
+        isolationCheck.supported &&
+        targetOs === "darwin"
+      ) {
         isolationMechanism = "macos_sandbox_exec";
         isolationNotice = "Enforcing OS-level kernel confinement via macOS sandbox-exec.";
+        downgradedIsolation = false;
         const home = homedir().replace(/\\/g, "\\\\").replace(/"/g, '\\"');
         const ws = (options.workspaceDir || process.cwd())
           .replace(/\\/g, "\\\\")
           .replace(/"/g, '\\"');
         execCmd = `sandbox-exec -p '(version 1)(deny default)(allow process-exec)(allow sysctl-read)(allow file-read* (subpath "${ws}"))(allow file-write* (subpath "${ws}"))(allow file-read* (subpath "/usr/lib"))(allow file-read* (subpath "/dev/null"))(deny file-read* (subpath "${home}/.ssh"))(deny file-read* (subpath "${home}/.aws"))' ${command}`;
-      } else if (options.enableKernelSandbox) {
+      } else if (requestedKernelSandbox) {
         isolationMechanism = "process_level_firewall";
-        isolationNotice = `Kernel sandbox requested, but OS-level sandbox-exec is only supported on macOS (current host: ${osType}). Executing under AST pattern firewall and real-time streaming redaction.`;
+        downgradedIsolation = true;
+        isolationNotice = `Kernel sandbox requested, but OS-level sandbox-exec is only supported on macOS (current host: ${targetOs}). Executing under AST pattern firewall and real-time streaming redaction. Note: Command inspection is defense-in-depth, not an OS security boundary. Pass requireIsolation: true to fail closed instead of silently downgrading.`;
       } else {
         isolationMechanism = "process_level_firewall";
-        isolationNotice = "Executing under AST pattern inspection firewall and real-time stdio stream redaction.";
+        downgradedIsolation = false;
+        isolationNotice =
+          "Executing under AST pattern inspection firewall and real-time stdio stream redaction (defense-in-depth).";
       }
 
       try {
@@ -365,6 +403,7 @@ export class AgentStdioInterceptor {
           totalSecretsScrubbed: 0,
           isolationMechanism,
           isolationNotice,
+          downgradedIsolation,
         });
         return;
       }
@@ -386,6 +425,7 @@ export class AgentStdioInterceptor {
           totalSecretsScrubbed: totalScrubbed,
           isolationMechanism,
           isolationNotice,
+          downgradedIsolation,
         });
       });
 
@@ -397,6 +437,7 @@ export class AgentStdioInterceptor {
           totalSecretsScrubbed: totalScrubbed,
           isolationMechanism,
           isolationNotice,
+          downgradedIsolation,
         });
       });
     });

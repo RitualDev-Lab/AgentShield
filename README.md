@@ -59,13 +59,42 @@ npx @ritualdev-lab/agentshield exec "cat .env"
 
 ## 🚀 Key Defense Layers
 
-### 🛡️ 1. Autonomous Agent Shell Sandbox
+### 🛡️ 1. Autonomous Agent Shell Sandbox & OS Isolation Boundary
 Intercept and sandbox agent terminal execution. If an agent tries to read `.env`, dump shell variables (`printenv`), or send keys to outbound endpoints, AgentShield blocks it on the fly:
 
 ```bash
 npx @ritualdev-lab/agentshield exec "cat .env"
 # 🚨 [AgentShield Sandbox Block] Blocked attempt to read raw .env or private credential file.
 # Protected credentials from entering agent LLM context window!
+```
+
+#### OS Isolation Guarantees & Defense-in-Depth Boundary
+> [!IMPORTANT]
+> **Defense-in-Depth vs OS Security Boundary**:
+> Userland command inspection (AST parsing and regex heuristics) is **defense-in-depth** designed to prevent accidental exfiltration and common script bypasses. It is **not** an OS kernel security boundary. Arbitrary compiled binaries or direct kernel syscalls require true OS-level containerization.
+
+| Platform | Primary Isolation Mechanism | Security Boundary Level | Guarantees & Limitations |
+| :--- | :--- | :---: | :--- |
+| **macOS** | `macos_sandbox_exec` | **Kernel-Enforced** | System call mediation via Apple Seatbelt; restricts file read/write and networking outside workspace. |
+| **Linux** | `linux_landlock` / `bwrap` | **Defense-in-Depth** *(unless containerized)* | Generates Landlock LSM & bubblewrap profiles. Without a container runtime, Node child processes inherit caller privileges. |
+| **Windows** | `windows_appcontainer` | **Defense-in-Depth** | Generates AppContainer / Low-Integrity profile templates. Win32 child processes run with normal caller token integrity. |
+| **Fallback** | `process_level_firewall` | **Defense-in-Depth** | AST pattern firewall and real-time streaming redaction. |
+
+#### Strict Isolation Enforcement (`--require-isolation`)
+By default, requesting kernel sandboxing on non-macOS hosts logs an isolation warning and runs under the defense-in-depth AST firewall. To **fail-closed** and refuse execution whenever OS-level kernel isolation cannot be guaranteed:
+
+```bash
+# Refuse execution if the host cannot enforce true OS kernel isolation
+npx @ritualdev-lab/agentshield exec "npm test" --require-isolation
+# 🛑 [AgentShield Isolation Refusal] Execution refused: requireIsolation is enabled, but OS-level kernel isolation is unavailable on host (win32). Refusing to silently downgrade to process-level firewall.
+```
+
+In the TypeScript SDK:
+```typescript
+const result = await interceptor.execute(command, {
+  enableKernelSandbox: true,
+  requireIsolation: true, // Fails closed instead of silently downgrading
+});
 ```
 
 ### 🚦 2. Git Pre-Commit Leak Shield

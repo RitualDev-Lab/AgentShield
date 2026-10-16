@@ -70,9 +70,11 @@ describe("Phase 2: AgentStdioInterceptor & Streaming Redaction", () => {
     assert.ok(result.isolationNotice);
     if (process.platform === "darwin") {
       assert.strictEqual(result.isolationMechanism, "macos_sandbox_exec");
+      assert.strictEqual(result.downgradedIsolation, false);
       assert.ok(result.isolationNotice.includes("sandbox-exec"));
     } else {
       assert.strictEqual(result.isolationMechanism, "process_level_firewall");
+      assert.strictEqual(result.downgradedIsolation, true);
       assert.ok(result.isolationNotice.includes("only supported on macOS"));
     }
   });

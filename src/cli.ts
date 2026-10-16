@@ -433,11 +433,9 @@ async function main() {
     }
 
     const enableKernel = args.includes("--kernel");
-    if (enableKernel && platform() !== "darwin") {
-      console.warn(
-        `⚠️  [AgentShield Isolation Notice] Kernel sandboxing (--kernel) was requested, but OS-level sandbox-exec is only supported on macOS (host: ${platform()}). Executing under AST pattern firewall and real-time streaming redaction.\n`,
-      );
-    }
+    const requireIsolation =
+      args.includes("--require-isolation") || args.includes("--strict-isolation");
+
     const isClaudeHook = args.includes("--claude-hook") || process.env.CLAUDE_TOOL_USE !== undefined;
     const { AgentStdioInterceptor } = await import("./interceptor.js");
     const interceptor = new AgentStdioInterceptor(engine, process.cwd());
@@ -445,6 +443,7 @@ async function main() {
     const result = await interceptor.execute(rawCmd, {
       workspaceDir: process.cwd(),
       enableKernelSandbox: enableKernel,
+      requireIsolation,
       maskStyle,
       onBlock: (check) => {
         console.error(
@@ -453,7 +452,14 @@ async function main() {
       },
     });
 
+    if (result.downgradedIsolation) {
+      console.warn(`\n⚠️  [AgentShield Isolation Warning] ${result.isolationNotice}\n`);
+    }
+
     if (result.isBlocked) {
+      if (result.isolationMechanism === "isolated_refusal") {
+        console.error(`\n🛑 [AgentShield Isolation Refusal] ${result.blockReason}\n`);
+      }
       // Exit code 2 tells Claude Code to abort the tool execution cleanly
       process.exit(isClaudeHook ? 2 : 1);
     }

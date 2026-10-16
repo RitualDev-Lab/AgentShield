@@ -1,6 +1,81 @@
 import { homedir, platform } from "node:os";
 import { join } from "node:path";
 
+export type IsolationMechanism =
+  | "macos_sandbox_exec"
+  | "linux_bubblewrap"
+  | "linux_landlock"
+  | "windows_appcontainer"
+  | "process_level_firewall"
+  | "isolated_refusal";
+
+export interface OsIsolationGuarantee {
+  os: NodeJS.Platform;
+  kernelIsolationSupported: boolean;
+  primaryMechanism: IsolationMechanism;
+  boundaryType: "kernel_enforced" | "defense_in_depth_firewall";
+  description: string;
+  securityBoundaryLimitations: string[];
+}
+
+/**
+ * Returns documented OS-level isolation guarantees, mechanism boundaries, and limitations.
+ * Command inspection and regex/AST pattern matching are defense-in-depth and do NOT constitute
+ * an OS kernel security boundary.
+ */
+export function getOsIsolationGuarantee(osType: NodeJS.Platform = platform()): OsIsolationGuarantee {
+  switch (osType) {
+    case "darwin":
+      return {
+        os: "darwin",
+        kernelIsolationSupported: true,
+        primaryMechanism: "macos_sandbox_exec",
+        boundaryType: "kernel_enforced",
+        description: "Apple Seatbelt (sandbox-exec) kernel-level system call mediation.",
+        securityBoundaryLimitations: [
+          "sandbox-exec is designated as deprecated by Apple in modern macOS versions.",
+          "Mach port IPC and certain inter-process communications may bypass file-based rules if not explicitly restricted.",
+        ],
+      };
+    case "linux":
+      return {
+        os: "linux",
+        kernelIsolationSupported: false,
+        primaryMechanism: "linux_landlock",
+        boundaryType: "defense_in_depth_firewall",
+        description: "Linux Landlock LSM / bubblewrap container profile generator.",
+        securityBoundaryLimitations: [
+          "Landlock requires Linux kernel >= 5.13 and unprivileged user namespaces.",
+          "Without an external container runtime (Docker, Podman, bwrap), Node child process runs with caller process credentials.",
+        ],
+      };
+    case "win32":
+      return {
+        os: "win32",
+        kernelIsolationSupported: false,
+        primaryMechanism: "windows_appcontainer",
+        boundaryType: "defense_in_depth_firewall",
+        description: "Windows AppContainer / Low-Integrity profile template.",
+        securityBoundaryLimitations: [
+          "Standard Node spawn on Windows runs under normal caller token integrity.",
+          "Regex and AST inspection do not constitute a Windows kernel security boundary.",
+        ],
+      };
+    default:
+      return {
+        os: osType,
+        kernelIsolationSupported: false,
+        primaryMechanism: "process_level_firewall",
+        boundaryType: "defense_in_depth_firewall",
+        description: "Process-level AST pattern inspection firewall and real-time streaming redaction.",
+        securityBoundaryLimitations: [
+          "Command inspection is defense-in-depth, NOT an OS security boundary.",
+          "Compiled binaries, memory manipulation, and direct kernel syscalls cannot be mediated by userland inspection.",
+        ],
+      };
+  }
+}
+
 export interface SandboxProfile {
   os: "linux" | "darwin" | "win32";
   policyName: string;
@@ -24,6 +99,24 @@ export class KernelSandboxConfinement {
     this.workspaceDir = workspaceDir;
     const osType = platform();
     this.currentOs = osType === "darwin" || osType === "win32" ? osType : "linux";
+  }
+
+  /**
+   * Evaluates whether the target host environment can enforce true OS-level kernel isolation.
+   */
+  public checkIsolationSupport(targetOs: NodeJS.Platform = platform()): {
+    supported: boolean;
+    mechanism: IsolationMechanism;
+    reason?: string;
+  } {
+    const guarantee = getOsIsolationGuarantee(targetOs);
+    return {
+      supported: guarantee.kernelIsolationSupported,
+      mechanism: guarantee.primaryMechanism,
+      reason: guarantee.kernelIsolationSupported
+        ? undefined
+        : `Host OS '${targetOs}' does not support active kernel sandbox confinement in the default runtime. Command inspection is defense-in-depth, not an OS security boundary.`,
+    };
   }
 
   /**
