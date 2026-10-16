@@ -143,18 +143,32 @@ Or run via CLI in any CI container:
 npx @ritualdev-lab/agentshield ci --base origin/main --report security-report.md
 ```
 
-### 📋 4. Enterprise Compliance Auditor
-Audit files and code diffs against industry regulatory controls with ready-to-present scores:
+### 📋 4. Scope-Honest Secret-Control Assessment
+Assess files and workspace streams against technical secret-handling controls in standard frameworks (SOC 2, PCI-DSS, HIPAA, ISO 27001):
 
 ```bash
 npx @ritualdev-lab/agentshield compliance .env
 ```
 ```text
-📋 [ENTERPRISE COMPLIANCE AUDIT] Status: COMPLIANT (Score: 100%)
-  ✅ [SOC2] CC6.1: Logical Access Controls & Credential Integrity
-  ✅ [PCI-DSS] Req-3.4: Protection of Authentication & Cardholder Tokens
-  ✅ [HIPAA] §164.312(a)(1): Technical Safeguards - Access Control
-  ✅ [ISO27001] A.8.28: Secure Coding & Secret Management
+📋 [SECRET-CONTROL ASSESSMENT] Status: NO_FINDINGS_IN_ASSESSED_CONTROLS (Assessed Controls Score: 100%)
+ℹ️  Scope: Technical secret detection, real-time streaming token redaction, and CLI command firewall.
+⚠️  Disclaimer: Notice: This report reflects only the results of automated secret detection across assessed technical controls ('NO_FINDINGS_IN_ASSESSED_CONTROLS'). It does NOT establish overall organizational SOC 2, HIPAA, PCI-DSS, or ISO 27001 compliance. Overall compliance requires an accredited third-party audit firm, administrative governance, physical safeguards, and operational policies.
+
+  Assessed Controls:
+    ✅ [SOC2] CC6.1: Logical Access Controls & Credential Integrity
+    ✅ [SOC2] CC6.6: Boundary Protection & Unauthorized Egress Controls
+    ✅ [PCI_DSS] Req-3.4: Protection of Authentication & Payment Gateway Secrets
+    ✅ [PCI_DSS] Req-8.3: Strong Authentication Credential Management
+    ✅ [HIPAA] §164.312(a)(1): Technical Safeguards - Access Control & Authentication
+    ✅ [ISO27001] A.8.28: Secure Coding & Secret Management
+    ✅ [ISO27001] A.8.24: Use of Cryptography & Key Protection
+
+  Broader Controls (Not Assessed by Secret Scanning):
+    ⏸️  [SOC2] CC1.1: Integrity & Ethical Values (Governance) (NOT ASSESSED)
+    ⏸️  [SOC2] CC5.2: Risk Assessment & Vendor Management (NOT ASSESSED)
+    ⏸️  [PCI_DSS] Req-9.1: Physical Access Restrictions (NOT ASSESSED)
+    ⏸️  [HIPAA] §164.308(a)(1): Administrative Safeguards (NOT ASSESSED)
+    ⏸️  [ISO27001] A.5.1: Policies for Information Security (NOT ASSESSED)
 ```
 
 ### 🔐 5. Zero-Trust In-Memory Surrogate Injection

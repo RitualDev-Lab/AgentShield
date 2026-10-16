@@ -553,24 +553,38 @@ async function main() {
 
     if (args.includes("--json")) {
       console.log(JSON.stringify(report, null, 2));
-      process.exit(report.status === "COMPLIANT" ? 0 : 1);
+      process.exit(
+        report.status === "NO_FINDINGS_IN_ASSESSED_CONTROLS" ? 0 : 1,
+      );
     }
 
     printBanner();
     console.log(
-      `📋 [ENTERPRISE COMPLIANCE AUDIT] Status: ${report.status} (Score: ${report.score}%)\n`,
+      `📋 [SECRET-CONTROL ASSESSMENT] Status: ${report.status} (Assessed Controls Score: ${report.score}%)\n`,
     );
-    for (const ctrl of report.controls) {
+    console.log(`ℹ️  Scope: ${report.scopeDisclosure.scope}`);
+    console.log(`⚠️  Disclaimer: ${report.scopeDisclosure.disclaimer}\n`);
+
+    console.log("  Assessed Controls:");
+    for (const ctrl of report.assessedControls) {
       const icon = ctrl.status === "PASSED" ? "✅" : "❌";
-      console.log(`  ${icon} [${ctrl.framework.toUpperCase()}] ${ctrl.controlId}: ${ctrl.name}`);
+      console.log(`    ${icon} [${ctrl.framework.toUpperCase()}] ${ctrl.controlId}: ${ctrl.name}`);
       if (ctrl.violations.length > 0) {
         for (const v of ctrl.violations) {
-          console.log(`     ⚠️ ${v}`);
+          console.log(`       ⚠️ ${v}`);
         }
       }
     }
 
-    if (report.status !== "COMPLIANT") {
+    console.log("\n  Broader Controls (Not Assessed by Secret Scanning):");
+    for (const ctrl of report.unassessedControls) {
+      console.log(`    ⏸️  [${ctrl.framework.toUpperCase()}] ${ctrl.controlId}: ${ctrl.name} (NOT ASSESSED)`);
+      console.log(`       Reason: ${ctrl.reason}`);
+      console.log(`       Evidence Needed: ${ctrl.requiredExternalEvidence.join("; ")}`);
+    }
+    console.log("");
+
+    if (report.status !== "NO_FINDINGS_IN_ASSESSED_CONTROLS") {
       process.exit(1);
     }
     process.exit(0);

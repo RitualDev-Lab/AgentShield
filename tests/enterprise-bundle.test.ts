@@ -47,7 +47,7 @@ describe("Phase 4: Enterprise Compliance Bundle Generator", () => {
 
     assert.match(bundle.bundleId, /^attestation_\d+_[a-z0-9]+$/);
     assert.strictEqual(bundle.organizationName, "Acme Corp");
-    assert.strictEqual(bundle.executiveStatus, "COMPLIANT");
+    assert.strictEqual(bundle.executiveStatus, "NO_FINDINGS_IN_ASSESSED_CONTROLS");
     assert.strictEqual(bundle.complianceScore, 100);
     assert.strictEqual(bundle.metrics.activeDeveloperNodes, 2);
     assert.strictEqual(bundle.metrics.totalBlockedViolations, 4);
@@ -122,7 +122,7 @@ describe("Phase 4: Enterprise Compliance Bundle Generator", () => {
     assert(md.includes("# 🏛️ Enterprise Security & Compliance Attestation Report"));
     assert(md.includes("Global Bank International"));
     assert(md.includes(bundle.bundleId));
-    assert(md.includes("- **Overall Status**: **COMPLIANT**"));
+    assert(md.includes("- **Overall Status**: **NO_FINDINGS_IN_ASSESSED_CONTROLS**"));
     assert(md.includes("- **Framework Compliance Score**: **100%**"));
     assert(md.includes("- **Audited Developer Workstations**: 2"));
     assert(md.includes("- **Unauthorized Egress Commands Blocked**: 4"));

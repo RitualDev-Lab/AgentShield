@@ -43,15 +43,18 @@ describe("Phase 4: Enterprise Control Plane", () => {
     });
   });
 
-  describe("Compliance Engine (SOC2, PCI-DSS, HIPAA, ISO27001)", () => {
-    it("should return COMPLIANT when 0 secrets are detected", () => {
+  describe("Secret-Control Assessment Engine (SOC2, PCI-DSS, HIPAA, ISO27001)", () => {
+    it("should return NO_FINDINGS_IN_ASSESSED_CONTROLS when 0 secrets are detected", () => {
       const report = ComplianceEngine.evaluate([]);
-      assert.equal(report.status, "COMPLIANT");
+      assert.equal(report.status, "NO_FINDINGS_IN_ASSESSED_CONTROLS");
+      assert.equal(report.legacyStatus, "COMPLIANT");
       assert.equal(report.score, 100);
       assert.equal(report.summary.totalViolations, 0);
+      assert.ok(report.unassessedControls.length > 0);
+      assert.ok(report.scopeDisclosure.disclaimer.includes("does NOT establish"));
     });
 
-    it("should flag SOC2 and PCI-DSS violations on leaked credentials", () => {
+    it("should flag SOC2 and PCI-DSS violations on leaked credentials as FINDINGS_DETECTED", () => {
       const finding: DetectedSecret = {
         patternId: "stripe-live-key",
         patternName: "Stripe Live Secret Key",
@@ -65,11 +68,12 @@ describe("Phase 4: Enterprise Control Plane", () => {
       };
 
       const report = ComplianceEngine.evaluate([finding]);
-      assert.equal(report.status, "NON_COMPLIANT");
+      assert.equal(report.status, "FINDINGS_DETECTED");
+      assert.equal(report.legacyStatus, "NON_COMPLIANT");
       assert.ok(report.score < 100);
       assert.ok(report.summary.totalViolations > 0);
 
-      const pciControl = report.controls.find((c) => c.framework === "pci_dss");
+      const pciControl = report.assessedControls.find((c) => c.framework === "pci_dss");
       assert.equal(pciControl?.status, "FAILED");
     });
   });

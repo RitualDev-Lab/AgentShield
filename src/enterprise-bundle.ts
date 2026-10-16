@@ -14,13 +14,19 @@ export interface ComplianceBundleOptions {
   includeLedgerEvidence?: boolean;
 }
 
+export type ExecutiveAssessmentStatus =
+  | "NO_FINDINGS_IN_ASSESSED_CONTROLS"
+  | "FINDINGS_DETECTED"
+  | "COMPLIANT"
+  | "NON_COMPLIANT";
+
 export interface ComplianceAttestationPackage {
   bundleId: string;
   generatedAt: string;
   organizationName: string;
   auditorEmail: string;
   frameworks: ComplianceFramework[];
-  executiveStatus: "COMPLIANT" | "NON_COMPLIANT";
+  executiveStatus: ExecutiveAssessmentStatus;
   complianceScore: number;
   cryptographicEvidence: {
     ledgerVerificationStatus: "VERIFIED_UNBROKEN" | "CORRUPTED" | "EMPTY";
@@ -147,6 +153,9 @@ export class EnterpriseComplianceBundleGenerator {
       `- **Overall Status**: **${pkg.executiveStatus}**`,
       `- **Framework Compliance Score**: **${pkg.complianceScore}%**`,
       `- **Frameworks Evaluated**: ${pkg.frameworks.map((f) => f.toUpperCase()).join(", ")}`,
+      "",
+      "> [!IMPORTANT]",
+      `> **Scope & Limitations**: ${pkg.auditReport.scopeDisclosure.disclaimer}`,
       "",
       "## 🔐 Cryptographic Ledger Verification",
       `- **HMAC Chain Status**: **${pkg.cryptographicEvidence.ledgerVerificationStatus}**`,
