@@ -539,6 +539,39 @@
       }
     ];
 
+    const GITHUB_HANDLE_REGEX = /^[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38}$/;
+
+    function getSafeAvatarUrl(handle) {
+      const clean = String(handle || '').trim().replace(/^@/, '');
+      if (GITHUB_HANDLE_REGEX.test(clean)) {
+        return `https://github.com/${encodeURIComponent(clean)}.png`;
+      }
+      return 'https://github.com/ghost.png';
+    }
+
+    function getSafeUrl(rawUrl) {
+      if (!rawUrl) return '';
+      try {
+        const parsed = new URL(String(rawUrl).trim(), window.location.origin);
+        if (parsed.protocol === 'https:' || parsed.protocol === 'http:') {
+          return parsed.href;
+        }
+      } catch (e) {
+        // invalid URL
+      }
+      return '';
+    }
+
+    function getSafePatronAvatar(patron) {
+      if (patron && patron.github && GITHUB_HANDLE_REGEX.test(String(patron.github).replace(/^@/, '').trim())) {
+        return getSafeAvatarUrl(patron.github);
+      }
+      if (patron && patron.avatar && typeof patron.avatar === 'string' && patron.avatar.startsWith('https://github.com/')) {
+        return patron.avatar;
+      }
+      return 'https://github.com/ghost.png';
+    }
+
     let currentCurrency = 'USD';
     let currentAmount = 5;
 
@@ -649,12 +682,7 @@
     });
 
     sponsorGithubInput.addEventListener('input', (e) => {
-      const handle = e.target.value.trim().replace(/^@/, '');
-      if (handle) {
-        previewAvatar.src = `https://github.com/${handle}.png`;
-      } else {
-        previewAvatar.src = 'https://github.com/ghost.png';
-      }
+      previewAvatar.src = getSafeAvatarUrl(e.target.value);
     });
 
     sponsorCommentInput.addEventListener('input', (e) => {
@@ -699,7 +727,8 @@
     function handleSponsorSubmit(e) {
       e.preventDefault();
       const name = sponsorNameInput.value.trim();
-      const github = sponsorGithubInput.value.trim().replace(/^@/, '');
+      const rawGithub = sponsorGithubInput.value.trim().replace(/^@/, '');
+      const cleanGithub = GITHUB_HANDLE_REGEX.test(rawGithub) ? rawGithub : '';
       const url = document.getElementById('sponsor-url').value.trim();
       const comment = sponsorCommentInput.value.trim();
       const isUSD = currentCurrency === 'USD';
@@ -708,12 +737,15 @@
 
       if (!name) return;
 
+      const safeAvatar = getSafeAvatarUrl(cleanGithub);
+      const safeUrl = getSafeUrl(url) || (cleanGithub ? `https://github.com/${encodeURIComponent(cleanGithub)}` : '');
+
       const newEntry = {
         id: 'patron-' + Date.now(),
         name,
-        github,
-        avatar: github ? `https://github.com/${github}.png` : 'https://github.com/ghost.png',
-        url: url || (github ? `https://github.com/${github}` : ''),
+        github: cleanGithub,
+        avatar: safeAvatar,
+        url: safeUrl,
         amountUSD: usd,
         amountINR: inr,
         tier: usd >= 100 ? 'gold' : usd >= 50 ? 'silver' : 'bronze',
@@ -738,6 +770,7 @@
 
     function renderLeaderboard(filter = 'all') {
       const container = document.getElementById('leaderboard-container');
+      if (!container) return;
       let patrons = getStoredPatrons();
 
       if (filter === 'gold') {
@@ -748,7 +781,9 @@
         patrons = [...patrons].sort((a, b) => b.amountUSD - a.amountUSD);
       }
 
-      container.innerHTML = patrons.map((patron, idx) => {
+      container.replaceChildren();
+
+      patrons.forEach((patron, idx) => {
         const rank = idx + 1;
         let rankBadge = `#${rank}`;
         let glowClass = 'border-slate-800';
@@ -767,66 +802,168 @@
         const tierLabel = patron.amountUSD >= 100 ? '👑 Gold Patron' : patron.amountUSD >= 50 ? '🛡️ Silver Backer' : '⚡ Supporter';
         const tierClass = patron.amountUSD >= 100 ? 'bg-amber-950/80 text-amber-300 border-amber-500/40' : patron.amountUSD >= 50 ? 'bg-slate-800 text-slate-200 border-slate-600' : 'bg-purple-950 text-purple-300 border-purple-500/40';
 
-        return `
-          <div class="p-4 sm:p-5 rounded-xl border ${glowClass} bg-slate-900/80 transition-all hover:bg-slate-900 flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div class="flex items-start sm:items-center space-x-3.5">
-              <span class="text-sm font-extrabold font-mono text-slate-400 w-12 shrink-0">${rankBadge}</span>
-              <img src="${patron.avatar}" alt="${patron.name}" class="w-11 h-11 rounded-full border border-purple-500/40 object-cover bg-slate-950 shrink-0">
-              <div>
-                <div class="flex items-center gap-2 flex-wrap">
-                  ${patron.url ? `<a href="${patron.url}" target="_blank" rel="noopener noreferrer" class="font-bold text-white hover:text-purple-300 transition text-sm sm:text-base">${patron.name}</a>` : `<span class="font-bold text-white text-sm sm:text-base">${patron.name}</span>`}
-                  <span class="text-purple-400 text-xs" title="Verified Sponsor">✓</span>
-                  <span class="px-2 py-0.5 text-[10px] font-mono font-bold rounded-full border ${tierClass}">${tierLabel}</span>
-                </div>
-                ${patron.comment ? `
-                  <div class="mt-2 text-xs text-slate-300 italic bg-slate-950/60 px-3 py-1.5 rounded-lg border border-slate-800/80">
-                    "${patron.comment}"
-                  </div>
-                ` : ''}
-              </div>
-            </div>
+        const row = document.createElement('div');
+        row.className = `p-4 sm:p-5 rounded-xl border ${glowClass} bg-slate-900/80 transition-all hover:bg-slate-900 flex flex-col md:flex-row md:items-center justify-between gap-4`;
 
-            <div class="flex items-center justify-between md:justify-end gap-6 shrink-0 pl-14 md:pl-0">
-              <div class="text-left md:text-right">
-                <div class="text-base sm:text-lg font-extrabold text-white font-mono">$${patron.amountUSD.toLocaleString()}</div>
-                <div class="text-[11px] text-slate-500 font-mono">₹${patron.amountINR ? patron.amountINR.toLocaleString() : (patron.amountUSD * 84).toLocaleString()}</div>
-              </div>
-              <div class="text-[10px] font-mono text-slate-500">${patron.date}</div>
-            </div>
-          </div>
-        `;
-      }).join('');
+        const leftGroup = document.createElement('div');
+        leftGroup.className = 'flex items-start sm:items-center space-x-3.5';
+
+        const rankSpan = document.createElement('span');
+        rankSpan.className = 'text-sm font-extrabold font-mono text-slate-400 w-12 shrink-0';
+        rankSpan.textContent = rankBadge;
+
+        const avatarImg = document.createElement('img');
+        avatarImg.src = getSafePatronAvatar(patron);
+        avatarImg.alt = String(patron.name || '');
+        avatarImg.className = 'w-11 h-11 rounded-full border border-purple-500/40 object-cover bg-slate-950 shrink-0';
+
+        const infoCol = document.createElement('div');
+
+        const titleRow = document.createElement('div');
+        titleRow.className = 'flex items-center gap-2 flex-wrap';
+
+        const safeUrl = getSafeUrl(patron.url);
+        if (safeUrl) {
+          const link = document.createElement('a');
+          link.href = safeUrl;
+          link.target = '_blank';
+          link.rel = 'noopener noreferrer';
+          link.className = 'font-bold text-white hover:text-purple-300 transition text-sm sm:text-base';
+          link.textContent = String(patron.name || 'Anonymous');
+          titleRow.appendChild(link);
+        } else {
+          const nameSpan = document.createElement('span');
+          nameSpan.className = 'font-bold text-white text-sm sm:text-base';
+          nameSpan.textContent = String(patron.name || 'Anonymous');
+          titleRow.appendChild(nameSpan);
+        }
+
+        const checkSpan = document.createElement('span');
+        checkSpan.className = 'text-purple-400 text-xs';
+        checkSpan.title = 'Verified Sponsor';
+        checkSpan.textContent = '✓';
+
+        const tierBadge = document.createElement('span');
+        tierBadge.className = `px-2 py-0.5 text-[10px] font-mono font-bold rounded-full border ${tierClass}`;
+        tierBadge.textContent = tierLabel;
+
+        titleRow.append(checkSpan, tierBadge);
+        infoCol.appendChild(titleRow);
+
+        if (patron.comment && String(patron.comment).trim()) {
+          const commentDiv = document.createElement('div');
+          commentDiv.className = 'mt-2 text-xs text-slate-300 italic bg-slate-950/60 px-3 py-1.5 rounded-lg border border-slate-800/80';
+          commentDiv.textContent = `"${String(patron.comment).trim()}"`;
+          infoCol.appendChild(commentDiv);
+        }
+
+        leftGroup.append(rankSpan, avatarImg, infoCol);
+
+        const rightGroup = document.createElement('div');
+        rightGroup.className = 'flex items-center justify-between md:justify-end gap-6 shrink-0 pl-14 md:pl-0';
+
+        const amtDiv = document.createElement('div');
+        amtDiv.className = 'text-left md:text-right';
+
+        const usdDiv = document.createElement('div');
+        usdDiv.className = 'text-base sm:text-lg font-extrabold text-white font-mono';
+        usdDiv.textContent = `$${(Number(patron.amountUSD) || 0).toLocaleString()}`;
+
+        const inrDiv = document.createElement('div');
+        inrDiv.className = 'text-[11px] text-slate-500 font-mono';
+        const inrVal = patron.amountINR ? Number(patron.amountINR) : (Number(patron.amountUSD) || 0) * 84;
+        inrDiv.textContent = `₹${inrVal.toLocaleString()}`;
+
+        amtDiv.append(usdDiv, inrDiv);
+
+        const dateDiv = document.createElement('div');
+        dateDiv.className = 'text-[10px] font-mono text-slate-500';
+        dateDiv.textContent = String(patron.date || '');
+
+        rightGroup.append(amtDiv, dateDiv);
+        row.append(leftGroup, rightGroup);
+
+        container.appendChild(row);
+      });
     }
 
     function renderComments() {
       const container = document.getElementById('comments-container');
+      if (!container) return;
       const patrons = getStoredPatrons().filter(p => p.comment && p.comment.trim().length > 0);
 
-      container.innerHTML = patrons.map(p => `
-        <div class="p-5 bg-slate-900/80 rounded-2xl border border-slate-800/80 flex flex-col justify-between hover:border-slate-700 transition">
-          <div>
-            <div class="flex items-center space-x-3 mb-3">
-              <img src="${p.avatar}" alt="${p.name}" class="w-9 h-9 rounded-full border border-purple-500/40 bg-slate-950 object-cover">
-              <div>
-                <div class="font-bold text-sm text-white flex items-center gap-1">
-                  ${p.url ? `<a href="${p.url}" target="_blank" rel="noopener noreferrer" class="hover:text-pink-300 transition">${p.name}</a>` : p.name}
-                  <span class="text-xs text-purple-400">✓</span>
-                </div>
-                <div class="text-[10px] font-mono text-slate-500">$${p.amountUSD} Sponsor • ${p.date}</div>
-              </div>
-            </div>
-            <p class="text-xs sm:text-sm text-slate-300 italic leading-relaxed">
-              "${p.comment}"
-            </p>
-          </div>
-          <div class="mt-4 pt-3 border-t border-slate-800/60 flex items-center justify-between text-[11px] text-slate-500">
-            <span class="flex items-center gap-1 text-pink-400">
-              <span>💖</span> Verified Backer
-            </span>
-            <span class="font-mono text-[10px]">AgentShield Wall of Love</span>
-          </div>
-        </div>
-      `).join('');
+      container.replaceChildren();
+
+      patrons.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'p-5 bg-slate-900/80 rounded-2xl border border-slate-800/80 flex flex-col justify-between hover:border-slate-700 transition';
+
+        const topSection = document.createElement('div');
+
+        const headerDiv = document.createElement('div');
+        headerDiv.className = 'flex items-center space-x-3 mb-3';
+
+        const avatarImg = document.createElement('img');
+        avatarImg.src = getSafePatronAvatar(p);
+        avatarImg.alt = String(p.name || '');
+        avatarImg.className = 'w-9 h-9 rounded-full border border-purple-500/40 bg-slate-950 object-cover';
+
+        const headerInfo = document.createElement('div');
+
+        const nameLine = document.createElement('div');
+        nameLine.className = 'font-bold text-sm text-white flex items-center gap-1';
+
+        const safeUrl = getSafeUrl(p.url);
+        if (safeUrl) {
+          const link = document.createElement('a');
+          link.href = safeUrl;
+          link.target = '_blank';
+          link.rel = 'noopener noreferrer';
+          link.className = 'hover:text-pink-300 transition';
+          link.textContent = String(p.name || 'Anonymous');
+          nameLine.appendChild(link);
+        } else {
+          const nameSpan = document.createElement('span');
+          nameSpan.textContent = String(p.name || 'Anonymous');
+          nameLine.appendChild(nameSpan);
+        }
+
+        const checkMark = document.createElement('span');
+        checkMark.className = 'text-xs text-purple-400';
+        checkMark.textContent = '✓';
+        nameLine.appendChild(checkMark);
+
+        const subInfo = document.createElement('div');
+        subInfo.className = 'text-[10px] font-mono text-slate-500';
+        subInfo.textContent = `$${Number(p.amountUSD) || 0} Sponsor • ${String(p.date || '')}`;
+
+        headerInfo.append(nameLine, subInfo);
+        headerDiv.append(avatarImg, headerInfo);
+
+        const commentP = document.createElement('p');
+        commentP.className = 'text-xs sm:text-sm text-slate-300 italic leading-relaxed';
+        commentP.textContent = `"${String(p.comment).trim()}"`;
+
+        topSection.append(headerDiv, commentP);
+
+        const footerDiv = document.createElement('div');
+        footerDiv.className = 'mt-4 pt-3 border-t border-slate-800/60 flex items-center justify-between text-[11px] text-slate-500';
+
+        const footerLeft = document.createElement('span');
+        footerLeft.className = 'flex items-center gap-1 text-pink-400';
+        const heartSpan = document.createElement('span');
+        heartSpan.textContent = '💖';
+        footerLeft.append(heartSpan, document.createTextNode(' Verified Backer'));
+
+        const footerRight = document.createElement('span');
+        footerRight.className = 'font-mono text-[10px]';
+        footerRight.textContent = 'AgentShield Wall of Love';
+
+        footerDiv.append(footerLeft, footerRight);
+        card.append(topSection, footerDiv);
+
+        container.appendChild(card);
+      });
     }
 
     document.querySelectorAll('.lb-filter-btn').forEach(btn => {
