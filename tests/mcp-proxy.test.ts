@@ -89,5 +89,107 @@ describe("Phase 2: High-Velocity Native Core & MCP Protocol Interceptor", () => 
       assert.equal(verdict.redactedCount, 1);
       assert.ok(verdict.sanitizedPayload?.includes("[AGENT_SHIELD:ANTHROPIC_API_KEY:"));
     });
+
+    it("should recursively scrub credentials from embedded resource blocks in MCP responses", () => {
+      const rawAwsKey = ["AKIA", "IOSFODNN7EXAMPLE"].join("");
+      const response = JSON.stringify({
+        jsonrpc: "2.0",
+        id: 4,
+        result: {
+          content: [
+            {
+              type: "resource",
+              resource: {
+                uri: "file:///app/config.json",
+                mimeType: "text/plain",
+                text: `{"aws_access_key": "${rawAwsKey}", "region": "us-east-1"}`,
+              },
+            },
+          ],
+        },
+      });
+
+      const verdict = proxy.inspectResponse(response);
+      assert.equal(verdict.isBlocked, false);
+      assert.equal(verdict.redactedCount, 1);
+      assert.ok(verdict.sanitizedPayload?.includes("[AGENT_SHIELD:AWS_ACCESS_KEY_ID:"));
+      assert.ok(!verdict.sanitizedPayload?.includes(rawAwsKey));
+
+      const parsed = JSON.parse(verdict.sanitizedPayload ?? "{}");
+      assert.equal(parsed.result.content[0].resource.mimeType, "text/plain");
+    });
+
+    it("should scrub credentials from custom structured JSON output outside content array", () => {
+      const rawStripeKey = ["sk", "live", "1234567890123456789012345678"].join("_");
+      const response = JSON.stringify({
+        jsonrpc: "2.0",
+        id: 5,
+        result: {
+          success: true,
+          status: 200,
+          data: {
+            organization: "Acme Corp",
+            stripeSecret: rawStripeKey,
+            retries: 3,
+            metadata: null,
+          },
+        },
+      });
+
+      const verdict = proxy.inspectResponse(response);
+      assert.equal(verdict.isBlocked, false);
+      assert.equal(verdict.redactedCount, 1);
+      assert.ok(verdict.sanitizedPayload?.includes("[AGENT_SHIELD:STRIPE_SECRET_KEY:"));
+      assert.ok(!verdict.sanitizedPayload?.includes(rawStripeKey));
+
+      const parsed = JSON.parse(verdict.sanitizedPayload ?? "{}");
+      assert.equal(parsed.result.success, true);
+      assert.equal(parsed.result.data.retries, 3);
+      assert.equal(parsed.result.data.metadata, null);
+    });
+
+    it("should scrub credentials from JSON-RPC error messages and error data payloads", () => {
+      const rawSecret = ["sk", "ant", "1234567890123456789012345678901234567890"].join("-");
+      const errorResponse = JSON.stringify({
+        jsonrpc: "2.0",
+        id: 6,
+        error: {
+          code: -32000,
+          message: `Failed upstream call with API_KEY=${rawSecret}: upstream timeout`,
+          data: {
+            failedKey: rawSecret,
+            failedAttempts: 5,
+          },
+        },
+      });
+
+      const verdict = proxy.inspectResponse(errorResponse);
+      assert.equal(verdict.isBlocked, false);
+      assert.ok(verdict.redactedCount >= 1);
+      assert.ok(!verdict.sanitizedPayload?.includes(rawSecret));
+      assert.ok(verdict.sanitizedPayload?.includes("[AGENT_SHIELD:ANTHROPIC_API_KEY:"));
+
+      const parsed = JSON.parse(verdict.sanitizedPayload ?? "{}");
+      assert.equal(parsed.error.code, -32000);
+      assert.equal(parsed.error.data.failedAttempts, 5);
+    });
+
+    it("should scrub credentials inside outbound request URIs and custom parameters", () => {
+      const rawToken = ["ghp", "123456789012345678901234567890123456"].join("_");
+      const request = JSON.stringify({
+        jsonrpc: "2.0",
+        id: 7,
+        method: "resources/read",
+        params: {
+          uri: `https://${rawToken}@github.com/org/private-repo.git`,
+        },
+      });
+
+      const verdict = proxy.inspectRequest(request);
+      assert.equal(verdict.isBlocked, false);
+      assert.equal(verdict.redactedCount, 1);
+      assert.ok(verdict.sanitizedPayload?.includes("[AGENT_SHIELD:GITHUB_PAT:"));
+      assert.ok(!verdict.sanitizedPayload?.includes(rawToken));
+    });
   });
 });
