@@ -99,10 +99,7 @@ export class AgentShieldSidecar {
     }
   }
 
-  private async dispatch(
-    method: string,
-    params: Record<string, unknown>,
-  ): Promise<unknown> {
+  private async dispatch(method: string, params: Record<string, unknown>): Promise<unknown> {
     switch (method) {
       case "shield.ping":
       case "ping":
@@ -131,11 +128,7 @@ export class AgentShieldSidecar {
       case "scan_and_redact":
       case "redact": {
         const text = String(params.text ?? "");
-        const maskStyle = params.maskStyle as
-          | "token"
-          | "hash"
-          | "asterisk"
-          | undefined;
+        const maskStyle = params.maskStyle as "token" | "hash" | "asterisk" | undefined;
         return this.engine.scanAndRedact(text, { maskStyle });
       }
 
@@ -160,14 +153,8 @@ export class AgentShieldSidecar {
       case "compliance": {
         const findings = (params.findings || []) as DetectedSecret[];
         const blockedCount = Number(params.blockedCount ?? 0);
-        const frameworks = params.frameworks as
-          | ComplianceFramework[]
-          | undefined;
-        return SecretControlAssessmentEngine.evaluate(
-          findings,
-          blockedCount,
-          frameworks,
-        );
+        const frameworks = params.frameworks as ComplianceFramework[] | undefined;
+        return SecretControlAssessmentEngine.evaluate(findings, blockedCount, frameworks);
       }
 
       default:

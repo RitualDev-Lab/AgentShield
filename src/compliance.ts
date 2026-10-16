@@ -82,14 +82,7 @@ export type ComplianceAuditReport = SecretControlAssessmentReport;
 export class SecretControlAssessmentEngine {
   private defaultFrameworks: ComplianceFramework[];
 
-  constructor(
-    defaultFrameworks: ComplianceFramework[] = [
-      "soc2",
-      "pci_dss",
-      "hipaa",
-      "iso27001",
-    ],
-  ) {
+  constructor(defaultFrameworks: ComplianceFramework[] = ["soc2", "pci_dss", "hipaa", "iso27001"]) {
     this.defaultFrameworks = defaultFrameworks;
   }
 
@@ -110,12 +103,7 @@ export class SecretControlAssessmentEngine {
   public static evaluate(
     findings: DetectedSecret[],
     blockedCommandsCount = 0,
-    requestedFrameworks: ComplianceFramework[] = [
-      "soc2",
-      "pci_dss",
-      "hipaa",
-      "iso27001",
-    ],
+    requestedFrameworks: ComplianceFramework[] = ["soc2", "pci_dss", "hipaa", "iso27001"],
   ): SecretControlAssessmentReport {
     const assessed: AssessedControl[] = [];
     const unassessed: UnassessedControl[] = [];
@@ -127,11 +115,7 @@ export class SecretControlAssessmentEngine {
       // CC6.1 - Logical Access Controls
       const cc61Violations: string[] = [];
       for (const f of findings) {
-        if (
-          f.category === "cloud" ||
-          f.category === "vcs" ||
-          f.severity === "critical"
-        ) {
+        if (f.category === "cloud" || f.category === "vcs" || f.severity === "critical") {
           cc61Violations.push(
             `Exposed authentication token: ${f.patternName} in ${f.file || "workspace stream"}`,
           );
@@ -160,8 +144,7 @@ export class SecretControlAssessmentEngine {
         framework: "soc2",
         controlId: "CC6.6",
         name: "Boundary Protection & Unauthorized Egress Controls",
-        description:
-          "Prevents unauthorized transmission of credentials beyond system boundaries.",
+        description: "Prevents unauthorized transmission of credentials beyond system boundaries.",
         status: cc66Violations.length === 0 ? "PASSED" : "FAILED",
         violations: cc66Violations,
         assessedAspect:
@@ -177,8 +160,7 @@ export class SecretControlAssessmentEngine {
           description:
             "Tone at the top, human resources background checks, and organizational ethics.",
           status: "NOT_ASSESSED",
-          reason:
-            "Organizational governance cannot be evaluated by automated secret scanning.",
+          reason: "Organizational governance cannot be evaluated by automated secret scanning.",
           requiredExternalEvidence: [
             "Formal employee code of conduct sign-offs",
             "HR background check verification records",
@@ -189,8 +171,7 @@ export class SecretControlAssessmentEngine {
           framework: "soc2",
           controlId: "CC5.2",
           name: "Risk Assessment & Vendor Management",
-          description:
-            "Identification and mitigation of third-party vendor and operational risks.",
+          description: "Identification and mitigation of third-party vendor and operational risks.",
           status: "NOT_ASSESSED",
           reason:
             "Requires third-party vendor risk assessments and annual organizational risk review.",
@@ -206,8 +187,7 @@ export class SecretControlAssessmentEngine {
           description:
             "Monitoring and remediating vulnerabilities across cloud infrastructure and OS hosts.",
           status: "NOT_ASSESSED",
-          reason:
-            "Host and OS patch levels require infrastructure scanner telemetry.",
+          reason: "Host and OS patch levels require infrastructure scanner telemetry.",
           requiredExternalEvidence: [
             "Infrastructure vulnerability scan reports",
             "Patch deployment SLA compliance metrics",
@@ -223,11 +203,7 @@ export class SecretControlAssessmentEngine {
       // Req 3.4 - Render Cardholder Authentication Tokens Unreadable
       const pciViolations: string[] = [];
       for (const f of findings) {
-        if (
-          f.category === "saas" ||
-          f.category === "crypto" ||
-          f.patternId.includes("stripe")
-        ) {
+        if (f.category === "saas" || f.category === "crypto" || f.patternId.includes("stripe")) {
           pciViolations.push(
             `Payment gateway / cryptographic secret exposed in cleartext: ${f.patternName}`,
           );
@@ -249,9 +225,7 @@ export class SecretControlAssessmentEngine {
       const req83Violations: string[] = [];
       for (const f of findings) {
         if (f.category === "ai" || f.category === "cloud") {
-          req83Violations.push(
-            `API access key exposed in workspace: ${f.patternName}`,
-          );
+          req83Violations.push(`API access key exposed in workspace: ${f.patternName}`);
         }
       }
       assessed.push({
@@ -272,11 +246,9 @@ export class SecretControlAssessmentEngine {
           framework: "pci_dss",
           controlId: "Req-9.1",
           name: "Physical Access Restrictions to Cardholder Data",
-          description:
-            "Restricts physical access to servers, workstations, and network equipment.",
+          description: "Restricts physical access to servers, workstations, and network equipment.",
           status: "NOT_ASSESSED",
-          reason:
-            "Physical data center and workstation controls require on-site inspection.",
+          reason: "Physical data center and workstation controls require on-site inspection.",
           requiredExternalEvidence: [
             "Facility badge entry logs and CCTV surveillance records",
             "Visitor access registers and escort protocols",
@@ -286,11 +258,9 @@ export class SecretControlAssessmentEngine {
           framework: "pci_dss",
           controlId: "Req-12.1",
           name: "Information Security Policy Governance",
-          description:
-            "Documented organizational security policy reviewed annually by leadership.",
+          description: "Documented organizational security policy reviewed annually by leadership.",
           status: "NOT_ASSESSED",
-          reason:
-            "Policy governance requires formal organizational documentation.",
+          reason: "Policy governance requires formal organizational documentation.",
           requiredExternalEvidence: [
             "Executive-approved information security policy",
             "Annual security awareness training logs",
@@ -344,8 +314,7 @@ export class SecretControlAssessmentEngine {
           framework: "hipaa",
           controlId: "§164.310(a)(1)",
           name: "Physical Safeguards - Facility Access & Device Security",
-          description:
-            "Physical safeguards for workstations, laptops, and data storage media.",
+          description: "Physical safeguards for workstations, laptops, and data storage media.",
           status: "NOT_ASSESSED",
           reason:
             "Hardware encryption policies and physical facility access require external verification.",
@@ -376,29 +345,24 @@ export class SecretControlAssessmentEngine {
           "Enforces elimination of hardcoded secrets from development repositories and agent workspaces.",
         status: a828Violations.length === 0 ? "PASSED" : "FAILED",
         violations: a828Violations,
-        assessedAspect:
-          "Static diff and workspace secret analysis against hardcoded secrets.",
+        assessedAspect: "Static diff and workspace secret analysis against hardcoded secrets.",
       });
 
       // A.8.24 - Use of Cryptography & Key Management
       const a824Violations: string[] = [];
       for (const f of findings) {
         if (f.category === "crypto" || f.patternId.includes("private-key")) {
-          a824Violations.push(
-            `Cryptographic private key exposed in repository: ${f.patternName}`,
-          );
+          a824Violations.push(`Cryptographic private key exposed in repository: ${f.patternName}`);
         }
       }
       assessed.push({
         framework: "iso27001",
         controlId: "A.8.24",
         name: "Use of Cryptography & Key Protection",
-        description:
-          "Ensures cryptographic keys are protected against unauthorized disclosure.",
+        description: "Ensures cryptographic keys are protected against unauthorized disclosure.",
         status: a824Violations.length === 0 ? "PASSED" : "FAILED",
         violations: a824Violations,
-        assessedAspect:
-          "Boundary-aware scanning for unencrypted private key blocks.",
+        assessedAspect: "Boundary-aware scanning for unencrypted private key blocks.",
       });
 
       // Broader ISO 27001 controls not assessed
@@ -421,11 +385,9 @@ export class SecretControlAssessmentEngine {
           framework: "iso27001",
           controlId: "A.6.1",
           name: "Internal Organization & Screening",
-          description:
-            "Screening of candidate employees and ongoing security responsibilities.",
+          description: "Screening of candidate employees and ongoing security responsibilities.",
           status: "NOT_ASSESSED",
-          reason:
-            "Personnel screening and background verification require HR documentation.",
+          reason: "Personnel screening and background verification require HR documentation.",
           requiredExternalEvidence: [
             "Documented pre-employment screening process and verification logs",
             "Signed confidentiality and intellectual property agreements",
@@ -438,19 +400,12 @@ export class SecretControlAssessmentEngine {
     // Calculations across assessed controls
     const totalAssessedPassed = assessed.filter((c) => c.status === "PASSED").length;
     const totalAssessedFailed = assessed.filter((c) => c.status === "FAILED").length;
-    const totalAssessedViolations = assessed.reduce(
-      (sum, c) => sum + c.violations.length,
-      0,
-    );
+    const totalAssessedViolations = assessed.reduce((sum, c) => sum + c.violations.length, 0);
     const score =
-      assessed.length > 0
-        ? Math.round((totalAssessedPassed / assessed.length) * 100)
-        : 100;
+      assessed.length > 0 ? Math.round((totalAssessedPassed / assessed.length) * 100) : 100;
 
     const status: "NO_FINDINGS_IN_ASSESSED_CONTROLS" | "FINDINGS_DETECTED" =
-      totalAssessedFailed === 0
-        ? "NO_FINDINGS_IN_ASSESSED_CONTROLS"
-        : "FINDINGS_DETECTED";
+      totalAssessedFailed === 0 ? "NO_FINDINGS_IN_ASSESSED_CONTROLS" : "FINDINGS_DETECTED";
 
     const legacyStatus: "COMPLIANT" | "NON_COMPLIANT" =
       totalAssessedFailed === 0 ? "COMPLIANT" : "NON_COMPLIANT";
@@ -509,9 +464,7 @@ export class SecretControlAssessmentEngine {
    * Formats a scope-honest Markdown report explaining assessed vs unassessed controls,
    * explicit limitations, and external audit evidence needed for true compliance.
    */
-  public static toAssessmentMarkdown(
-    report: SecretControlAssessmentReport,
-  ): string {
+  public static toAssessmentMarkdown(report: SecretControlAssessmentReport): string {
     const lines = [
       "# 📋 AgentShield Secret-Control Assessment Report",
       `**Assessment Title**: ${report.assessmentTitle}`,

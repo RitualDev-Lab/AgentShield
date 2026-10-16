@@ -18,7 +18,8 @@ export const SPONSORED_PRODUCTS: Record<string, SponsoredProductTier> = {
   "sponsor-verified-badge": {
     id: "pdt_agentshield_verified_badge",
     name: "Secured by AgentShield Verified Badge",
-    description: "Automated cryptographic secret audit certification, dynamic SVG badge, and verified status on DevShelf.",
+    description:
+      "Automated cryptographic secret audit certification, dynamic SVG badge, and verified status on DevShelf.",
     priceUsd: 29,
     type: "one_time",
     features: [
@@ -31,7 +32,8 @@ export const SPONSORED_PRODUCTS: Record<string, SponsoredProductTier> = {
   "devshelf-featured-spotlight": {
     id: "pdt_devshelf_featured_spotlight",
     name: "DevShelf Featured Spotlight & Top Placement",
-    description: "Featured top placement on DevShelf home, dedicated SEO spotlight card, and Verified Sponsor badge.",
+    description:
+      "Featured top placement on DevShelf home, dedicated SEO spotlight card, and Verified Sponsor badge.",
     priceUsd: 79,
     type: "one_time",
     features: [
@@ -44,7 +46,8 @@ export const SPONSORED_PRODUCTS: Record<string, SponsoredProductTier> = {
   "team-ci-gate": {
     id: "pdt_agentshield_team_gate",
     name: "AgentShield Team & CI/CD Gate",
-    description: "Automated PR review bot, GitHub Action gate on private repositories, and team policy synchronization.",
+    description:
+      "Automated PR review bot, GitHub Action gate on private repositories, and team policy synchronization.",
     priceUsd: 19,
     type: "subscription",
     features: [
@@ -84,7 +87,9 @@ export class DodoPaymentsService {
       "IlOYnHQslUViToGJ.cVrp8qUVYfPVb2WeDXrh2C1iSxcYI5BDx-IHqJNlc8etLr0h";
     this.environment = environment || (process.env.DODO_PAYMENTS_ENV === "live" ? "live" : "test");
     this.baseUrl =
-      this.environment === "live" ? "https://live.dodopayments.com" : "https://test.dodopayments.com";
+      this.environment === "live"
+        ? "https://live.dodopayments.com"
+        : "https://test.dodopayments.com";
   }
 
   /**
@@ -100,7 +105,8 @@ export class DodoPaymentsService {
   public async createCheckoutSession(
     options: CreateCheckoutOptions,
   ): Promise<CheckoutSessionResult> {
-    const product = SPONSORED_PRODUCTS[options.tierId] || SPONSORED_PRODUCTS["sponsor-verified-badge"];
+    const product =
+      SPONSORED_PRODUCTS[options.tierId] || SPONSORED_PRODUCTS["sponsor-verified-badge"];
     const returnUrl =
       options.returnUrl ||
       `https://agentshield.ritualdev.in/verify/success?tool=${encodeURIComponent(options.toolName || "tool")}`;
@@ -176,11 +182,7 @@ export class DodoPaymentsService {
   /**
    * Validates Dodo Payments incoming webhook event signature
    */
-  public verifyWebhookEvent(
-    payload: string,
-    signatureHeader?: string,
-    secret?: string,
-  ): boolean {
+  public verifyWebhookEvent(payload: string, signatureHeader?: string, secret?: string): boolean {
     if (!signatureHeader) return false;
     const webhookSecret = secret || process.env.DODO_WEBHOOK_SECRET || this.apiKey;
     const hmac = createHmac("sha256", webhookSecret).update(payload).digest("hex");

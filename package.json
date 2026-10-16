@@ -9,13 +9,7 @@
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": [
-    "dist",
-    "README.md",
-    "LICENSE",
-    "SKILL.md",
-    "action.yml"
-  ],
+  "files": ["dist", "README.md", "LICENSE", "SKILL.md", "action.yml"],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/RitualDev-Lab/AgentShield.git"

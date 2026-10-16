@@ -436,7 +436,8 @@ async function main() {
     const requireIsolation =
       args.includes("--require-isolation") || args.includes("--strict-isolation");
 
-    const isClaudeHook = args.includes("--claude-hook") || process.env.CLAUDE_TOOL_USE !== undefined;
+    const isClaudeHook =
+      args.includes("--claude-hook") || process.env.CLAUDE_TOOL_USE !== undefined;
     const { AgentStdioInterceptor } = await import("./interceptor.js");
     const interceptor = new AgentStdioInterceptor(engine, process.cwd());
 
@@ -553,9 +554,7 @@ async function main() {
 
     if (args.includes("--json")) {
       console.log(JSON.stringify(report, null, 2));
-      process.exit(
-        report.status === "NO_FINDINGS_IN_ASSESSED_CONTROLS" ? 0 : 1,
-      );
+      process.exit(report.status === "NO_FINDINGS_IN_ASSESSED_CONTROLS" ? 0 : 1);
     }
 
     printBanner();
@@ -578,7 +577,9 @@ async function main() {
 
     console.log("\n  Broader Controls (Not Assessed by Secret Scanning):");
     for (const ctrl of report.unassessedControls) {
-      console.log(`    ⏸️  [${ctrl.framework.toUpperCase()}] ${ctrl.controlId}: ${ctrl.name} (NOT ASSESSED)`);
+      console.log(
+        `    ⏸️  [${ctrl.framework.toUpperCase()}] ${ctrl.controlId}: ${ctrl.name} (NOT ASSESSED)`,
+      );
       console.log(`       Reason: ${ctrl.reason}`);
       console.log(`       Evidence Needed: ${ctrl.requiredExternalEvidence.join("; ")}`);
     }
@@ -760,7 +761,9 @@ async function main() {
   } else if (command === "badge") {
     const toolName = args.filter((a) => !a.startsWith("--"))[1];
     if (!toolName) {
-      console.error("❌ Error: Please specify tool name. Usage: agentshield badge <tool-name> [--repo <url>] [--tier <verified|sponsor|enterprise>]");
+      console.error(
+        "❌ Error: Please specify tool name. Usage: agentshield badge <tool-name> [--repo <url>] [--tier <verified|sponsor|enterprise>]",
+      );
       process.exit(1);
     }
 
@@ -778,8 +781,14 @@ async function main() {
     }
 
     const { VerifiedBadgeGenerator } = await import("./badge-generator.js");
-    const snippet = VerifiedBadgeGenerator.getMarkdownSnippet(toolName, "https://agentshield.ritualdev.in", tier);
-    const signature = repoUrl ? VerifiedBadgeGenerator.signAuditRecord(toolName, repoUrl, tier) : null;
+    const snippet = VerifiedBadgeGenerator.getMarkdownSnippet(
+      toolName,
+      "https://agentshield.ritualdev.in",
+      tier,
+    );
+    const signature = repoUrl
+      ? VerifiedBadgeGenerator.signAuditRecord(toolName, repoUrl, tier)
+      : null;
 
     if (args.includes("--svg")) {
       const svg = VerifiedBadgeGenerator.generateSvgBadge(toolName, { tier });
@@ -788,7 +797,9 @@ async function main() {
     }
 
     printBanner();
-    console.log(`🛡️ [Secured by AgentShield] Verified Badge for "${toolName}" (${tier.toUpperCase()} TIER)\n`);
+    console.log(
+      `🛡️ [Secured by AgentShield] Verified Badge for "${toolName}" (${tier.toUpperCase()} TIER)\n`,
+    );
     console.log("Markdown (for README.md):");
     console.log(`  ${snippet.markdown}\n`);
     console.log("HTML (for websites/docs):");
@@ -798,18 +809,24 @@ async function main() {
     if (signature) {
       console.log("Cryptographic Verification Signature:");
       console.log(`  ${signature}`);
-      console.log(`  Verify URL: https://agentshield.ritualdev.in/api/v1/badges/verify?tool=${encodeURIComponent(toolName)}&repo=${encodeURIComponent(repoUrl)}&tier=${tier}&hash=${signature}\n`);
+      console.log(
+        `  Verify URL: https://agentshield.ritualdev.in/api/v1/badges/verify?tool=${encodeURIComponent(toolName)}&repo=${encodeURIComponent(repoUrl)}&tier=${tier}&hash=${signature}\n`,
+      );
     }
     process.exit(0);
   } else if (command === "bounty-verify") {
     printBanner();
     const target = args.filter((a) => !a.startsWith("--"))[1];
     if (!target) {
-      console.error("❌ Error: Missing target payload. Usage: agentshield bounty-verify <file-or-command>");
+      console.error(
+        "❌ Error: Missing target payload. Usage: agentshield bounty-verify <file-or-command>",
+      );
       process.exit(1);
     }
 
-    console.log("🧪 [AgentShield Bounty Verification Engine] Evaluating exploit/bypass candidate...\n");
+    console.log(
+      "🧪 [AgentShield Bounty Verification Engine] Evaluating exploit/bypass candidate...\n",
+    );
 
     let isSecretLeak = false;
     let isCommandBlocked = false;
@@ -852,9 +869,13 @@ async function main() {
     } else {
       console.log("⚠️ [VERDICT: UNRESTRICTED / POTENTIAL CANDIDATE]");
       console.log("   Payload was not blocked by default rules.");
-      console.log("   If this payload extracts production credentials or breaks sandbox isolation,");
+      console.log(
+        "   If this payload extracts production credentials or breaks sandbox isolation,",
+      );
       console.log("   it qualifies for a Community Bug Bounty ($50 - $500).");
-      console.log("   Report privately: https://github.com/RitualDev-Lab/AgentShield/security/advisories/new\n");
+      console.log(
+        "   Report privately: https://github.com/RitualDev-Lab/AgentShield/security/advisories/new\n",
+      );
       process.exit(0);
     }
   } else if (command === "sidecar" || command === "daemon") {

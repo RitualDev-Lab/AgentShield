@@ -393,7 +393,9 @@ export class ControlPlaneServer {
       }
 
       // Handle GitHub Security Advisory / repository_advisory event
-      let advisoryReply: ReturnType<typeof GitHubAppService.buildSecurityAdvisoryAcknowledgement> | undefined;
+      let advisoryReply:
+        | ReturnType<typeof GitHubAppService.buildSecurityAdvisoryAcknowledgement>
+        | undefined;
       const ghPayload = payload as import("./github-app.js").GitHubAppWebhookPayload;
       const isAdvisoryEvent =
         eventType === "repository_advisory" ||
@@ -403,7 +405,10 @@ export class ControlPlaneServer {
       if (isAdvisoryEvent) {
         const advData = ghPayload?.repository_advisory || ghPayload?.security_advisory || {};
         const repoFullName = ghPayload?.repository?.full_name || "RitualDev-Lab/AgentShield";
-        advisoryReply = GitHubAppService.buildSecurityAdvisoryAcknowledgement(advData, repoFullName);
+        advisoryReply = GitHubAppService.buildSecurityAdvisoryAcknowledgement(
+          advData,
+          repoFullName,
+        );
       }
 
       res.writeHead(200, { "Content-Type": "application/json" });
@@ -522,7 +527,11 @@ export class ControlPlaneServer {
     }
 
     // GET /api/v1/badges/patron/:username.svg (Dynamic patron backer badge generator)
-    if (pathname.startsWith("/api/v1/badges/patron/") && pathname.endsWith(".svg") && method === "GET") {
+    if (
+      pathname.startsWith("/api/v1/badges/patron/") &&
+      pathname.endsWith(".svg") &&
+      method === "GET"
+    ) {
       const { PublicTransparencyLedger } = await import("./transparency-ledger.js");
       const rawUser = pathname.replace("/api/v1/badges/patron/", "").replace(".svg", "");
       const username = decodeURIComponent(rawUser);

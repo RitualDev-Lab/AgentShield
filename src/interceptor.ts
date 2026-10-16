@@ -194,6 +194,27 @@ export class RedactingStream extends Transform {
       }
 
       if (splitIndex !== -1) {
+        // Boundary scan: verify whether splitIndex intersects any active secret in trailingSlice
+        const boundaryWindow = trailingSlice.slice(
+          0,
+          Math.min(trailingSlice.length, splitIndex + this.maxWindowSize),
+        );
+        const findings = this.engine.scan(boundaryWindow, { includeRaw: true });
+        for (const finding of findings) {
+          if (!finding.raw) continue;
+          const matchPos = boundaryWindow.indexOf(finding.raw);
+          if (matchPos !== -1) {
+            const matchEnd = matchPos + finding.raw.length;
+            // If split cuts across this secret, back up splitIndex to before the secret
+            if (splitIndex > matchPos && splitIndex < matchEnd) {
+              splitIndex = matchPos;
+              break;
+            }
+          }
+        }
+      }
+
+      if (splitIndex > 0) {
         safeSlice += trailingSlice.slice(0, splitIndex);
         trailingSlice = trailingSlice.slice(splitIndex);
       } else if (trailingSlice.length > this.maxUnbrokenBuffer) {

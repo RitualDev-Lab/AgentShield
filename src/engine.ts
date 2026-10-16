@@ -1,9 +1,5 @@
 import { createHash } from "node:crypto";
-import {
-  calculateShannonEntropy,
-  isHighEntropySecret,
-  isLikelyFalsePositive,
-} from "./entropy.js";
+import { calculateShannonEntropy, isHighEntropySecret, isLikelyFalsePositive } from "./entropy.js";
 import { BUILTIN_PATTERNS } from "./patterns.js";
 import type { DetectedSecret, ScanOptions, ScanResult, SecretPattern } from "./types.js";
 

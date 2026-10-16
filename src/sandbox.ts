@@ -98,9 +98,7 @@ const DANGEROUS_COMMAND_PATTERNS = [
       (/(?:-e|--env)\s+(?:[A-Z0-9_]*(?:KEY|SECRET|TOKEN|PASSWORD|APIKEY|AUTH|CREDENTIAL|PRIVATE)[A-Z0-9_]*=|(?:[A-Z0-9_]*(?:KEY|SECRET|TOKEN|PASSWORD|APIKEY|AUTH|CREDENTIAL|PRIVATE)[A-Z0-9_]*\b(?![-_a-zA-Z0-9=])))/i.test(
         cmd,
       ) ||
-        /(?:--env-file)\s+(?:[^\s|;&]*[\/\\])?(?:\.env|\.aws[\/\\]credentials|id_rsa)/i.test(
-          cmd,
-        ) ||
+        /(?:--env-file)\s+(?:[^\s|;&]*[\/\\])?(?:\.env|\.aws[\/\\]credentials|id_rsa)/i.test(cmd) ||
         /(?:-e|--env)\s+[A-Z0-9_]+=\$(?:[A-Z0-9_]*(?:KEY|SECRET|TOKEN|PASSWORD|APIKEY|AUTH)[A-Z0-9_]*)/i.test(
           cmd,
         )),

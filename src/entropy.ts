@@ -82,7 +82,11 @@ export function isLikelyFalsePositive(token: string): boolean {
   }
 
   // Base64 Data URIs (SVGs, images, fonts, data:image/...)
-  if (/^(data:image\/|data:application\/|data:font\/)/i.test(trimmed) || trimmed.startsWith("PHN2Zy") || trimmed.startsWith("data:")) {
+  if (
+    /^(data:image\/|data:application\/|data:font\/)/i.test(trimmed) ||
+    trimmed.startsWith("PHN2Zy") ||
+    trimmed.startsWith("data:")
+  ) {
     return true;
   }
 

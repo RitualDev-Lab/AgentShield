@@ -13,15 +13,30 @@ describe("Phase 2: Secured by AgentShield Verified Sponsor Badge Suite", () => {
     assert.strictEqual(signature.length, 16);
 
     // Verify valid signature
-    const isValid = VerifiedBadgeGenerator.verifyAuditRecord(toolName, repoUrl, "verified", signature);
+    const isValid = VerifiedBadgeGenerator.verifyAuditRecord(
+      toolName,
+      repoUrl,
+      "verified",
+      signature,
+    );
     assert.strictEqual(isValid, true, "Valid audit signature must pass verification");
 
     // Verify tampered signature fails
-    const tampered = VerifiedBadgeGenerator.verifyAuditRecord(toolName, repoUrl, "verified", "deadbeefcafebabe");
+    const tampered = VerifiedBadgeGenerator.verifyAuditRecord(
+      toolName,
+      repoUrl,
+      "verified",
+      "deadbeefcafebabe",
+    );
     assert.strictEqual(tampered, false, "Tampered audit signature must be rejected");
 
     // Verify tier mismatch fails
-    const tierMismatch = VerifiedBadgeGenerator.verifyAuditRecord(toolName, repoUrl, "sponsor", signature);
+    const tierMismatch = VerifiedBadgeGenerator.verifyAuditRecord(
+      toolName,
+      repoUrl,
+      "sponsor",
+      signature,
+    );
     assert.strictEqual(tierMismatch, false, "Tier mismatch must fail verification");
   });
 
@@ -33,11 +48,17 @@ describe("Phase 2: Secured by AgentShield Verified Sponsor Badge Suite", () => {
     assert.ok(verifiedSvg.includes("#8b5cf6"), "Verified tier should use violet accent");
 
     const sponsorSvg = VerifiedBadgeGenerator.generateSvgBadge(toolName, { tier: "sponsor" });
-    assert.ok(sponsorSvg.includes("AgentShield ★ Sponsor"), "Sponsor badge must include sponsor star");
+    assert.ok(
+      sponsorSvg.includes("AgentShield ★ Sponsor"),
+      "Sponsor badge must include sponsor star",
+    );
     assert.ok(sponsorSvg.includes("#ec4899"), "Sponsor tier should use hot pink accent");
 
     const owaspSvg = VerifiedBadgeGenerator.generateSvgBadge(toolName, { tier: "owasp-llm06" });
-    assert.ok(owaspSvg.includes("OWASP LLM06 Compliant"), "OWASP badge must include OWASP LLM06 text");
+    assert.ok(
+      owaspSvg.includes("OWASP LLM06 Compliant"),
+      "OWASP badge must include OWASP LLM06 text",
+    );
     assert.ok(owaspSvg.includes("#10b981"), "OWASP badge should use emerald accent");
   });
 

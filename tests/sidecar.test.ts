@@ -198,9 +198,7 @@ describe("Phase 4: Multi-Language JSON-RPC Stdio Sidecar Daemon", () => {
       });
 
       // Write two JSON-RPC commands
-      inputStream.write(
-        `${JSON.stringify({ jsonrpc: "2.0", id: 101, method: "shield.ping" })}\n`,
-      );
+      inputStream.write(`${JSON.stringify({ jsonrpc: "2.0", id: 101, method: "shield.ping" })}\n`);
       inputStream.write(
         `${JSON.stringify({ jsonrpc: "2.0", id: 102, method: "shield.health" })}\n`,
       );

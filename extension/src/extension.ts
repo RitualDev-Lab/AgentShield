@@ -109,7 +109,7 @@ export function activate(context: vscode.ExtensionContext) {
         if (scan.hasSecrets) {
           const firstSecret = scan.findings[0];
           statusBarItem.text = "$(alert) Secret Detected!";
-          
+
           const action = await vscode.window.showWarningMessage(
             `🚨 [AgentShield Zero-Leak Warning] Detected real ${firstSecret.patternName} pasted into ${event.document.fileName.split(/[\\/]/).pop()}!`,
             "Auto-Redact Now",

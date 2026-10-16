@@ -102,8 +102,24 @@ describe("A1 Regression: Boundary-Safe Streaming Redaction & Multiline Windowing
 
     const rawOpenSshKey = [
       ["-----", "BEGIN OPENSSH ", "PRIVATE KEY", "-----"].join(""),
-      ["b3BlbnNzaC", "1rZXktdjEA", "AAAABG5vbm", "UAAAAEbm9u", "ZQAAAAAAAA", "ABAAABlwAA", "AAdzc2gtcn"].join(""),
-      ["NhAAAAAwEA", "AQAAAYEAw7", "q9abcdefgh", "ijklmnopqr", "stuvwxyz12", "3456789012", "34"].join(""),
+      [
+        "b3BlbnNzaC",
+        "1rZXktdjEA",
+        "AAAABG5vbm",
+        "UAAAAEbm9u",
+        "ZQAAAAAAAA",
+        "ABAAABlwAA",
+        "AAdzc2gtcn",
+      ].join(""),
+      [
+        "NhAAAAAwEA",
+        "AQAAAYEAw7",
+        "q9abcdefgh",
+        "ijklmnopqr",
+        "stuvwxyz12",
+        "3456789012",
+        "34",
+      ].join(""),
       ["-----", "END OPENSSH ", "PRIVATE KEY", "-----"].join(""),
     ].join("\n");
 
@@ -227,6 +243,28 @@ describe("A1 Regression: Boundary-Safe Streaming Redaction & Multiline Windowing
       assert.strictEqual(output.includes(secret2), false, "GitHub token leaked in minified JSON!");
       assert.ok(output.includes("[AGENT_SHIELD:OPENAI_API_KEY:"));
       assert.ok(output.includes("[AGENT_SHIELD:GITHUB_PAT:"));
+    });
+
+    it("never cuts secrets across delimiter splits in long single-line streams", async () => {
+      const secret = ["sk", "live", "1234567890123456789012345678"].join("_");
+      // Build single line payload exceeding 2 * maxWindowSize (e.g. 1200 chars) with delimiter near the secret
+      const prefix = "a".repeat(600);
+      const payload = `${prefix} Bearer ${secret} ${prefix}`;
+
+      const chunks: Buffer[] = [];
+      for (let i = 0; i < payload.length; i += 150) {
+        chunks.push(Buffer.from(payload.slice(i, i + 150), "utf8"));
+      }
+
+      const transform = createRedactingStream(engine, "token");
+      const output = await streamToString(Readable.from(chunks).pipe(transform));
+
+      assert.strictEqual(
+        output.includes(secret),
+        false,
+        "Stripe secret leaked across delimiter window cut!",
+      );
+      assert.ok(output.includes("[AGENT_SHIELD:STRIPE_SECRET_KEY:"));
     });
   });
 });

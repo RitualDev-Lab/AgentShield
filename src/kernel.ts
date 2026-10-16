@@ -23,7 +23,9 @@ export interface OsIsolationGuarantee {
  * Command inspection and regex/AST pattern matching are defense-in-depth and do NOT constitute
  * an OS kernel security boundary.
  */
-export function getOsIsolationGuarantee(osType: NodeJS.Platform = platform()): OsIsolationGuarantee {
+export function getOsIsolationGuarantee(
+  osType: NodeJS.Platform = platform(),
+): OsIsolationGuarantee {
   switch (osType) {
     case "darwin":
       return {
@@ -67,7 +69,8 @@ export function getOsIsolationGuarantee(osType: NodeJS.Platform = platform()): O
         kernelIsolationSupported: false,
         primaryMechanism: "process_level_firewall",
         boundaryType: "defense_in_depth_firewall",
-        description: "Process-level AST pattern inspection firewall and real-time streaming redaction.",
+        description:
+          "Process-level AST pattern inspection firewall and real-time streaming redaction.",
         securityBoundaryLimitations: [
           "Command inspection is defense-in-depth, NOT an OS security boundary.",
           "Compiled binaries, memory manipulation, and direct kernel syscalls cannot be mediated by userland inspection.",

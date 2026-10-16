@@ -4,10 +4,7 @@ import { join } from "node:path";
 import { describe, it } from "node:test";
 import { AgentShieldEngine } from "../src/engine.js";
 import { AgentStdioInterceptor } from "../src/interceptor.js";
-import {
-  KernelSandboxConfinement,
-  getOsIsolationGuarantee,
-} from "../src/kernel.js";
+import { KernelSandboxConfinement, getOsIsolationGuarantee } from "../src/kernel.js";
 import type { CommandInspectionResult } from "../src/sandbox.js";
 
 describe("A2 Regression: Strict Isolation Enforcement & Defense-in-Depth Boundary", () => {
@@ -110,7 +107,11 @@ describe("A2 Regression: Strict Isolation Enforcement & Defense-in-Depth Boundar
 
         assert.strictEqual(result.isBlocked, true);
         assert.strictEqual(result.isolationMechanism, "isolated_refusal");
-        assert.strictEqual(existsSync(probeFile), false, "Probe file MUST NOT be created if execution was refused");
+        assert.strictEqual(
+          existsSync(probeFile),
+          false,
+          "Probe file MUST NOT be created if execution was refused",
+        );
       } finally {
         if (existsSync(probeFile)) {
           try {
@@ -137,7 +138,11 @@ describe("A2 Regression: Strict Isolation Enforcement & Defense-in-Depth Boundar
       assert.strictEqual(result.exitCode, 0);
       assert.strictEqual(result.isolationMechanism, "process_level_firewall");
       assert.strictEqual(result.downgradedIsolation, true);
-      assert.ok(result.isolationNotice.includes("Kernel sandbox requested, but OS-level sandbox-exec is only supported on macOS"));
+      assert.ok(
+        result.isolationNotice.includes(
+          "Kernel sandbox requested, but OS-level sandbox-exec is only supported on macOS",
+        ),
+      );
       assert.ok(result.isolationNotice.includes("defense-in-depth"));
       assert.ok(result.isolationNotice.includes("requireIsolation: true"));
     });

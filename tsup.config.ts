@@ -16,4 +16,3 @@ export default defineConfig({
     __AGENTSHIELD_VERSION__: JSON.stringify(pkg.version),
   },
 });
-

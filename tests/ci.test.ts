@@ -13,10 +13,7 @@ describe("AgentShield CI/CD Security Gate", () => {
 
   it("should reject malicious baseRef strings attempting command or flag injection", () => {
     const runner = new CiGateRunner(process.cwd());
-    assert.throws(
-      () => runner.auditPullRequest("origin/main; rm -rf /"),
-      /Invalid git base ref/,
-    );
+    assert.throws(() => runner.auditPullRequest("origin/main; rm -rf /"), /Invalid git base ref/);
     assert.throws(
       () => runner.auditPullRequest("origin/main && cat /etc/passwd"),
       /Invalid git base ref/,
@@ -33,7 +30,11 @@ describe("AgentShield CI/CD Security Gate", () => {
       const runner = new CiGateRunner(tempDir);
       // In a non-git directory, both range and fallback diff will fail
       const result = runner.auditPullRequest("origin/main");
-      assert.strictEqual(result.passed, false, "Security gate must fail closed when git diff fails");
+      assert.strictEqual(
+        result.passed,
+        false,
+        "Security gate must fail closed when git diff fails",
+      );
       assert.ok(result.scanError, "Must record scanError explaining git failure");
       assert.ok(
         result.markdownReport.includes("Unable to compute Git diff"),

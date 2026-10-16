@@ -4,7 +4,10 @@ import test, { describe } from "node:test";
 import { DodoPaymentsService, SPONSORED_PRODUCTS } from "../src/dodo-payments.js";
 
 describe("Phase 3: Dodo Payments Sponsored Placements & Self-Serve Checkout Suite", () => {
-  const service = new DodoPaymentsService("IlOYnHQslUViToGJ.cVrp8qUVYfPVb2WeDXrh2C1iSxcYI5BDx-IHqJNlc8etLr0h", "test");
+  const service = new DodoPaymentsService(
+    "IlOYnHQslUViToGJ.cVrp8qUVYfPVb2WeDXrh2C1iSxcYI5BDx-IHqJNlc8etLr0h",
+    "test",
+  );
 
   test("retrieves available sponsorship and audit products with correct pricing", () => {
     const products = service.getAvailableProducts();

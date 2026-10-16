@@ -34,11 +34,13 @@ export class PublicTransparencyLedger {
   private ledgerPath: string;
   private secretKey: string;
   private entries: TransparencyEntry[] = [];
-  private static readonly GENESIS_HASH = "0000000000000000000000000000000000000000000000000000000000000000";
+  private static readonly GENESIS_HASH =
+    "0000000000000000000000000000000000000000000000000000000000000000";
 
   constructor(
     ledgerPath: string = join(process.cwd(), ".agentshield", "transparency.ledger.jsonl"),
-    secretKey: string = process.env.AGENTSHIELD_TRANSPARENCY_SALT || "agentshield_public_transparency_v1",
+    secretKey: string = process.env.AGENTSHIELD_TRANSPARENCY_SALT ||
+      "agentshield_public_transparency_v1",
   ) {
     this.ledgerPath = ledgerPath;
     this.secretKey = secretKey;
@@ -59,8 +61,18 @@ export class PublicTransparencyLedger {
     // Seed initial genesis community funding entries if fresh
     if (this.entries.length === 0) {
       this.record("DONATION", "Dev Community Backer", 25, "Continuous CI/CD fuzzing support");
-      this.record("DONATION", "Security Patron", 100, "Seed contribution to Researcher Bug Bounty Fund");
-      this.record("BOUNTY_PAYOUT", "Security Researcher #1", 50, "Bounty reward: Obfuscated ANSI-C escape subshell bypass");
+      this.record(
+        "DONATION",
+        "Security Patron",
+        100,
+        "Seed contribution to Researcher Bug Bounty Fund",
+      );
+      this.record(
+        "BOUNTY_PAYOUT",
+        "Security Researcher #1",
+        50,
+        "Bounty reward: Obfuscated ANSI-C escape subshell bypass",
+      );
     }
   }
 
@@ -89,7 +101,9 @@ export class PublicTransparencyLedger {
     const sequence = this.entries.length + 1;
     const timestamp = new Date().toISOString();
     const previousHash =
-      this.entries.length > 0 ? this.entries[this.entries.length - 1].hash : PublicTransparencyLedger.GENESIS_HASH;
+      this.entries.length > 0
+        ? this.entries[this.entries.length - 1].hash
+        : PublicTransparencyLedger.GENESIS_HASH;
 
     const hash = this.computeHash(sequence, timestamp, type, entity, amountUsd, previousHash);
 
@@ -166,7 +180,8 @@ export class PublicTransparencyLedger {
       }
     }
 
-    const currentDefenseFundReserveUsd = totalInflowUsd - (totalBountiesPaidUsd + totalInfrastructureUsd);
+    const currentDefenseFundReserveUsd =
+      totalInflowUsd - (totalBountiesPaidUsd + totalInfrastructureUsd);
     const { isValid } = this.verifyChain();
 
     return {

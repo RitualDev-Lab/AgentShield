@@ -21,15 +21,9 @@ describe("A3 Regression: Scope-Honest Secret-Control Assessment Engine", () => {
       // Verify scope disclosure
       assert.ok(report.scopeDisclosure);
       assert.ok(
-        report.scopeDisclosure.disclaimer.includes(
-          "does NOT establish overall organizational",
-        ),
+        report.scopeDisclosure.disclaimer.includes("does NOT establish overall organizational"),
       );
-      assert.ok(
-        report.scopeDisclosure.disclaimer.includes(
-          "NO_FINDINGS_IN_ASSESSED_CONTROLS",
-        ),
-      );
+      assert.ok(report.scopeDisclosure.disclaimer.includes("NO_FINDINGS_IN_ASSESSED_CONTROLS"));
       assert.ok(report.scopeDisclosure.limitations.length >= 3);
       assert.ok(report.scopeDisclosure.requiredExternalEvidence.length >= 4);
     });
@@ -58,39 +52,21 @@ describe("A3 Regression: Scope-Honest Secret-Control Assessment Engine", () => {
       }
 
       // Check specific standard controls
-      const soc2Ethical = report.unassessedControls.find(
-        (c) => c.controlId === "CC1.1",
-      );
+      const soc2Ethical = report.unassessedControls.find((c) => c.controlId === "CC1.1");
       assert.ok(soc2Ethical);
-      assert.ok(
-        soc2Ethical.requiredExternalEvidence.some((e) =>
-          e.includes("code of conduct"),
-        ),
-      );
+      assert.ok(soc2Ethical.requiredExternalEvidence.some((e) => e.includes("code of conduct")));
 
-      const pciPhysical = report.unassessedControls.find(
-        (c) => c.controlId === "Req-9.1",
-      );
+      const pciPhysical = report.unassessedControls.find((c) => c.controlId === "Req-9.1");
       assert.ok(pciPhysical);
-      assert.ok(
-        pciPhysical.requiredExternalEvidence.some((e) =>
-          e.includes("badge entry"),
-        ),
-      );
+      assert.ok(pciPhysical.requiredExternalEvidence.some((e) => e.includes("badge entry")));
 
-      const hipaaBaa = report.unassessedControls.find(
-        (c) => c.controlId === "§164.308(a)(1)",
-      );
+      const hipaaBaa = report.unassessedControls.find((c) => c.controlId === "§164.308(a)(1)");
       assert.ok(hipaaBaa);
       assert.ok(
-        hipaaBaa.requiredExternalEvidence.some((e) =>
-          e.includes("Business Associate Agreements"),
-        ),
+        hipaaBaa.requiredExternalEvidence.some((e) => e.includes("Business Associate Agreements")),
       );
 
-      const isoGovernance = report.unassessedControls.find(
-        (c) => c.controlId === "A.5.1",
-      );
+      const isoGovernance = report.unassessedControls.find((c) => c.controlId === "A.5.1");
       assert.ok(isoGovernance);
       assert.ok(
         isoGovernance.requiredExternalEvidence.some((e) =>
@@ -134,15 +110,11 @@ describe("A3 Regression: Scope-Honest Secret-Control Assessment Engine", () => {
       assert.ok(report.summary.totalViolations >= 2);
 
       // Verify PCI DSS Req-3.4 and SOC2 CC6.1 failed
-      const pciReq34 = report.assessedControls.find(
-        (c) => c.controlId === "Req-3.4",
-      );
+      const pciReq34 = report.assessedControls.find((c) => c.controlId === "Req-3.4");
       assert.strictEqual(pciReq34?.status, "FAILED");
       assert.ok(pciReq34?.violations.length > 0);
 
-      const soc2CC61 = report.assessedControls.find(
-        (c) => c.controlId === "CC6.1",
-      );
+      const soc2CC61 = report.assessedControls.find((c) => c.controlId === "CC6.1");
       assert.strictEqual(soc2CC61?.status, "FAILED");
       assert.ok(soc2CC61?.violations.length > 0);
     });
@@ -151,11 +123,7 @@ describe("A3 Regression: Scope-Honest Secret-Control Assessment Engine", () => {
   describe("3. Framework Selection Filtering & Markdown Formatting", () => {
     it("filters assessed and unassessed controls to only requested frameworks", () => {
       const frameworks: ComplianceFramework[] = ["soc2"];
-      const report = SecretControlAssessmentEngine.evaluate(
-        [],
-        0,
-        frameworks,
-      );
+      const report = SecretControlAssessmentEngine.evaluate([], 0, frameworks);
 
       assert.deepStrictEqual(report.frameworks, ["soc2"]);
       assert.ok(report.assessedControls.every((c) => c.framework === "soc2"));
@@ -170,16 +138,8 @@ describe("A3 Regression: Scope-Honest Secret-Control Assessment Engine", () => {
       assert.ok(md.includes("NO_FINDINGS_IN_ASSESSED_CONTROLS"));
       assert.ok(md.includes("Assessment Scope & Compliance Disclaimer"));
       assert.ok(md.includes("## 🛡️ Assessed Technical Controls"));
-      assert.ok(
-        md.includes(
-          "## ⏸️ Broader Regulatory Controls (Not Assessed by Secret Scanning)",
-        ),
-      );
-      assert.ok(
-        md.includes(
-          "## 📑 Scope, Limitations & Required External Audit Evidence",
-        ),
-      );
+      assert.ok(md.includes("## ⏸️ Broader Regulatory Controls (Not Assessed by Secret Scanning)"));
+      assert.ok(md.includes("## 📑 Scope, Limitations & Required External Audit Evidence"));
     });
 
     it("maintains backwards-compatible ComplianceEngine alias and controls array", () => {

@@ -182,11 +182,7 @@ describe("Phase 5: Property-Based Testing & Security Invariants", () => {
         // Must be identified as likely false positive if high entropy
         const isFalsePositive = isLikelyFalsePositive(sample);
         const scan = engine.scan(sample);
-        assert.strictEqual(
-          scan.length,
-          0,
-          `Benign sample falsely flagged as secret: ${sample}`,
-        );
+        assert.strictEqual(scan.length, 0, `Benign sample falsely flagged as secret: ${sample}`);
       }
     });
 

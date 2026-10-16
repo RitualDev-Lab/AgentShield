@@ -37,7 +37,10 @@ export class VerifiedBadgeGenerator {
    */
   public static signAuditRecord(toolName: string, repoUrl: string, tier: AuditBadgeTier): string {
     const payload = `${toolName.toLowerCase().trim()}|${repoUrl.toLowerCase().trim()}|${tier}`;
-    return createHmac("sha256", VerifiedBadgeGenerator.BADGE_SECRET).update(payload).digest("hex").slice(0, 16);
+    return createHmac("sha256", VerifiedBadgeGenerator.BADGE_SECRET)
+      .update(payload)
+      .digest("hex")
+      .slice(0, 16);
   }
 
   /**
@@ -147,7 +150,8 @@ export class VerifiedBadgeGenerator {
     }
     const shieldsIoBadgeUrl = `https://img.shields.io/badge/${encodeURIComponent(label)}-${encodeURIComponent(status)}-${color}?logo=shield&logoColor=white&style=flat-square`;
 
-    const altText = tier === "owasp-llm06" ? "AgentShield: OWASP LLM06 Compliant" : "Secured by AgentShield";
+    const altText =
+      tier === "owasp-llm06" ? "AgentShield: OWASP LLM06 Compliant" : "Secured by AgentShield";
     const markdown = `[![${altText}](${shieldsIoBadgeUrl})](${auditVerifyUrl})`;
     const html = `<a href="${auditVerifyUrl}" target="_blank" rel="noopener noreferrer"><img src="${shieldsIoBadgeUrl}" alt="${altText}" /></a>`;
 
