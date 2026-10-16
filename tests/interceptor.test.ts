@@ -54,5 +54,26 @@ describe("Phase 2: AgentStdioInterceptor & Streaming Redaction", () => {
 
     assert.strictEqual(result.isBlocked, false);
     assert.strictEqual(result.exitCode, 0);
+    assert.ok(result.isolationMechanism);
+    assert.ok(result.isolationNotice);
+  });
+
+  it("transparently reports isolation status when kernel sandbox is requested", async () => {
+    const interceptor = new AgentStdioInterceptor(engine);
+    const result = await interceptor.execute('node -e "console.log(1+1)"', {
+      enableKernelSandbox: true,
+    });
+
+    assert.strictEqual(result.isBlocked, false);
+    assert.strictEqual(result.exitCode, 0);
+    assert.ok(result.isolationMechanism);
+    assert.ok(result.isolationNotice);
+    if (process.platform === "darwin") {
+      assert.strictEqual(result.isolationMechanism, "macos_sandbox_exec");
+      assert.ok(result.isolationNotice.includes("sandbox-exec"));
+    } else {
+      assert.strictEqual(result.isolationMechanism, "process_level_firewall");
+      assert.ok(result.isolationNotice.includes("only supported on macOS"));
+    }
   });
 });

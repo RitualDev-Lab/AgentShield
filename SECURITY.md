@@ -27,10 +27,10 @@ Before reporting, you can locally verify whether your exploit payload or bypass 
 
 ```bash
 # Run local PoC exploit check
-npx @ritualdev_lab/agentshield bounty-verify <exploit-file-or-command>
+npx @ritualdev-lab/agentshield bounty-verify <exploit-file-or-command>
 
 # Example: Testing command sandbox evasion
-npx @ritualdev_lab/agentshield bounty-verify "cat .env"
+npx @ritualdev-lab/agentshield bounty-verify "cat .env"
 ```
 
 ---

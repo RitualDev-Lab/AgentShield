@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { platform } from "node:os";
 import { join } from "node:path";
 import { loadConfig, parseCustomPatterns } from "./config.js";
 import { AgentShieldEngine } from "./engine.js";
@@ -432,6 +433,11 @@ async function main() {
     }
 
     const enableKernel = args.includes("--kernel");
+    if (enableKernel && platform() !== "darwin") {
+      console.warn(
+        `⚠️  [AgentShield Isolation Notice] Kernel sandboxing (--kernel) was requested, but OS-level sandbox-exec is only supported on macOS (host: ${platform()}). Executing under AST pattern firewall and real-time streaming redaction.\n`,
+      );
+    }
     const isClaudeHook = args.includes("--claude-hook") || process.env.CLAUDE_TOOL_USE !== undefined;
     const { AgentStdioInterceptor } = await import("./interceptor.js");
     const interceptor = new AgentStdioInterceptor(engine, process.cwd());

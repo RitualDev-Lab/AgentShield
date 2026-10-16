@@ -12,11 +12,17 @@ export interface StdioInterceptorOptions {
   onBlock?: (inspection: CommandInspectionResult) => void;
 }
 
+export type IsolationMechanism =
+  | "macos_sandbox_exec"
+  | "process_level_firewall";
+
 export interface InterceptedExecutionResult {
   exitCode: number;
   isBlocked: boolean;
   blockReason?: string;
   totalSecretsScrubbed: number;
+  isolationMechanism: IsolationMechanism;
+  isolationNotice: string;
 }
 
 /**
@@ -93,6 +99,8 @@ export class AgentStdioInterceptor {
         isBlocked: true,
         blockReason: astCheck.reason,
         totalSecretsScrubbed: 0,
+        isolationMechanism: "process_level_firewall",
+        isolationNotice: "Command blocked by AST pre-flight policy firewall before OS execution.",
       };
     }
 
@@ -110,6 +118,8 @@ export class AgentStdioInterceptor {
         isBlocked: true,
         blockReason: kernelCheck.reason,
         totalSecretsScrubbed: 0,
+        isolationMechanism: "process_level_firewall",
+        isolationNotice: "Command blocked by kernel path containment verification.",
       };
     }
 
@@ -120,17 +130,25 @@ export class AgentStdioInterceptor {
     return new Promise((resolve) => {
       let child: ChildProcess;
       const osType = platform();
+      let isolationMechanism: IsolationMechanism = "process_level_firewall";
+      let isolationNotice = "";
 
       // Wrap in OS-level sandbox if requested and supported
       let execCmd = command;
       if (options.enableKernelSandbox && osType === "darwin") {
+        isolationMechanism = "macos_sandbox_exec";
+        isolationNotice = "Enforcing OS-level kernel confinement via macOS sandbox-exec.";
         const home = homedir().replace(/\\/g, "\\\\").replace(/"/g, '\\"');
         const ws = (options.workspaceDir || process.cwd())
           .replace(/\\/g, "\\\\")
           .replace(/"/g, '\\"');
-        // Note: Workspace allow permits subpath file-read*; reading workspace .env directly
-        // is captured and scrubbed by the stdio output transform stream and AST pre-flight gate.
         execCmd = `sandbox-exec -p '(version 1)(deny default)(allow process-exec)(allow sysctl-read)(allow file-read* (subpath "${ws}"))(allow file-write* (subpath "${ws}"))(allow file-read* (subpath "/usr/lib"))(allow file-read* (subpath "/dev/null"))(deny file-read* (subpath "${home}/.ssh"))(deny file-read* (subpath "${home}/.aws"))' ${command}`;
+      } else if (options.enableKernelSandbox) {
+        isolationMechanism = "process_level_firewall";
+        isolationNotice = `Kernel sandbox requested, but OS-level sandbox-exec is only supported on macOS (current host: ${osType}). Executing under AST pattern firewall and real-time streaming redaction.`;
+      } else {
+        isolationMechanism = "process_level_firewall";
+        isolationNotice = "Executing under AST pattern inspection firewall and real-time stdio stream redaction.";
       }
 
       try {
@@ -146,6 +164,8 @@ export class AgentStdioInterceptor {
           isBlocked: false,
           blockReason: errorMsg,
           totalSecretsScrubbed: 0,
+          isolationMechanism,
+          isolationNotice,
         });
         return;
       }
@@ -165,6 +185,8 @@ export class AgentStdioInterceptor {
           exitCode: code ?? 0,
           isBlocked: false,
           totalSecretsScrubbed: totalScrubbed,
+          isolationMechanism,
+          isolationNotice,
         });
       });
 
@@ -174,6 +196,8 @@ export class AgentStdioInterceptor {
           isBlocked: false,
           blockReason: err.message,
           totalSecretsScrubbed: totalScrubbed,
+          isolationMechanism,
+          isolationNotice,
         });
       });
     });

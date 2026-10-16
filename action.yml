@@ -35,33 +35,39 @@ runs:
       shell: bash
       env:
         GITHUB_TOKEN: ${{ inputs.github_token || github.token }}
+        INPUT_BASE_REF: ${{ inputs.base_ref }}
+        INPUT_FAIL_ON_LEAK: ${{ inputs.fail_on_leak }}
+        INPUT_POST_PR_COMMENT: ${{ inputs.post_pr_comment }}
+        INPUT_ANNOTATE_DIFF: ${{ inputs.annotate_diff }}
+        INPUT_SARIF_FILE: ${{ inputs.sarif_file }}
+        ACTION_PATH: ${{ github.action_path }}
       run: |
         EXTRA_FLAGS=""
-        if [ "${{ inputs.annotate_diff }}" = "true" ]; then
+        if [ "$INPUT_ANNOTATE_DIFF" = "true" ]; then
           EXTRA_FLAGS="$EXTRA_FLAGS --annotate"
         fi
-        if [ "${{ inputs.post_pr_comment }}" = "true" ]; then
+        if [ "$INPUT_POST_PR_COMMENT" = "true" ]; then
           EXTRA_FLAGS="$EXTRA_FLAGS --post-pr-comment"
         fi
-        if [ -n "${{ inputs.sarif_file }}" ]; then
-          EXTRA_FLAGS="$EXTRA_FLAGS --sarif ${{ inputs.sarif_file }}"
+        if [ -n "$INPUT_SARIF_FILE" ]; then
+          EXTRA_FLAGS="$EXTRA_FLAGS --sarif $INPUT_SARIF_FILE"
         fi
 
         EXIT_CODE=0
-        if [ -f "${{ github.action_path }}/dist/cli.js" ]; then
-          node "${{ github.action_path }}/dist/cli.js" ci --base "${{ inputs.base_ref }}" --report .agentshield-report.md $EXTRA_FLAGS || EXIT_CODE=$?
-        elif [ -f "${{ github.action_path }}/package.json" ]; then
-          (cd "${{ github.action_path }}" && npm install --silent && npm run build --silent)
-          node "${{ github.action_path }}/dist/cli.js" ci --base "${{ inputs.base_ref }}" --report .agentshield-report.md $EXTRA_FLAGS || EXIT_CODE=$?
+        if [ -f "$ACTION_PATH/dist/cli.js" ]; then
+          node "$ACTION_PATH/dist/cli.js" ci --base "$INPUT_BASE_REF" --report .agentshield-report.md $EXTRA_FLAGS || EXIT_CODE=$?
+        elif [ -f "$ACTION_PATH/package.json" ]; then
+          (cd "$ACTION_PATH" && npm install --silent && npm run build --silent)
+          node "$ACTION_PATH/dist/cli.js" ci --base "$INPUT_BASE_REF" --report .agentshield-report.md $EXTRA_FLAGS || EXIT_CODE=$?
         else
-          npx --yes @ritualdev_lab/agentshield@latest ci --base "${{ inputs.base_ref }}" --report .agentshield-report.md $EXTRA_FLAGS || EXIT_CODE=$?
-        fi
-        
-        if [ -f .agentshield-report.md ]; then
-          cat .agentshield-report.md >> $GITHUB_STEP_SUMMARY
+          npx --yes @ritualdev-lab/agentshield@latest ci --base "$INPUT_BASE_REF" --report .agentshield-report.md $EXTRA_FLAGS || EXIT_CODE=$?
         fi
 
-        if [ "${{ inputs.fail_on_leak }}" = "true" ] && [ $EXIT_CODE -ne 0 ]; then
+        if [ -f .agentshield-report.md ]; then
+          cat .agentshield-report.md >> "$GITHUB_STEP_SUMMARY"
+        fi
+
+        if [ "$INPUT_FAIL_ON_LEAK" = "true" ] && [ $EXIT_CODE -ne 0 ]; then
           echo "❌ [AgentShield] Exposed secrets detected in Pull Request diff. Merging blocked."
           exit $EXIT_CODE
         fi
