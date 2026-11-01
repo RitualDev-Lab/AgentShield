@@ -1,3 +1,5 @@
+import { StringDecoder } from "node:string_decoder";
+
 export type TaintLevel = "CLEAN" | "SUSPICIOUS" | "CONFIDENTIAL" | "CRITICAL";
 
 export interface TaintNode {
@@ -24,6 +26,77 @@ export interface TaintFlowCheckResult {
 }
 
 /**
+ * Stream-aware Taint Flow Detector:
+ * Inspects streaming egress chunks against active tainted tokens and confidential signatures,
+ * maintaining an internal sliding window and multi-byte UTF-8 decoder across chunk seams.
+ */
+export class TaintStreamDetector {
+  private graph: DirectionalTaintGraph;
+  private destination: string;
+  private decoder: StringDecoder;
+  private pendingBuffer = "";
+  private lookbackSize: number;
+
+  constructor(graph: DirectionalTaintGraph, destination: string, lookbackSize = 256) {
+    this.graph = graph;
+    this.destination = destination;
+    this.decoder = new StringDecoder("utf8");
+    this.lookbackSize = lookbackSize;
+  }
+
+  /**
+   * Processes a stream chunk (string or Buffer), checking for tainted tokens split across boundaries.
+   */
+  public write(chunk: Buffer | string): TaintFlowCheckResult {
+    const textChunk = Buffer.isBuffer(chunk) ? this.decoder.write(chunk) : chunk;
+    this.pendingBuffer += textChunk;
+
+    const signatures = this.graph.getSignatures();
+    for (const [sig, meta] of signatures.entries()) {
+      if (this.pendingBuffer.includes(sig)) {
+        return {
+          isBlocked: true,
+          reason: `Exfiltration blocked: tainted signature '${sig}' found in streaming egress to '${this.destination}'.`,
+          taintedSource: meta.resourceId,
+          targetDestination: this.destination,
+          taintLevel: meta.level,
+        };
+      }
+    }
+
+    if (this.pendingBuffer.length > this.lookbackSize) {
+      this.pendingBuffer = this.pendingBuffer.slice(-this.lookbackSize);
+    }
+
+    return { isBlocked: false, taintLevel: "CLEAN" };
+  }
+
+  /**
+   * Flushes any remaining bytes in the UTF-8 decoder and inspects the tail of the stream.
+   */
+  public flush(): TaintFlowCheckResult {
+    const trailing = this.decoder.end();
+    this.pendingBuffer += trailing;
+
+    const signatures = this.graph.getSignatures();
+    for (const [sig, meta] of signatures.entries()) {
+      if (this.pendingBuffer.includes(sig)) {
+        return {
+          isBlocked: true,
+          reason: `Exfiltration blocked: tainted signature '${sig}' detected at end of stream to '${this.destination}'.`,
+          taintedSource: meta.resourceId,
+          targetDestination: this.destination,
+          taintLevel: meta.level,
+        };
+      }
+    }
+
+    this.pendingBuffer = "";
+    return { isBlocked: false, taintLevel: "CLEAN" };
+  }
+}
+
+/**
  * Cross-Turn Directional Data Taint Graph:
  * Tracks data lineage across multi-stage autonomous agent tool calls.
  * Defeats tool-chaining attacks where an agent reads private configs in Turn 1,
@@ -32,6 +105,7 @@ export interface TaintFlowCheckResult {
 export class DirectionalTaintGraph {
   private nodes = new Map<string, TaintNode>();
   private transitions: TaintTransition[] = [];
+  private signatures = new Map<string, { resourceId: string; level: TaintLevel }>();
 
   /**
    * Taints a node when sensitive files or memory buffers are accessed
@@ -51,6 +125,21 @@ export class DirectionalTaintGraph {
     };
     this.nodes.set(resourceId, node);
     return node;
+  }
+
+  /**
+   * Associates a secret signature or token pattern with a tainted resource
+   */
+  public registerResourceSignature(
+    resourceId: string,
+    signature: string,
+    level: TaintLevel = "CRITICAL",
+  ): void {
+    this.signatures.set(signature, { resourceId, level });
+  }
+
+  public getSignatures(): Map<string, { resourceId: string; level: TaintLevel }> {
+    return new Map(this.signatures);
   }
 
   /**
@@ -77,6 +166,13 @@ export class DirectionalTaintGraph {
       operation,
       timestamp: new Date().toISOString(),
     });
+  }
+
+  /**
+   * Creates a stream detector that inspects chunked streams to a destination
+   */
+  public createStreamDetector(destination: string, lookbackSize = 256): TaintStreamDetector {
+    return new TaintStreamDetector(this, destination, lookbackSize);
   }
 
   /**
@@ -109,5 +205,6 @@ export class DirectionalTaintGraph {
   public clear(): void {
     this.nodes.clear();
     this.transitions = [];
+    this.signatures.clear();
   }
 }

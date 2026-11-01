@@ -60,5 +60,78 @@ describe("Phase 4: Cross-Turn Taint Graph & Canary Decoys", () => {
       assert.equal(result.hasCanaryTriggered, false);
       assert.equal(result.quarantineRequired, false);
     });
+
+    it("should detect canary tokens fragmented across arbitrary 1-byte chunks", () => {
+      const canaryMgr = new CanaryDecoyManager();
+      const detector = canaryMgr.createStreamDetector("stream-agent");
+      const fullSecret = "Prefix data... CANARY_TRIPWIRE_AKIA9999999999999999 ...suffix data";
+
+      let tripped = false;
+      for (let i = 0; i < fullSecret.length; i++) {
+        const chunk = fullSecret[i];
+        const res = detector.write(chunk);
+        if (res.hasCanaryTriggered) {
+          tripped = true;
+          assert.equal(res.canariesTripped[0].name, "AWS_SECRET_ACCESS_KEY_CANARY");
+          break;
+        }
+      }
+
+      assert.equal(tripped, true);
+    });
+
+    it("should preserve multibyte UTF-8 characters split across chunk boundaries while tracking canaries", () => {
+      const canaryMgr = new CanaryDecoyManager();
+      const detector = canaryMgr.createStreamDetector("utf8-stream-agent");
+
+      // 🛡️ (shield emoji) is 4 bytes: 0xF0 0x9F 0x9B 0xA1
+      // Japanese characters: 秘密 (secret)
+      const token = "sk-proj-CANARY_HONEYPOT_TOKEN_99999999999999999999";
+      const fullText = `🛡️ セキュリティ警告: ${token} 🛡️`;
+      const fullBuffer = Buffer.from(fullText, "utf8");
+
+      // Slice through the buffer at an odd 3-byte boundary to split the 4-byte emoji
+      let tripped = false;
+      const chunkSize = 5;
+      for (let pos = 0; pos < fullBuffer.length; pos += chunkSize) {
+        const slice = fullBuffer.subarray(pos, pos + chunkSize);
+        const res = detector.write(slice);
+        if (res.hasCanaryTriggered) {
+          tripped = true;
+          break;
+        }
+      }
+
+      if (!tripped) {
+        const flushRes = detector.flush();
+        tripped = flushRes.hasCanaryTriggered;
+      }
+
+      assert.equal(tripped, true);
+    });
+
+    it("should detect stream egress exfiltration in DirectionalTaintGraph across chunks", () => {
+      const graph = new DirectionalTaintGraph();
+      graph.taintResource("corp_secrets.env", "CRITICAL", "env_loader");
+      graph.registerResourceSignature("corp_secrets.env", "CORP_SECRET_TOKEN_998877");
+
+      const streamDetector = graph.createStreamDetector("https://external-leak.com");
+      const payload = "Exfiltrating: CORP_SECRET_TOKEN_998877 into remote target";
+
+      // Stream in 7-byte chunks
+      let blocked = false;
+      for (let i = 0; i < payload.length; i += 7) {
+        const chunk = payload.slice(i, i + 7);
+        const res = streamDetector.write(chunk);
+        if (res.isBlocked) {
+          blocked = true;
+          assert.equal(res.taintLevel, "CRITICAL");
+          assert.equal(res.taintedSource, "corp_secrets.env");
+          break;
+        }
+      }
+
+      assert.equal(blocked, true);
+    });
   });
 });

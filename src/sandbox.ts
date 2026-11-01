@@ -152,6 +152,59 @@ const DANGEROUS_COMMAND_PATTERNS = [
 
 export class AgentCommandSandbox {
   /**
+   * Evaluates command against OS kernel micro-jail boundary rules (bubblewrap / AppContainer / Landlock).
+   * Blocks container escapes, namespace breakouts (nsenter, chroot /host), and privilege elevations.
+   */
+  public evaluateContainerConfinement(
+    command: string,
+    mechanism?: "linux_bubblewrap" | "windows_appcontainer" | "linux_landlock" | string,
+  ): CommandInspectionResult {
+    // 1. Run baseline AST inspection first
+    const baseResult = this.inspectCommand(command);
+    if (baseResult.isBlocked) {
+      return baseResult;
+    }
+
+    const candidates = normalizeShellCommand(command);
+    const escapePatterns = [
+      {
+        test: (cmd: string) => /\b(nsenter|chroot\s+(?:\/host|\/mnt|\/target|\/))\b/i.test(cmd),
+        reason: "Blocked container namespace breakout attempt (nsenter/chroot).",
+      },
+      {
+        test: (cmd: string) =>
+          /\b(?:\/proc\/(?:1\/ns|1\/environ|sys|kcore)|\/dev\/(?:mem|kmem|port))\b/i.test(cmd),
+        reason: "Blocked attempt to access sensitive kernel virtual filesystems or device memory.",
+      },
+      {
+        test: (cmd: string) =>
+          /\b(psexec(?:\.exe)?\s+-[a-zA-Z0-9]*s|runas\s+\/user:Administrator|Set-ItemProperty\s+HKLM:)\b/i.test(
+            cmd,
+          ),
+        reason:
+          "Blocked AppContainer process privilege elevation or administrative token acquisition.",
+      },
+    ];
+
+    for (const cmdVariant of candidates) {
+      const trimmed = cmdVariant.trim();
+      for (const pattern of escapePatterns) {
+        if (pattern.test(trimmed)) {
+          return {
+            isBlocked: true,
+            reason: pattern.reason,
+            category: "dangerous_mutation",
+          };
+        }
+      }
+    }
+
+    return {
+      isBlocked: false,
+    };
+  }
+
+  /**
    * Inspects a command before execution by an AI coding agent.
    */
   public inspectCommand(command: string): CommandInspectionResult {

@@ -1,14 +1,15 @@
-import { createServer, type IncomingMessage, type ServerResponse, type Server } from "node:http";
-import type { RemotePolicyPayload } from "./remote-policy.js";
+import { type IncomingMessage, type Server, type ServerResponse, createServer } from "node:http";
+import type { AuditBadgeTier } from "./badge-generator.js";
 import type { FleetAgentTelemetryReport } from "./control-plane.js";
 import {
-  EnterpriseWebhookStreamer,
   EnterpriseSsoValidator,
-  type WebhookSubscription,
+  EnterpriseWebhookStreamer,
   type SsoUserClaims,
+  type WebhookSubscription,
 } from "./enterprise-sso.js";
+import type { RemotePolicyPayload } from "./remote-policy.js";
 import { SiemExporter } from "./siem.js";
-import type { AuditBadgeTier } from "./badge-generator.js";
+import { VaultInjector } from "./vault.js";
 
 export interface ControlPlaneIncidentEvent {
   id: string;
@@ -29,6 +30,7 @@ export interface ControlPlaneServerOptions {
   initialPolicy?: RemotePolicyPayload;
   ssoSigningSecret?: string;
   allowedOrgIds?: string[];
+  telemetryEncryptionKey?: string;
 }
 
 /**
@@ -47,14 +49,18 @@ export class ControlPlaneServer {
   private policies: Map<string, RemotePolicyPayload> = new Map();
   private heartbeats: Map<string, FleetAgentTelemetryReport> = new Map();
   private incidents: ControlPlaneIncidentEvent[] = [];
+  private sseClients: Set<ServerResponse> = new Set();
   private apiKey: string;
   private port: number;
+  private telemetryEncryptionKey: string;
   public webhookStreamer: EnterpriseWebhookStreamer;
   public ssoValidator: EnterpriseSsoValidator;
 
   constructor(options: ControlPlaneServerOptions = {}) {
     this.port = options.port !== undefined ? options.port : 3000;
     this.apiKey = options.apiKey || "mock-enterprise-api-key";
+    this.telemetryEncryptionKey =
+      options.telemetryEncryptionKey || "agentshield-enterprise-telemetry-key-2026";
     this.webhookStreamer = new EnterpriseWebhookStreamer();
     this.ssoValidator = new EnterpriseSsoValidator(
       options.ssoSigningSecret || "agentshield-enterprise-secret-key-2026",
@@ -83,6 +89,24 @@ export class ControlPlaneServer {
     return Array.from(this.heartbeats.values());
   }
 
+  public getConnectedStreamsCount(): number {
+    return this.sseClients.size;
+  }
+
+  /**
+   * Broadcasts an audit event in real-time to all connected Server-Sent Events subscribers
+   */
+  public broadcastEvent(eventType: string, data: unknown): void {
+    const message = `event: ${eventType}\ndata: ${JSON.stringify(data)}\n\n`;
+    for (const client of this.sseClients) {
+      try {
+        client.write(message);
+      } catch {
+        this.sseClients.delete(client);
+      }
+    }
+  }
+
   public async start(): Promise<number> {
     return new Promise((resolve, reject) => {
       this.server = createServer((req, res) => {
@@ -102,6 +126,15 @@ export class ControlPlaneServer {
 
   public async stop(): Promise<void> {
     return new Promise((resolve) => {
+      for (const client of this.sseClients) {
+        try {
+          client.end();
+        } catch {
+          // ignore
+        }
+      }
+      this.sseClients.clear();
+
       if (this.server) {
         this.server.close(() => {
           this.server = null;
@@ -201,6 +234,168 @@ export class ControlPlaneServer {
       return;
     }
 
+    // GET /api/v1/events/stream (Real-Time SSE Audit Event Stream)
+    if (pathname === "/api/v1/events/stream" && method === "GET") {
+      res.writeHead(200, {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache, no-transform",
+        Connection: "keep-alive",
+        "Access-Control-Allow-Origin": "*",
+      });
+
+      this.sseClients.add(res);
+
+      res.write(": connected\n\n");
+      res.write(
+        `event: connected\ndata: ${JSON.stringify({
+          status: "connected",
+          subscriberCount: this.sseClients.size,
+          timestamp: new Date().toISOString(),
+        })}\n\n`,
+      );
+
+      req.on("close", () => {
+        this.sseClients.delete(res);
+      });
+      return;
+    }
+
+    // POST /api/v1/policies/push or POST /api/v1/policies/:orgId/push (Centralized Remote Policy Push)
+    const policyPushMatch = pathname.match(/^\/api\/v1\/policies(?:\/([^/]+))?\/push$/);
+    if (policyPushMatch && method === "POST") {
+      readBody().then((body) => {
+        try {
+          const payload = JSON.parse(body) as {
+            orgId?: string;
+            policy: RemotePolicyPayload;
+            targetAgents?: string[];
+          };
+          const targetOrg = policyPushMatch[1]
+            ? decodeURIComponent(policyPushMatch[1])
+            : payload.orgId || payload.policy?.orgId;
+
+          if (!targetOrg || !payload.policy) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Missing required orgId or policy payload" }));
+            return;
+          }
+
+          payload.policy.orgId = targetOrg;
+          payload.policy.updatedAt = new Date().toISOString();
+          this.policies.set(targetOrg, payload.policy);
+
+          // Broadcast policy push to all active real-time SSE streams
+          this.broadcastEvent("policy_push", {
+            orgId: targetOrg,
+            policy: payload.policy,
+            targetAgents: payload.targetAgents || ["*"],
+            timestamp: payload.policy.updatedAt,
+          });
+
+          res.writeHead(200, { "Content-Type": "application/json" });
+          res.end(
+            JSON.stringify({
+              success: true,
+              orgId: targetOrg,
+              policyVersion: payload.policy.policyVersion,
+              deliveredStreamsCount: this.sseClients.size,
+              timestamp: payload.policy.updatedAt,
+            }),
+          );
+        } catch {
+          res.writeHead(400, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ error: "Invalid JSON policy push payload" }));
+        }
+      });
+      return;
+    }
+
+    // POST /api/v1/telemetry/encrypted (Encrypted Telemetry Aggregation)
+    if (pathname === "/api/v1/telemetry/encrypted" && method === "POST") {
+      readBody().then((body) => {
+        try {
+          const payload = JSON.parse(body) as {
+            orgId?: string;
+            encryptedData: string;
+            iv: string;
+            tag: string;
+            key?: string;
+          };
+
+          if (!payload.encryptedData || !payload.iv || !payload.tag) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(
+              JSON.stringify({
+                error: "Missing encryptedData, iv, or tag in telemetry payload",
+              }),
+            );
+            return;
+          }
+
+          const decKey = payload.key || this.telemetryEncryptionKey;
+          const decrypted = VaultInjector.decryptPayload<Record<string, unknown>>(
+            { ciphertext: payload.encryptedData, iv: payload.iv, tag: payload.tag },
+            decKey,
+          );
+
+          if (!decrypted) {
+            res.writeHead(401, { "Content-Type": "application/json" });
+            res.end(
+              JSON.stringify({
+                error: "Telemetry decryption or authentication tag verification failed",
+              }),
+            );
+            return;
+          }
+
+          let reportType = "unknown";
+          if (
+            decrypted.agentId &&
+            decrypted.hostname &&
+            typeof decrypted.totalCommandsExecuted === "number"
+          ) {
+            const report = decrypted as unknown as FleetAgentTelemetryReport;
+            const key = `${report.agentId}@${report.hostname}`;
+            this.heartbeats.set(key, report);
+            this.broadcastEvent("heartbeat", report);
+            reportType = "heartbeat";
+          } else if (decrypted.severity || decrypted.command || decrypted.ruleCategory) {
+            const event = decrypted as Partial<ControlPlaneIncidentEvent>;
+            const incident: ControlPlaneIncidentEvent = {
+              id: `inc_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+              orgId: event.orgId || payload.orgId || "default",
+              agentId: event.agentId || "unknown-agent",
+              agentRuntime: event.agentRuntime || "generic",
+              hostname: event.hostname || "localhost",
+              command: event.command,
+              ruleCategory: event.ruleCategory,
+              reason: event.reason,
+              severity: event.severity || "high",
+              timestamp: new Date().toISOString(),
+            };
+            this.incidents.unshift(incident);
+            if (this.incidents.length > 500) this.incidents.pop();
+            this.broadcastEvent("incident", incident);
+            reportType = "incident";
+          }
+
+          res.writeHead(200, { "Content-Type": "application/json" });
+          res.end(
+            JSON.stringify({
+              success: true,
+              aggregated: true,
+              type: reportType,
+              timestamp: new Date().toISOString(),
+            }),
+          );
+        } catch {
+          res.writeHead(400, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ error: "Invalid encrypted telemetry request" }));
+        }
+      });
+      return;
+    }
+
     // POST /api/v1/telemetry/heartbeat
     if (pathname === "/api/v1/telemetry/heartbeat" && method === "POST") {
       readBody().then((body) => {
@@ -208,6 +403,7 @@ export class ControlPlaneServer {
           const report = JSON.parse(body) as FleetAgentTelemetryReport;
           const key = `${report.agentId}@${report.hostname}`;
           this.heartbeats.set(key, report);
+          this.broadcastEvent("heartbeat", report);
           res.writeHead(200, { "Content-Type": "application/json" });
           res.end(JSON.stringify({ success: true, registeredNodes: this.heartbeats.size }));
         } catch {
@@ -238,6 +434,9 @@ export class ControlPlaneServer {
           this.incidents.unshift(incident);
           // Retain last 500 incidents in memory
           if (this.incidents.length > 500) this.incidents.pop();
+
+          // Broadcast to connected SSE streams
+          this.broadcastEvent("incident", incident);
 
           // Stream incident out to all subscribed enterprise SIEM webhooks (Datadog, Splunk, Slack)
           const siemEvent = {

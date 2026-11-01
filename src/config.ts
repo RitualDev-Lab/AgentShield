@@ -2,6 +2,21 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import type { SecretPattern } from "./types.js";
 
+export interface AntigravityProfileConfig {
+  enabled?: boolean;
+  profile?: string;
+  interceptTools?: string[];
+  enforceSandbox?: boolean;
+  requireIsolation?: boolean;
+  quarantineOnCanaryTrip?: boolean;
+  protectedPatterns?: string[];
+  hooks?: {
+    preCommand?: string;
+    preWrite?: string;
+    auditLog?: string;
+  };
+}
+
 export interface AgentShieldConfig {
   version?: string;
   allowlist?: string[];
@@ -38,6 +53,7 @@ export interface AgentShieldConfig {
       strictMode?: boolean;
     };
   };
+  antigravity?: AntigravityProfileConfig;
 }
 
 export function loadConfig(rootDir: string = process.cwd()): AgentShieldConfig | null {

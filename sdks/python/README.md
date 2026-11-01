@@ -57,18 +57,59 @@ if check["isBlocked"]:
     # 🚨 Blocked: Blocked attempt to read raw .env file
 ```
 
-### 3. LangChain & LangGraph Integration
+### 3. Framework Integrations
 
+#### LangChain & LangGraph
 ```python
 from langchain_openai import ChatOpenAI
 from agentshield import AgentShieldCallbackHandler
 
-# Attach handler to automatically scrub secrets from prompt inputs
-llm = ChatOpenAI(
-    callbacks=[AgentShieldCallbackHandler()]
-)
+llm = ChatOpenAI(callbacks=[AgentShieldCallbackHandler()])
+# Prompts are automatically scrubbed before dispatch to OpenAI!
+```
 
-# Any prompt containing keys will be sanitized before egress to OpenAI!
+#### LlamaIndex
+```python
+from agentshield import AgentShieldLlamaIndexCallbackHandler
+
+handler = AgentShieldLlamaIndexCallbackHandler()
+# Intercepts query pipelines, retrieved context nodes, and tool calls
+```
+
+#### LiteLLM
+```python
+import litellm
+from agentshield import AgentShieldLiteLLMHandler
+
+handler = AgentShieldLiteLLMHandler()
+litellm.input_callback = [handler.pre_call_hook]
+litellm.output_callback = [handler.post_call_hook]
+```
+
+#### CrewAI
+```python
+from crewai import Agent
+from agentshield import AgentShieldCrewAIHook
+
+hook = AgentShieldCrewAIHook()
+# Sanitizes task descriptions, agent outputs, and blocks malicious sandbox commands
+```
+
+#### Direct Interceptors (Gemini, OpenAI, Anthropic)
+```python
+from agentshield import GeminiInterceptor, OpenAIInterceptor, AnthropicInterceptor
+
+# Google Gemini SDK
+gemini_shield = GeminiInterceptor()
+safe_contents = gemini_shield.sanitize_contents(["My prompt with sk-proj-123456789..."])
+
+# OpenAI SDK
+openai_shield = OpenAIInterceptor()
+safe_messages = openai_shield.sanitize_messages([{"role": "user", "content": "..."}])
+
+# Anthropic SDK
+claude_shield = AnthropicInterceptor()
+safe_claude_msg = claude_shield.sanitize_messages([{"role": "user", "content": "..."}])
 ```
 
 ### 4. Sidecar Daemon Client

@@ -70,4 +70,16 @@ describe("AgentShield Team Config Parser", () => {
     assert.equal(asteriskRes.hasSecrets, true);
     assert.equal(asteriskRes.sanitizedText.includes("********"), true);
   });
+
+  it("should load antigravity profile extension from .agentshield.json", async () => {
+    const { loadConfig } = await import("../src/config.js");
+    const cfg = loadConfig(process.cwd());
+    assert.ok(cfg);
+    assert.ok(cfg.antigravity);
+    assert.equal(cfg.antigravity.enabled, true);
+    assert.equal(cfg.antigravity.profile, "high-assurance-agent");
+    assert.ok(cfg.antigravity.interceptTools?.includes("run_command"));
+    assert.equal(cfg.antigravity.enforceSandbox, true);
+    assert.ok(cfg.antigravity.protectedPatterns?.length);
+  });
 });

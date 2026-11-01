@@ -1,3 +1,5 @@
+import { StringDecoder } from "node:string_decoder";
+
 export interface CanaryDecoyAsset {
   id: string;
   type: "env_var" | "decoy_file" | "jwt_token";
@@ -16,6 +18,68 @@ export interface CanaryDetectionResult {
 }
 
 /**
+ * Stream-aware Canary Detector:
+ * Hardened to detect canary secrets fragmented across arbitrary multi-byte UTF-8 boundaries
+ * and chunk sizes (down to 1 byte at a time) using an internal lookback window and UTF-8 decoder.
+ */
+export class CanaryStreamDetector {
+  private manager: CanaryDecoyManager;
+  private actor: string;
+  private decoder: StringDecoder;
+  private pendingBuffer = "";
+  private lookbackSize: number;
+
+  constructor(manager: CanaryDecoyManager, actor = "autonomous-agent", lookbackSize = 256) {
+    this.manager = manager;
+    this.actor = actor;
+    this.decoder = new StringDecoder("utf8");
+    this.lookbackSize = Math.max(lookbackSize, manager.getLookbackWindowSize());
+  }
+
+  /**
+   * Processes a streaming chunk (string or Buffer), maintaining state across chunk seams
+   * and properly assembling multi-byte UTF-8 characters.
+   */
+  public write(chunk: Buffer | string): CanaryDetectionResult {
+    const textChunk = Buffer.isBuffer(chunk) ? this.decoder.write(chunk) : chunk;
+    this.pendingBuffer += textChunk;
+
+    const check = this.manager.inspectPayload(this.pendingBuffer, this.actor);
+    if (check.hasCanaryTriggered) {
+      return check;
+    }
+
+    // Keep sliding lookback window for seamless cross-chunk canary detection
+    if (this.pendingBuffer.length > this.lookbackSize) {
+      this.pendingBuffer = this.pendingBuffer.slice(-this.lookbackSize);
+    }
+
+    return {
+      hasCanaryTriggered: false,
+      canariesTripped: [],
+      quarantineRequired: false,
+    };
+  }
+
+  /**
+   * Finalizes the stream, decoding any trailing multibyte UTF-8 fragment and checking the final buffer.
+   */
+  public flush(): CanaryDetectionResult {
+    const trailing = this.decoder.end();
+    this.pendingBuffer += trailing;
+
+    const result = this.manager.inspectPayload(this.pendingBuffer, this.actor);
+    this.pendingBuffer = "";
+    return result;
+  }
+
+  public reset(): void {
+    this.decoder = new StringDecoder("utf8");
+    this.pendingBuffer = "";
+  }
+}
+
+/**
  * Honeypot Canary Decoys & Tripwire Defense:
  * Positions synthetic canary variables (e.g., `AWS_SECRET_CANARY_DO_NOT_USE`)
  * and breadcrumb tokens in runtime memory and virtual filesystems.
@@ -24,6 +88,7 @@ export interface CanaryDetectionResult {
  */
 export class CanaryDecoyManager {
   private decopAssets = new Map<string, CanaryDecoyAsset>();
+  private defaultStreamDetector: CanaryStreamDetector | null = null;
 
   constructor() {
     this.seedDefaultCanaries();
@@ -57,6 +122,46 @@ export class CanaryDecoyManager {
 
   public registerCanary(asset: CanaryDecoyAsset): void {
     this.decopAssets.set(asset.id, asset);
+    this.defaultStreamDetector = null; // Re-create with new size on demand
+  }
+
+  public getLookbackWindowSize(): number {
+    let maxLen = 128;
+    for (const c of this.decopAssets.values()) {
+      if (c.syntheticValue.length > maxLen) maxLen = c.syntheticValue.length;
+      if (c.name.length > maxLen) maxLen = c.name.length;
+    }
+    return maxLen * 2;
+  }
+
+  public createStreamDetector(actor = "autonomous-agent"): CanaryStreamDetector {
+    return new CanaryStreamDetector(this, actor);
+  }
+
+  /**
+   * Stateful stream inspection method that handles fragmented chunks
+   */
+  public inspectStreamChunk(
+    chunk: Buffer | string,
+    actor = "autonomous-agent",
+  ): CanaryDetectionResult {
+    if (!this.defaultStreamDetector) {
+      this.defaultStreamDetector = this.createStreamDetector(actor);
+    }
+    return this.defaultStreamDetector.write(chunk);
+  }
+
+  public flushStream(): CanaryDetectionResult {
+    if (this.defaultStreamDetector) {
+      const res = this.defaultStreamDetector.flush();
+      this.defaultStreamDetector = null;
+      return res;
+    }
+    return {
+      hasCanaryTriggered: false,
+      canariesTripped: [],
+      quarantineRequired: false,
+    };
   }
 
   /**

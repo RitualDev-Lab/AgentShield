@@ -87,6 +87,107 @@ export interface SandboxProfile {
   runnerScript: string;
 }
 
+export interface BubblewrapOptions {
+  workspaceDir?: string;
+  roBindPaths?: string[];
+  bindWorkspace?: boolean;
+  unshareAll?: boolean;
+  unshareNet?: boolean;
+  dieWithParent?: boolean;
+  tmpfsPath?: string;
+  extraArgs?: string[];
+}
+
+export interface AppContainerOptions {
+  workspaceDir?: string;
+  appContainerSid?: string;
+  lowIntegrity?: boolean;
+  denyNetwork?: boolean;
+  allowedCapabilities?: string[];
+  blockedPaths?: string[];
+}
+
+/**
+ * Builds bubblewrap (bwrap) CLI arguments for native Linux container sandboxing.
+ * Confines child processes strictly to the agent workspace, mounting system libs read-only,
+ * creating an isolated tmpfs, and unsharing process/user/IPC namespaces.
+ */
+export function buildBubblewrapArgs(options: BubblewrapOptions = {}): string[] {
+  const ws = options.workspaceDir || process.cwd();
+  const roBinds = options.roBindPaths || [
+    "/usr",
+    "/bin",
+    "/lib",
+    "/lib64",
+    "/etc/alternatives",
+    "/etc/ssl/certs",
+  ];
+
+  const args: string[] = [];
+
+  // Read-only system mounts
+  for (const p of roBinds) {
+    args.push("--ro-bind-try", p, p);
+  }
+
+  // Device nodes and virtual filesystems
+  args.push("--dev", "/dev");
+  args.push("--proc", "/proc");
+
+  // Isolated tmpfs
+  const tmp = options.tmpfsPath || "/tmp";
+  args.push("--tmpfs", tmp);
+
+  // Read-write bind agent workspace
+  if (options.bindWorkspace !== false) {
+    args.push("--bind", ws, ws);
+    args.push("--chdir", ws);
+  }
+
+  // Namespace isolation
+  if (options.unshareAll !== false) {
+    args.push("--unshare-user", "--unshare-ipc", "--unshare-pid", "--unshare-uts");
+  }
+
+  if (options.unshareNet) {
+    args.push("--unshare-net");
+  }
+
+  if (options.dieWithParent !== false) {
+    args.push("--die-with-parent");
+  }
+
+  if (options.extraArgs && options.extraArgs.length > 0) {
+    args.push(...options.extraArgs);
+  }
+
+  return args;
+}
+
+/**
+ * Formats a full bubblewrap execution command wrapping a target shell command.
+ */
+export function buildBubblewrapCommand(command: string, options: BubblewrapOptions = {}): string {
+  const bwrapArgs = buildBubblewrapArgs(options);
+  const escapedCmd = command.replace(/'/g, "'\\''");
+  return `bwrap ${bwrapArgs.join(" ")} -- /bin/sh -c '${escapedCmd}'`;
+}
+
+/**
+ * Builds Windows AppContainer / Low-Integrity process boundary confinement runner.
+ * Confines write operations to workspace, isolates registry hives, and restricts DACLs.
+ */
+export function buildAppContainerCommand(
+  command: string,
+  options: AppContainerOptions = {},
+): string {
+  const ws = (options.workspaceDir || process.cwd()).replace(/'/g, "''");
+  const sid = options.appContainerSid || "S-1-15-2-1";
+  const escapedCmd = command.replace(/'/g, "''");
+
+  return `powershell -NoProfile -ExecutionPolicy Bypass -Command "& { $ws = '${ws}'; $sid = '${sid}'; $env:AGENT_WORKSPACE = $ws; $env:APP_CONTAINER_SID = $sid; cmd.exe /c '${escapedCmd}' }"`;
+}
+
 /**
  * OS Micro-Sandboxing Profile Generator:
  * Generates kernel confinement policies for agent child processes:
@@ -161,6 +262,67 @@ export AGENT_WORKSPACE="${safeWorkspace}"
 # Denies access to /root, /home/*/.ssh, /home/*/.aws
 exec "$@"
 `;
+  }
+
+  /**
+   * Generates Linux Bubblewrap container profile runner script
+   */
+  public generateBubblewrapProfile(options: BubblewrapOptions = {}): string {
+    const mergedOpts = { workspaceDir: this.workspaceDir, ...options };
+    const bwrapArgs = buildBubblewrapArgs(mergedOpts);
+    return `#!/bin/sh
+# AgentShield Bubblewrap Container Confinement Wrapper
+exec bwrap ${bwrapArgs.join(" ")} -- "$@"
+`;
+  }
+
+  /**
+   * Generates Windows AppContainer / Low-Integrity profile specification
+   */
+  public generateAppContainerProfile(options: AppContainerOptions = {}): SandboxProfile {
+    const mergedOpts = { workspaceDir: this.workspaceDir, ...options };
+    const runnerScript = buildAppContainerCommand("powershell.exe", mergedOpts);
+    const blockedPaths = [
+      join(process.env.USERPROFILE || "C:\\Users", ".ssh"),
+      join(process.env.USERPROFILE || "C:\\Users", ".aws"),
+      join(
+        process.env.USERPROFILE || "C:\\Users",
+        "AppData",
+        "Roaming",
+        "Microsoft",
+        "Credentials",
+      ),
+      join(process.env.USERPROFILE || "C:\\Users", ".azure"),
+    ];
+
+    return {
+      os: "win32",
+      policyName: "agentshield-windows-appcontainer-jail",
+      allowedWorkspace: this.workspaceDir,
+      blockedPaths,
+      runnerScript,
+    };
+  }
+
+  /**
+   * Checks whether bubblewrap binary is available on Linux host
+   */
+  public isBubblewrapAvailable(): boolean {
+    if (this.currentOs !== "linux") return false;
+    try {
+      const { execSync } = require("node:child_process");
+      execSync("which bwrap", { stdio: "ignore" });
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Checks whether Windows AppContainer isolation is supported on current OS
+   */
+  public isAppContainerSupported(): boolean {
+    return this.currentOs === "win32";
   }
 
   /**

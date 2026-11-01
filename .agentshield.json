@@ -16,5 +16,25 @@
       "severity": "critical",
       "category": "generic"
     }
-  ]
+  ],
+  "antigravity": {
+    "enabled": true,
+    "profile": "high-assurance-agent",
+    "interceptTools": ["run_command", "write_file", "edit_file"],
+    "enforceSandbox": true,
+    "requireIsolation": false,
+    "quarantineOnCanaryTrip": true,
+    "protectedPatterns": [
+      "\\.env(?:\\.[a-zA-Z0-9_-]+)?",
+      "id_rsa(?:\\.pub)?",
+      "id_ed25519",
+      "\\.aws[\\/]credentials",
+      "\\.ssh[\\/].*"
+    ],
+    "hooks": {
+      "preCommand": "agentshield exec",
+      "preWrite": "agentshield scan",
+      "auditLog": ".agentshield/antigravity.audit.log"
+    }
+  }
 }
