@@ -3,7 +3,13 @@ import { homedir, platform } from "node:os";
 import { Transform } from "node:stream";
 import { StringDecoder } from "node:string_decoder";
 import { AgentShieldEngine } from "./engine.js";
-import { KernelSandboxConfinement, type IsolationMechanism } from "./kernel.js";
+import {
+  buildAppContainerCommand,
+  buildBubblewrapCommand,
+  buildSeatbeltCommand,
+  KernelSandboxConfinement,
+  type IsolationMechanism,
+} from "./kernel.js";
 import { AgentCommandSandbox, type CommandInspectionResult } from "./sandbox.js";
 
 export interface StdioInterceptorOptions {
@@ -393,11 +399,7 @@ export class AgentStdioInterceptor {
         isolationMechanism = "macos_sandbox_exec";
         isolationNotice = "Enforcing OS-level kernel confinement via macOS sandbox-exec.";
         downgradedIsolation = false;
-        const home = homedir().replace(/\\/g, "\\\\").replace(/"/g, '\\"');
-        const ws = (options.workspaceDir || process.cwd())
-          .replace(/\\/g, "\\\\")
-          .replace(/"/g, '\\"');
-        execCmd = `sandbox-exec -p '(version 1)(deny default)(allow process-exec)(allow sysctl-read)(allow file-read* (subpath "${ws}"))(allow file-write* (subpath "${ws}"))(allow file-read* (subpath "/usr/lib"))(allow file-read* (subpath "/dev/null"))(deny file-read* (subpath "${home}/.ssh"))(deny file-read* (subpath "${home}/.aws"))' ${command}`;
+        execCmd = buildSeatbeltCommand(command, { workspaceDir: options.workspaceDir });
       } else if (requestedKernelSandbox) {
         isolationMechanism = "process_level_firewall";
         downgradedIsolation = true;

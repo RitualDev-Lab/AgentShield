@@ -10,6 +10,9 @@ export * from "./config.js";
 export * from "./ci.js";
 export * from "./version.js";
 export * from "./sidecar.js";
+export * from "./egress-filter.js";
+export * from "./top-monitor.js";
+export * from "./mcp-wrapper.js";
 
 // --- Enterprise & Labs Experimental Modules ---
 export * from "./siem.js";

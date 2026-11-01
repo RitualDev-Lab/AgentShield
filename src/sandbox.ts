@@ -1,3 +1,5 @@
+import { inspectCommandForEgress, type NetworkEgressPolicy } from "./egress-filter.js";
+
 export interface CommandInspectionResult {
   isBlocked: boolean;
   reason?: string;
@@ -207,7 +209,10 @@ export class AgentCommandSandbox {
   /**
    * Inspects a command before execution by an AI coding agent.
    */
-  public inspectCommand(command: string): CommandInspectionResult {
+  public inspectCommand(
+    command: string,
+    egressPolicy?: NetworkEgressPolicy,
+  ): CommandInspectionResult {
     const candidates = normalizeShellCommand(command);
 
     for (const cmdVariant of candidates) {
@@ -222,6 +227,16 @@ export class AgentCommandSandbox {
           };
         }
       }
+    }
+
+    // Inspect network egress boundaries (metadata IMDS, loopback bypass, unapproved C2)
+    const egress = inspectCommandForEgress(command, egressPolicy);
+    if (egress.isBlocked) {
+      return {
+        isBlocked: true,
+        reason: egress.reason,
+        category: "credential_exfiltration",
+      };
     }
 
     return {

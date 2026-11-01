@@ -38,6 +38,8 @@ Usage:
   npx @ritualdev-lab/agentshield init-claude            Generate Claude Code PreToolUse hook configuration
   npx @ritualdev-lab/agentshield init-cursor            Generate Cursor / Windsurf settings.json protection rules
   npx @ritualdev-lab/agentshield benchmark              Run sub-millisecond scanning throughput benchmarks
+  npx @ritualdev-lab/agentshield top                    Launch live interactive terminal process & taint monitor
+  npx @ritualdev-lab/agentshield wrap <server...>       Transparent zero-config MCP wrapper for IDEs & agents
   npx @ritualdev-lab/agentshield badge <tool-name>      Generate Secured by AgentShield verified sponsor badge markdown / SVG
   npx @ritualdev-lab/agentshield bounty-verify <input>  Run local security PoC check against sandbox and secret engine
 
@@ -878,6 +880,22 @@ async function main() {
       );
       process.exit(0);
     }
+  } else if (command === "top" || command === "htop") {
+    const { runTopMonitor } = await import("./top-monitor.js");
+    const isOnce = args.includes("--once");
+    const isJson = args.includes("--json");
+    let intervalMs = 1500;
+    const intervalIdx = args.indexOf("--interval");
+    if (intervalIdx !== -1 && args[intervalIdx + 1]) {
+      intervalMs = Number.parseInt(args[intervalIdx + 1], 10) || 1500;
+    }
+    await runTopMonitor({ once: isOnce, json: isJson, intervalMs });
+    if (isOnce || isJson) {
+      process.exit(0);
+    }
+  } else if (command === "wrap" || command === "mcp-wrap") {
+    const { runMcpWrapper } = await import("./mcp-wrapper.js");
+    runMcpWrapper(args.slice(1));
   } else if (command === "sidecar" || command === "daemon") {
     const { AgentShieldSidecar } = await import("./sidecar.js");
     const sidecar = new AgentShieldSidecar(engine);

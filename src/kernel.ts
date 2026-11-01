@@ -98,6 +98,17 @@ export interface BubblewrapOptions {
   extraArgs?: string[];
 }
 
+export interface SeatbeltOptions {
+  workspaceDir?: string;
+  allowNetwork?: boolean;
+  allowedReadPaths?: string[];
+  allowedWritePaths?: string[];
+  blockedPaths?: string[];
+  allowSysctl?: boolean;
+  allowProcessExec?: boolean;
+  extraDirectives?: string[];
+}
+
 export interface AppContainerOptions {
   workspaceDir?: string;
   appContainerSid?: string;
@@ -174,6 +185,106 @@ export function buildBubblewrapCommand(command: string, options: BubblewrapOptio
 }
 
 /**
+ * Builds Apple Seatbelt (sandbox-exec) Scheme confinement profile.
+ * Confines filesystem operations strictly to workspace, denies access to system credentials,
+ * and restricts network access.
+ */
+export function buildSeatbeltProfile(options: SeatbeltOptions = {}): string {
+  const ws = (options.workspaceDir || process.cwd()).replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+  const home = homedir().replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+
+  const readPaths = options.allowedReadPaths || [
+    "/usr/lib",
+    "/usr/share",
+    "/System/Library",
+    "/bin",
+    "/usr/bin",
+    "/dev/null",
+    "/dev/urandom",
+    "/dev/random",
+    "/etc/resolv.conf",
+    "/etc/ssl/certs",
+  ];
+
+  const blocked = options.blockedPaths || [
+    `${home}/.ssh`,
+    `${home}/.aws`,
+    `${home}/.config`,
+    `${home}/.gnupg`,
+    `${home}/.azure`,
+    `${home}/.netrc`,
+    "/etc/shadow",
+    "/etc/master.passwd",
+  ];
+
+  const lines: string[] = ["(version 1)", "(deny default)"];
+
+  if (options.allowProcessExec !== false) {
+    lines.push("(allow process-exec)");
+  }
+
+  if (options.allowSysctl !== false) {
+    lines.push("(allow sysctl-read)");
+  }
+
+  // Workspace read and write
+  lines.push(`(allow file-read* (subpath "${ws}"))`);
+  lines.push(`(allow file-write* (subpath "${ws}"))`);
+
+  // Extra allowed write paths
+  if (options.allowedWritePaths) {
+    for (const p of options.allowedWritePaths) {
+      lines.push(
+        `(allow file-write* (subpath "${p.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"))`,
+      );
+    }
+  }
+
+  // Allowed read paths
+  for (const p of readPaths) {
+    lines.push(`(allow file-read* (subpath "${p.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"))`);
+  }
+
+  // Strictly blocked paths
+  for (const p of blocked) {
+    lines.push(`(deny file-read* (subpath "${p.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"))`);
+    lines.push(`(deny file-write* (subpath "${p.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"))`);
+  }
+
+  // Network confinement
+  if (options.allowNetwork) {
+    lines.push("(allow network*)");
+  } else {
+    lines.push("(deny network*)");
+  }
+
+  if (options.extraDirectives) {
+    for (const d of options.extraDirectives) {
+      lines.push(d);
+    }
+  }
+
+  return `${lines.join("\n")}\n`;
+}
+
+/**
+ * Builds Apple Seatbelt (sandbox-exec) CLI arguments for native macOS kernel sandboxing.
+ */
+export function buildSeatbeltArgs(command: string, options: SeatbeltOptions = {}): string[] {
+  const profile = buildSeatbeltProfile(options);
+  return ["-p", profile, "/bin/sh", "-c", command];
+}
+
+/**
+ * Formats a full sandbox-exec execution command wrapping a target shell command on macOS.
+ */
+export function buildSeatbeltCommand(command: string, options: SeatbeltOptions = {}): string {
+  const profile = buildSeatbeltProfile(options).trim().replace(/\n/g, "");
+  const escapedCmd = command.replace(/'/g, "'\\''");
+  return `sandbox-exec -p '${profile}' /bin/sh -c '${escapedCmd}'`;
+}
+
+/**
  * Builds Windows AppContainer / Low-Integrity process boundary confinement runner.
  * Confines write operations to workspace, isolates registry hives, and restricts DACLs.
  */
@@ -226,23 +337,9 @@ export class KernelSandboxConfinement {
   /**
    * Generates Apple Seatbelt sandbox profile for macOS hosts
    */
-  public generateSeatbeltProfile(): string {
-    const safeWorkspace = this.workspaceDir.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
-    const home = homedir().replace(/\\/g, "\\\\").replace(/"/g, '\\"');
-    return `(version 1)
-(deny default)
-(allow process-exec)
-(allow sysctl-read)
-(allow file-read* (subpath "${safeWorkspace}"))
-(allow file-write* (subpath "${safeWorkspace}"))
-(allow file-read* (subpath "/usr/lib"))
-(allow file-read* (subpath "/usr/share"))
-(allow file-read* (subpath "/dev/null"))
-(deny file-read* (subpath "${home}/.ssh"))
-(deny file-read* (subpath "${home}/.aws"))
-(deny file-read* (subpath "${home}/.config"))
-(deny network*)
-`;
+  public generateSeatbeltProfile(options: SeatbeltOptions = {}): string {
+    const mergedOpts = { workspaceDir: this.workspaceDir, ...options };
+    return buildSeatbeltProfile(mergedOpts);
   }
 
   /**
@@ -323,6 +420,20 @@ exec bwrap ${bwrapArgs.join(" ")} -- "$@"
    */
   public isAppContainerSupported(): boolean {
     return this.currentOs === "win32";
+  }
+
+  /**
+   * Checks whether macOS Seatbelt (sandbox-exec) is supported and available on current OS
+   */
+  public isSeatbeltAvailable(): boolean {
+    if (this.currentOs !== "darwin") return false;
+    try {
+      const { execSync } = require("node:child_process");
+      execSync("which sandbox-exec", { stdio: "ignore" });
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   /**
