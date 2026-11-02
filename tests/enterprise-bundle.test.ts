@@ -163,4 +163,24 @@ describe("Phase 4: Enterprise Compliance Bundle Generator", () => {
       await server.stop();
     }
   });
+
+  it("should generate self-contained HTML and PDF audit documents", () => {
+    const bundle = EnterpriseComplianceBundleGenerator.generateBundle(
+      mockFleetReports,
+      [],
+      "test-salt",
+      { organizationName: "Acme Corp", frameworks: ["soc2", "iso27001"] },
+    );
+
+    const html = EnterpriseComplianceBundleGenerator.toHtml(bundle);
+    assert.ok(html.includes("<!DOCTYPE html>"));
+    assert.ok(html.includes("AgentShield Enterprise Compliance Audit"));
+    assert.ok(html.includes("Acme Corp"));
+    assert.ok(html.includes("SOC2"));
+
+    const pdf = EnterpriseComplianceBundleGenerator.toPdf(bundle);
+    assert.ok(pdf.startsWith("%PDF-1.4"));
+    assert.ok(pdf.includes("%%EOF"));
+    assert.ok(pdf.includes("Acme Corp"));
+  });
 });

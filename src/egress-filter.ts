@@ -16,6 +16,26 @@ export interface NetworkEgressPolicy {
   blockedDomains?: string[]; // e.g. ["*.ngrok.io", "*.webhook.site"]
   allowedCidrs?: string[]; // e.g. ["192.168.1.0/24"]
   blockedCidrs?: string[]; // explicit custom CIDR denials
+  airGapped?: boolean; // 100% offline private VPC: zero outbound public traffic, allows local LLMs (Ollama, vLLM)
+  allowLocalLlm?: boolean; // default: true in air-gapped mode
+}
+
+export const LOCAL_LLM_PORTS = [11434, 8000, 1234];
+export const LOCAL_LLM_HOSTS = ["localhost", "127.0.0.1", "::1", "ollama", "vllm.local"];
+
+export function isLocalLlmTarget(target: string): boolean {
+  const normalized = target.toLowerCase().trim();
+  const host = extractHostFromTarget(normalized);
+  const isLocalHost = LOCAL_LLM_HOSTS.includes(host) || host.endsWith(".local");
+
+  if (!isLocalHost) return false;
+
+  // Check if port is specified or matches local LLM defaults (Ollama: 11434, vLLM: 8000, LM Studio: 1234)
+  for (const port of LOCAL_LLM_PORTS) {
+    if (normalized.includes(`:${port}`)) return true;
+  }
+
+  return normalized.includes("ollama") || normalized.includes("vllm");
 }
 
 export interface NetworkEgressVerdict {
@@ -176,15 +196,26 @@ export function evaluateNetworkEgress(
   target: string,
   policy: NetworkEgressPolicy = {},
 ): NetworkEgressVerdict {
+  const isAirGapped = Boolean(
+    policy.airGapped ||
+      process.env.AGENTSHIELD_AIR_GAPPED === "1" ||
+      process.env.AGENTSHIELD_AIR_GAPPED === "true" ||
+      process.env.RITUAL_AIR_GAPPED === "1" ||
+      process.env.RITUAL_AIR_GAPPED === "true",
+  );
+  const allowLocalLlm =
+    policy.allowLocalLlm === true || (isAirGapped && policy.allowLocalLlm !== false);
+  const isLocalLlm = allowLocalLlm && isLocalLlmTarget(target);
+
   const denyMetadata = policy.denyMetadata !== false;
-  const denyLoopback = policy.denyLoopback !== false;
+  const denyLoopback = isLocalLlm ? false : policy.denyLoopback !== false;
   const denyPrivate = Boolean(policy.denyPrivateNetworks);
 
   const host = extractHostFromTarget(target);
   const ipInt = ipToUint32(host);
   const isIp = ipInt !== null;
 
-  // 1. Cloud Metadata IMDS Check
+  // 1. Cloud Metadata IMDS Check (Always blocked, even in air-gapped/local mode)
   if (denyMetadata) {
     if (
       CLOUD_METADATA_IPS.includes(host) ||
@@ -209,6 +240,32 @@ export function evaluateNetworkEgress(
           normalizedHost: host,
         };
       }
+    }
+  }
+
+  // 1.5 Air-Gapped Mode Handling
+  if (isAirGapped) {
+    if (isLocalLlm) {
+      return {
+        isBlocked: false,
+        target,
+        normalizedHost: host,
+      };
+    }
+
+    // Check if target matches explicitly allowed private VPC domains or CIDRs
+    const isExplicitlyAllowed =
+      (policy.allowedDomains && policy.allowedDomains.some((d) => matchesDomain(host, d))) ||
+      (policy.allowedCidrs && isIp && policy.allowedCidrs.some((cidr) => isIpInCidr(host, cidr)));
+
+    if (!isExplicitlyAllowed) {
+      return {
+        isBlocked: true,
+        reason: `Egress blocked: Air-Gapped / Private VPC mode active. Zero outbound internet traffic allowed. Only authorized local LLM runtimes (Ollama, vLLM, LM Studio) or internal VPC endpoints are permitted.`,
+        category: "policy_denied",
+        target,
+        normalizedHost: host,
+      };
     }
   }
 

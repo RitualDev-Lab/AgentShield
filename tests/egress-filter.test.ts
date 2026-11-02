@@ -152,4 +152,45 @@ describe("AgentShield Network Egress Boundary & CIDR Filter Suite", () => {
       assert.strictEqual(check.isBlocked, false);
     });
   });
+
+  describe("6. Air-Gapped / Private VPC Mode & Local LLM Support", () => {
+    it("allows local LLM runtimes (Ollama:11434, vLLM:8000, LM Studio:1234) in air-gapped mode", () => {
+      const ollamaRes = evaluateNetworkEgress("http://localhost:11434/api/generate", {
+        airGapped: true,
+      });
+      assert.strictEqual(ollamaRes.isBlocked, false);
+
+      const vllmRes = evaluateNetworkEgress("http://127.0.0.1:8000/v1/chat/completions", {
+        airGapped: true,
+      });
+      assert.strictEqual(vllmRes.isBlocked, false);
+
+      const lmStudioRes = evaluateNetworkEgress("http://localhost:1234/v1/models", {
+        airGapped: true,
+      });
+      assert.strictEqual(lmStudioRes.isBlocked, false);
+    });
+
+    it("blocks public outbound internet connections in air-gapped mode", () => {
+      const publicRes = evaluateNetworkEgress("https://api.openai.com/v1/chat/completions", {
+        airGapped: true,
+      });
+      assert.strictEqual(publicRes.isBlocked, true);
+      assert.strictEqual(publicRes.category, "policy_denied");
+      assert.ok(publicRes.reason?.includes("Air-Gapped"));
+
+      const githubRes = evaluateNetworkEgress("https://api.github.com/repos", {
+        airGapped: true,
+      });
+      assert.strictEqual(githubRes.isBlocked, true);
+    });
+
+    it("still blocks cloud metadata endpoints in air-gapped mode", () => {
+      const imdsRes = evaluateNetworkEgress("http://169.254.169.254/latest/meta-data/", {
+        airGapped: true,
+      });
+      assert.strictEqual(imdsRes.isBlocked, true);
+      assert.strictEqual(imdsRes.category, "metadata_imds");
+    });
+  });
 });

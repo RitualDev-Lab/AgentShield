@@ -48,6 +48,7 @@ Enterprise Team Fleet & Remote Policy:
   npx @ritualdev-lab/agentshield logout                           Disconnect machine and clear organization credentials
   npx @ritualdev-lab/agentshield policy sync                      Fetch and synchronize remote enterprise security policy
   npx @ritualdev-lab/agentshield server [--port <number>]         Run local/self-hosted SaaS Control Plane server MVP
+  npx @ritualdev-lab/agentshield report [--compliance soc2]       Generate verifiable SOC 2 / ISO 27001 audit PDF & HTML
   npx @ritualdev-lab/agentshield attestation [--org <name>]       Generate cryptographic SOC 2 / ISO 27001 bundle
 
 Experimental Labs & Enterprise Controls (--labs / --experimental):
@@ -57,6 +58,9 @@ Experimental Labs & Enterprise Controls (--labs / --experimental):
   npx @ritualdev-lab/agentshield ledger verify          Verify cryptographic integrity of audit ledger HMAC chain
 
 Options:
+  --compliance <soc2|iso27001>           Target compliance framework (default: soc2)
+  --audit-pdf <filePath>                 Write verifiable PDF compliance audit report to file
+  --air-gapped                           Run 100% offline with zero outbound phone-homes (local LLM mode)
   --base <branch>                        Git base ref for CI diff (default: origin/main)
   --report <filePath>                    Write Markdown security audit report to file
   --sarif <filePath>                     Export findings in OASIS SARIF 2.1.0 format
@@ -72,8 +76,97 @@ async function main() {
   const args = process.argv.slice(2);
   const command = args[0];
 
+  if (args.includes("--air-gapped")) {
+    process.env.AGENTSHIELD_AIR_GAPPED = "1";
+    process.env.RITUAL_AIR_GAPPED = "1";
+  }
+
   if (!command || command === "--help" || command === "-h") {
     printHelp();
+    process.exit(0);
+  }
+
+  if (command === "report") {
+    printBanner();
+    let orgName = "Enterprise Organization";
+    const orgIdx = args.indexOf("--org");
+    if (orgIdx !== -1 && args[orgIdx + 1]) orgName = args[orgIdx + 1];
+
+    const compIdx = args.indexOf("--compliance");
+    const frameworkArg =
+      compIdx !== -1 && args[compIdx + 1] ? args[compIdx + 1].toLowerCase() : "soc2";
+    const frameworks = frameworkArg === "iso27001" ? ["iso27001"] : ["soc2"];
+
+    const pdfIdx = args.indexOf("--audit-pdf");
+    const outIdx = args.indexOf("-o") !== -1 ? args.indexOf("-o") : args.indexOf("--output");
+    let outPath: string | null = null;
+    let format: "pdf" | "html" | "json" | "markdown" = "html";
+
+    if (pdfIdx !== -1 && args[pdfIdx + 1]) {
+      outPath = args[pdfIdx + 1];
+      format = "pdf";
+    } else if (outIdx !== -1 && args[outIdx + 1]) {
+      outPath = args[outIdx + 1];
+      if (outPath.endsWith(".pdf")) format = "pdf";
+      else if (outPath.endsWith(".json")) format = "json";
+      else if (outPath.endsWith(".md")) format = "markdown";
+      else format = "html";
+    } else {
+      outPath = `./agentshield-${frameworkArg}-audit.html`;
+    }
+
+    const formatIdx = args.indexOf("--format");
+    if (formatIdx !== -1 && args[formatIdx + 1]) {
+      format = args[formatIdx + 1].toLowerCase() as any;
+    }
+
+    const { EnterpriseComplianceBundleGenerator } = await import("./enterprise-bundle.js");
+    const { TamperEvidentLedger } = await import("./ledger.js");
+
+    const ledgerPath = join(process.cwd(), ".agentshield", "audit.ledger.jsonl");
+    const ledger = new TamperEvidentLedger(ledgerPath);
+    const ledgerEntries = ledger.getEntries();
+
+    const creds = loadCredentials();
+    if (creds?.orgId && orgName === "Enterprise Organization") {
+      orgName = creds.orgId;
+    }
+
+    const bundle = EnterpriseComplianceBundleGenerator.generateBundle(
+      [],
+      ledgerEntries,
+      process.env.AGENTSHIELD_LEDGER_KEY || "agentshield-tamper-evident-salt-v1",
+      { organizationName: orgName, frameworks: frameworks as any },
+    );
+
+    let outputText = "";
+    if (format === "html") {
+      outputText = EnterpriseComplianceBundleGenerator.toHtml(bundle);
+    } else if (format === "pdf") {
+      outputText = EnterpriseComplianceBundleGenerator.toPdf(bundle);
+    } else if (format === "markdown") {
+      outputText = EnterpriseComplianceBundleGenerator.toExecutiveMarkdown(bundle);
+    } else {
+      outputText = JSON.stringify(bundle, null, 2);
+    }
+
+    if (outPath) {
+      writeFileSync(outPath, outputText, "utf8");
+      console.log(`
+🛡️  AgentShield Compliance Audit Reporter
+──────────────────────────────────────────
+Framework:        ${frameworkArg.toUpperCase()}
+Bundle ID:        ${bundle.bundleId}
+Generated At:     ${bundle.generatedAt}
+Compliance Score: ${bundle.complianceScore}% (${bundle.executiveStatus})
+Auditor SHA Seal: ${bundle.rawEvidencePayloadSha256}
+Report Saved To:  ${outPath}
+──────────────────────────────────────────
+Audit file ready for compliance officer review.
+`);
+    } else {
+      console.log(outputText);
+    }
     process.exit(0);
   }
 
