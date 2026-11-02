@@ -42,6 +42,7 @@ Usage:
   npx @ritualdev-lab/agentshield wrap <server...>       Transparent zero-config MCP wrapper for IDEs & agents
   npx @ritualdev-lab/agentshield badge <tool-name>      Generate Secured by AgentShield verified sponsor badge markdown / SVG
   npx @ritualdev-lab/agentshield bounty-verify <input>  Run local security PoC check against sandbox and secret engine
+  npx @ritualdev-lab/agentshield upgrade [--tier pro]   Upgrade to Pro ($15/mo) or Team ($99/mo) via Dodo Payments
 
 Enterprise Team Fleet & Remote Policy:
   npx @ritualdev-lab/agentshield login --org <id> --token <key>   Authenticate machine with enterprise organization
@@ -166,6 +167,61 @@ Audit file ready for compliance officer review.
 `);
     } else {
       console.log(outputText);
+    }
+    process.exit(0);
+  }
+
+  if (command === "upgrade") {
+    printBanner();
+    const tierIdx = args.indexOf("--tier");
+    const tierArg = tierIdx !== -1 && args[tierIdx + 1] ? args[tierIdx + 1] : "pro";
+    const selectedTierKey =
+      tierArg === "team" ? "team-scale" : tierArg === "badge" ? "sponsor-verified-badge" : "pro-developer";
+
+    const { DodoPaymentsService, SPONSORED_PRODUCTS } = await import("./dodo-payments.js");
+    const dodo = new DodoPaymentsService();
+    const product = SPONSORED_PRODUCTS[selectedTierKey];
+
+    if (!product) {
+      console.error(
+        `❌ Unknown tier '${tierArg}'. Available: pro, team, badge`,
+      );
+      process.exit(1);
+    }
+
+    try {
+      const checkout = await dodo.createCheckoutSession({
+        tierId: selectedTierKey,
+        returnUrl: "https://ritual.dev/welcome-pro",
+      });
+
+      console.log(`
+💳 Ritual Defense Upgrade (Powered by Dodo Payments)
+────────────────────────────────────────────────────
+Plan:               ${product.name}
+Billing:            $${product.priceUsd}/month (${product.type})
+Description:        ${product.description}
+
+Features Included:
+${product.features.map((f) => "  ✅ " + f).join("\n")}
+
+Merchant of Record: Dodo Payments (Global Tax, Indian GST, VAT, Cards, UPI, Apple Pay)
+Complete Checkout:  ${checkout.checkoutUrl}
+────────────────────────────────────────────────────
+`);
+    } catch {
+      console.log(`
+💳 Ritual Defense Upgrade
+────────────────────────────────────────────────────
+Plan:               ${product.name}
+Price:              $${product.priceUsd}/month (${product.type})
+Features:
+${product.features.map((f) => "  ✅ " + f).join("\n")}
+
+Merchant of Record: Dodo Payments (Global Tax, Indian GST, VAT)
+Direct Checkout:    https://test.dodopayments.com/buy/${product.id}
+────────────────────────────────────────────────────
+`);
     }
     process.exit(0);
   }

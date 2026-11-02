@@ -57,6 +57,34 @@ export const SPONSORED_PRODUCTS: Record<string, SponsoredProductTier> = {
       "Priority security advisory support",
     ],
   },
+  "pro-developer": {
+    id: "pdt_ritual_pro_individual",
+    name: "Ritual Pro Individual Developer",
+    description:
+      "Cloud log sync, multi-machine profiles, priority MCP generation, and native menu-bar status widget.",
+    priceUsd: 15,
+    type: "subscription",
+    features: [
+      "AgentShield & DBShield Cloud Audit Log Sync",
+      "DevShelf Hosted MCP Tool Runners",
+      "SkillPrism Managed Semantic Embedding Index",
+      "Verified Pro Developer Badge on DevShelf",
+    ],
+  },
+  "team-scale": {
+    id: "pdt_ritual_team_scale",
+    name: "Ritual Team & CI/CD Governance",
+    description:
+      "Multi-seat team policy enforcement, Slack mutation approvals, and shared Redis token-saving cache.",
+    priceUsd: 99,
+    type: "subscription",
+    features: [
+      "DBShield Interactive Slack #db-approvals Bot",
+      "SkillPrism Shared Team Redis Cluster Cache (-70% token spend)",
+      "Automated PR Review Security Bot (web-sec-auditor)",
+      "Fleet Central Dashboard & Tamper-Evident Ledger",
+    ],
+  },
 };
 
 export interface CreateCheckoutOptions {
