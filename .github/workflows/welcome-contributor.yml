@@ -25,16 +25,18 @@ jobs:
             const isBot = pr.user.type === 'Bot';
             if (isBot) return;
 
-            const welcomeBody = `### 👋 Thanks for opening this Pull Request, @${author}!
-
-Thank you for contributing to **AgentShield**! 🛡️
-
-Here is what happens next:
-1. 🧪 **Automated Security Gate**: Our CI workflow (\`pr-gate.yml\`) audits your diff for accidental credential exposure and runs test suites.
-2. 🔍 **Code & Security Review**: A maintainer from @RitualDev-Lab will review your changes shortly.
-3. 🌟 **Contributor Recognition**: Once merged, you'll be featured on our contributors list!
-
-> 💡 **Tip**: Make sure secrets/mock API keys in tests are synthetic/redacted and tests pass locally (\`pnpm test\`).`;
+            const welcomeBody = [
+              `### 👋 Thanks for opening this Pull Request, @${author}!`,
+              '',
+              'Thank you for contributing to **AgentShield**! 🛡️',
+              '',
+              'Here is what happens next:',
+              '1. 🧪 **Automated Security Gate**: Our CI workflow (`pr-gate.yml`) audits your diff for accidental credential exposure and runs test suites.',
+              '2. 🔍 **Code & Security Review**: A maintainer from @RitualDev-Lab will review your changes shortly.',
+              '3. 🌟 **Contributor Recognition**: Once merged, you\'ll be featured on our contributors list!',
+              '',
+              '> 💡 **Tip**: Make sure secrets/mock API keys in tests are synthetic/redacted and tests pass locally (`pnpm test`).'
+            ].join('\n');
 
             await github.rest.issues.createComment({
               owner: context.repo.owner,
@@ -53,13 +55,15 @@ Here is what happens next:
             const isBot = issue.user.type === 'Bot';
             if (isBot) return;
 
-            const welcomeBody = `### 👋 Thanks for reporting this issue, @${author}!
-
-We appreciate your vigilance in keeping AI agents secure with **AgentShield**. 🛡️
-
-Our security team will review and triage this report shortly. If this is a suspected vulnerability or security finding, remember you can also disclose responsibly via our [Security Policy](https://github.com/RitualDev-Lab/AgentShield/security/policy).
-
-> 🤝 Want to contribute a fix or pattern? Let us know and we'd be happy to guide you through opening a PR!`;
+            const welcomeBody = [
+              `### 👋 Thanks for reporting this issue, @${author}!`,
+              '',
+              'We appreciate your vigilance in keeping AI agents secure with **AgentShield**. 🛡️',
+              '',
+              'Our security team will review and triage this report shortly. If this is a suspected vulnerability or security finding, remember you can also disclose responsibly via our [Security Policy](https://github.com/RitualDev-Lab/AgentShield/security/policy).',
+              '',
+              '> 🤝 Want to contribute a fix or pattern? Let us know and we\'d be happy to guide you through opening a PR!'
+            ].join('\n');
 
             await github.rest.issues.createComment({
               owner: context.repo.owner,
