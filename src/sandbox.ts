@@ -1,4 +1,4 @@
-import { inspectCommandForEgress, type NetworkEgressPolicy } from "./egress-filter.js";
+import { type NetworkEgressPolicy, inspectCommandForEgress } from "./egress-filter.js";
 
 export interface CommandInspectionResult {
   isBlocked: boolean;

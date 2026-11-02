@@ -1,11 +1,11 @@
 import { createHash } from "node:crypto";
 import {
-  ComplianceEngine,
   type ComplianceAuditReport,
+  ComplianceEngine,
   type ComplianceFramework,
 } from "./compliance.js";
-import { type AuditLedgerEntry, TamperEvidentLedger } from "./ledger.js";
 import type { FleetAgentTelemetryReport } from "./control-plane.js";
+import { type AuditLedgerEntry, TamperEvidentLedger } from "./ledger.js";
 
 export interface ComplianceBundleOptions {
   organizationName: string;
@@ -182,9 +182,11 @@ export class EnterpriseComplianceBundleGenerator {
    * Formats the compliance package into a print-ready self-contained HTML audit document.
    */
   public static toHtml(pkg: ComplianceAttestationPackage): string {
-    const statusColor = pkg.executiveStatus === "NO_FINDINGS_IN_ASSESSED_CONTROLS" || pkg.executiveStatus === "COMPLIANT"
-      ? "#10b981"
-      : "#ef4444";
+    const statusColor =
+      pkg.executiveStatus === "NO_FINDINGS_IN_ASSESSED_CONTROLS" ||
+      pkg.executiveStatus === "COMPLIANT"
+        ? "#10b981"
+        : "#ef4444";
 
     const controlsHtml = pkg.auditReport.controls
       .map(
@@ -194,7 +196,11 @@ export class EnterpriseComplianceBundleGenerator {
         <td><strong>${c.name}</strong><br><span style="color: #64748b; font-size: 13px;">${c.description}</span></td>
         <td>
           <span style="display: inline-block; padding: 4px 10px; border-radius: 9999px; font-size: 12px; font-weight: 700; background: ${
-            c.status === "PASSED" ? "#dcfce7; color: #15803d" : c.status === "NOT_ASSESSED" ? "#f1f5f9; color: #64748b" : "#fee2e2; color: #b91c1c"
+            c.status === "PASSED"
+              ? "#dcfce7; color: #15803d"
+              : c.status === "NOT_ASSESSED"
+                ? "#f1f5f9; color: #64748b"
+                : "#fee2e2; color: #b91c1c"
           };">
             ${c.status}
           </span>
@@ -276,37 +282,37 @@ export class EnterpriseComplianceBundleGenerator {
   public static toPdf(pkg: ComplianceAttestationPackage): string {
     const title = `AgentShield Compliance Audit Report - ${pkg.organizationName}`;
     const lines = [
-      `================================================================================`,
+      "================================================================================",
       `                     ${title.toUpperCase()}`,
-      `================================================================================`,
-      ``,
+      "================================================================================",
+      "",
       `Bundle ID:        ${pkg.bundleId}`,
       `Organization:     ${pkg.organizationName}`,
       `Generated At:     ${pkg.generatedAt}`,
       `Auditor Contact:  ${pkg.auditorEmail}`,
       `Compliance Score: ${pkg.complianceScore}% (${pkg.executiveStatus})`,
       `Frameworks:       ${pkg.frameworks.map((f) => f.toUpperCase()).join(", ")}`,
-      ``,
-      `--------------------------------------------------------------------------------`,
-      `CRYPTOGRAPHIC LEDGER PROOF`,
-      `--------------------------------------------------------------------------------`,
+      "",
+      "--------------------------------------------------------------------------------",
+      "CRYPTOGRAPHIC LEDGER PROOF",
+      "--------------------------------------------------------------------------------",
       `Chain Status:     ${pkg.cryptographicEvidence.ledgerVerificationStatus}`,
       `Verified Blocks:  ${pkg.cryptographicEvidence.totalVerifiedBlocks}`,
       `Head Merkle Root: ${pkg.cryptographicEvidence.headMerkleRoot}`,
       `SHA-256 Hash:     ${pkg.rawEvidencePayloadSha256}`,
-      ``,
-      `--------------------------------------------------------------------------------`,
-      `CONTROL VERIFICATION MATRIX`,
-      `--------------------------------------------------------------------------------`,
+      "",
+      "--------------------------------------------------------------------------------",
+      "CONTROL VERIFICATION MATRIX",
+      "--------------------------------------------------------------------------------",
     ];
 
     for (const c of pkg.auditReport.controls) {
       lines.push(`[${c.status}] [${c.framework.toUpperCase()}] ${c.controlId}: ${c.name}`);
       lines.push(`       ${c.description}`);
-      lines.push(``);
+      lines.push("");
     }
 
-    lines.push(`================================================================================`);
+    lines.push("================================================================================");
 
     const textContent = lines.join("\n");
     const escapedText = textContent

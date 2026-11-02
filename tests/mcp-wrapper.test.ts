@@ -1,7 +1,7 @@
 import assert from "node:assert";
 import { describe, it } from "node:test";
-import { TransparentMcpWrapper } from "../src/mcp-wrapper.js";
 import type { McpJsonRpcRequest } from "../src/mcp-types.js";
+import { TransparentMcpWrapper } from "../src/mcp-wrapper.js";
 
 describe("AgentShield Transparent MCP Wrapper Suite", () => {
   const wrapper = new TransparentMcpWrapper({ silent: true });

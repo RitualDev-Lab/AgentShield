@@ -9,11 +9,11 @@
  * - Tool responses (recursively scrubbing leaked secrets before context ingestion)
  */
 
-import { spawn, type ChildProcess } from "node:child_process";
+import { type ChildProcess, spawn } from "node:child_process";
 import { platform } from "node:os";
 import readline from "node:readline";
-import { AgentShieldEngine } from "./engine.js";
 import { evaluateNetworkEgress } from "./egress-filter.js";
+import { AgentShieldEngine } from "./engine.js";
 import { McpProxyInterceptor } from "./mcp-proxy.js";
 import type { McpJsonRpcRequest } from "./mcp-types.js";
 import { AgentCommandSandbox } from "./sandbox.js";

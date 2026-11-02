@@ -1,5 +1,5 @@
 import { createInterface } from "node:readline";
-import { SecretControlAssessmentEngine, type ComplianceFramework } from "./compliance.js";
+import { type ComplianceFramework, SecretControlAssessmentEngine } from "./compliance.js";
 import { AgentShieldEngine } from "./engine.js";
 import { AgentCommandSandbox } from "./sandbox.js";
 import type { DetectedSecret } from "./types.js";

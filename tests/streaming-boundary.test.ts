@@ -2,7 +2,7 @@ import assert from "node:assert";
 import { Readable } from "node:stream";
 import { describe, it } from "node:test";
 import { AgentShieldEngine } from "../src/engine.js";
-import { createRedactingStream, RedactingStream } from "../src/interceptor.js";
+import { RedactingStream, createRedactingStream } from "../src/interceptor.js";
 
 async function streamToString(stream: Readable): Promise<string> {
   let result = "";

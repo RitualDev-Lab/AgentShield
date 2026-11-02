@@ -1,13 +1,13 @@
 import assert from "node:assert";
 import { join } from "node:path";
 import { describe, it } from "node:test";
-import {
-  EnterpriseComplianceBundleGenerator,
-  type ComplianceAttestationPackage,
-} from "../src/enterprise-bundle.js";
-import { TamperEvidentLedger } from "../src/ledger.js";
 import { ControlPlaneServer } from "../src/control-plane-server.js";
 import type { FleetAgentTelemetryReport } from "../src/control-plane.js";
+import {
+  type ComplianceAttestationPackage,
+  EnterpriseComplianceBundleGenerator,
+} from "../src/enterprise-bundle.js";
+import { TamperEvidentLedger } from "../src/ledger.js";
 
 describe("Phase 4: Enterprise Compliance Bundle Generator", () => {
   const mockFleetReports: FleetAgentTelemetryReport[] = [

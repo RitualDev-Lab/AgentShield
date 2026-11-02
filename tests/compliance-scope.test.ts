@@ -2,9 +2,9 @@ import assert from "node:assert";
 import { describe, it } from "node:test";
 import {
   ComplianceEngine,
-  SecretControlAssessmentEngine,
   type ComplianceFramework,
   type DetectedSecret,
+  SecretControlAssessmentEngine,
 } from "../src/index.js";
 
 describe("A3 Regression: Scope-Honest Secret-Control Assessment Engine", () => {

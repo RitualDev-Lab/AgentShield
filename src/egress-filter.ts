@@ -255,13 +255,14 @@ export function evaluateNetworkEgress(
 
     // Check if target matches explicitly allowed private VPC domains or CIDRs
     const isExplicitlyAllowed =
-      (policy.allowedDomains && policy.allowedDomains.some((d) => matchesDomain(host, d))) ||
+      policy.allowedDomains?.some((d) => matchesDomain(host, d)) ||
       (policy.allowedCidrs && isIp && policy.allowedCidrs.some((cidr) => isIpInCidr(host, cidr)));
 
     if (!isExplicitlyAllowed) {
       return {
         isBlocked: true,
-        reason: `Egress blocked: Air-Gapped / Private VPC mode active. Zero outbound internet traffic allowed. Only authorized local LLM runtimes (Ollama, vLLM, LM Studio) or internal VPC endpoints are permitted.`,
+        reason:
+          "Egress blocked: Air-Gapped / Private VPC mode active. Zero outbound internet traffic allowed. Only authorized local LLM runtimes (Ollama, vLLM, LM Studio) or internal VPC endpoints are permitted.",
         category: "policy_denied",
         target,
         normalizedHost: host,

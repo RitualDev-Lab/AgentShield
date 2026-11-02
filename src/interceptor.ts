@@ -1,14 +1,14 @@
-import { spawn, type ChildProcess } from "node:child_process";
+import { type ChildProcess, spawn } from "node:child_process";
 import { homedir, platform } from "node:os";
 import { Transform } from "node:stream";
 import { StringDecoder } from "node:string_decoder";
 import { AgentShieldEngine } from "./engine.js";
 import {
+  type IsolationMechanism,
+  KernelSandboxConfinement,
   buildAppContainerCommand,
   buildBubblewrapCommand,
   buildSeatbeltCommand,
-  KernelSandboxConfinement,
-  type IsolationMechanism,
 } from "./kernel.js";
 import { AgentCommandSandbox, type CommandInspectionResult } from "./sandbox.js";
 

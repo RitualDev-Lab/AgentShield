@@ -1,21 +1,21 @@
 import assert from "node:assert";
 import { existsSync, rmSync } from "node:fs";
-import { describe, it, before, after } from "node:test";
-import {
-  saveCredentials,
-  loadCredentials,
-  clearCredentials,
-  cacheRemotePolicy,
-  getCachedRemotePolicy,
-  clearCachedPolicy,
-  mergeRemotePolicyIntoConfig,
-  fetchRemotePolicy,
-  type RemotePolicyPayload,
-  CREDENTIALS_FILE,
-  CACHED_POLICY_FILE,
-} from "../src/remote-policy.js";
-import { AgentShieldEngine } from "../src/engine.js";
+import { after, before, describe, it } from "node:test";
 import { parseCustomPatterns } from "../src/config.js";
+import { AgentShieldEngine } from "../src/engine.js";
+import {
+  CACHED_POLICY_FILE,
+  CREDENTIALS_FILE,
+  type RemotePolicyPayload,
+  cacheRemotePolicy,
+  clearCachedPolicy,
+  clearCredentials,
+  fetchRemotePolicy,
+  getCachedRemotePolicy,
+  loadCredentials,
+  mergeRemotePolicyIntoConfig,
+  saveCredentials,
+} from "../src/remote-policy.js";
 
 describe("Phase 1: Remote Team Config & Organization Tokens", () => {
   const originalOrg = process.env.AGENTSHIELD_ORG_ID;

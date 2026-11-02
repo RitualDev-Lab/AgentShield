@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { createServer, type Server } from "node:http";
+import { type Server, createServer } from "node:http";
 import { after, before, describe, it } from "node:test";
 import type { CiAuditResult } from "../src/ci.js";
 import { GitHubActionBot } from "../src/github-action.js";

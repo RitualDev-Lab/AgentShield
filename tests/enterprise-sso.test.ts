@@ -1,13 +1,13 @@
 import assert from "node:assert";
-import { createServer, type Server } from "node:http";
-import { describe, it, before, after } from "node:test";
-import {
-  EnterpriseWebhookStreamer,
-  EnterpriseSsoValidator,
-  type WebhookSubscription,
-  type SsoUserClaims,
-} from "../src/enterprise-sso.js";
+import { type Server, createServer } from "node:http";
+import { after, before, describe, it } from "node:test";
 import { ControlPlaneServer } from "../src/control-plane-server.js";
+import {
+  EnterpriseSsoValidator,
+  EnterpriseWebhookStreamer,
+  type SsoUserClaims,
+  type WebhookSubscription,
+} from "../src/enterprise-sso.js";
 import { SiemExporter } from "../src/siem.js";
 
 describe("Phase 3: SIEM Streaming, Webhooks & Enterprise SSO Suite", () => {

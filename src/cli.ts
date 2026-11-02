@@ -96,7 +96,8 @@ async function main() {
     const compIdx = args.indexOf("--compliance");
     const frameworkArg =
       compIdx !== -1 && args[compIdx + 1] ? args[compIdx + 1].toLowerCase() : "soc2";
-    const frameworks = frameworkArg === "iso27001" ? ["iso27001"] : ["soc2"];
+    const frameworks: import("./compliance.js").ComplianceFramework[] =
+      frameworkArg === "iso27001" ? ["iso27001"] : ["soc2"];
 
     const pdfIdx = args.indexOf("--audit-pdf");
     const outIdx = args.indexOf("-o") !== -1 ? args.indexOf("-o") : args.indexOf("--output");
@@ -118,7 +119,10 @@ async function main() {
 
     const formatIdx = args.indexOf("--format");
     if (formatIdx !== -1 && args[formatIdx + 1]) {
-      format = args[formatIdx + 1].toLowerCase() as any;
+      const f = args[formatIdx + 1].toLowerCase();
+      if (f === "pdf" || f === "html" || f === "json" || f === "markdown") {
+        format = f;
+      }
     }
 
     const { EnterpriseComplianceBundleGenerator } = await import("./enterprise-bundle.js");
@@ -137,7 +141,7 @@ async function main() {
       [],
       ledgerEntries,
       process.env.AGENTSHIELD_LEDGER_KEY || "agentshield-tamper-evident-salt-v1",
-      { organizationName: orgName, frameworks: frameworks as any },
+      { organizationName: orgName, frameworks },
     );
 
     let outputText = "";
@@ -176,16 +180,18 @@ Audit file ready for compliance officer review.
     const tierIdx = args.indexOf("--tier");
     const tierArg = tierIdx !== -1 && args[tierIdx + 1] ? args[tierIdx + 1] : "pro";
     const selectedTierKey =
-      tierArg === "team" ? "team-scale" : tierArg === "badge" ? "sponsor-verified-badge" : "pro-developer";
+      tierArg === "team"
+        ? "team-scale"
+        : tierArg === "badge"
+          ? "sponsor-verified-badge"
+          : "pro-developer";
 
     const { DodoPaymentsService, SPONSORED_PRODUCTS } = await import("./dodo-payments.js");
     const dodo = new DodoPaymentsService();
     const product = SPONSORED_PRODUCTS[selectedTierKey];
 
     if (!product) {
-      console.error(
-        `❌ Unknown tier '${tierArg}'. Available: pro, team, badge`,
-      );
+      console.error(`❌ Unknown tier '${tierArg}'. Available: pro, team, badge`);
       process.exit(1);
     }
 
@@ -203,7 +209,7 @@ Billing:            $${product.priceUsd}/month (${product.type})
 Description:        ${product.description}
 
 Features Included:
-${product.features.map((f) => "  ✅ " + f).join("\n")}
+${product.features.map((f) => `  ✅ ${f}`).join("\n")}
 
 Merchant of Record: Dodo Payments (Global Tax, Indian GST, VAT, Cards, UPI, Apple Pay)
 Complete Checkout:  ${checkout.checkoutUrl}
@@ -216,7 +222,7 @@ Complete Checkout:  ${checkout.checkoutUrl}
 Plan:               ${product.name}
 Price:              $${product.priceUsd}/month (${product.type})
 Features:
-${product.features.map((f) => "  ✅ " + f).join("\n")}
+${product.features.map((f) => `  ✅ ${f}`).join("\n")}
 
 Merchant of Record: Dodo Payments (Global Tax, Indian GST, VAT)
 Direct Checkout:    https://test.dodopayments.com/buy/${product.id}
