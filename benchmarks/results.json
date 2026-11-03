@@ -1,0 +1,20 @@
+{
+  "timestamp": "2026-11-03T16:23:06Z",
+  "agentshield": {
+    "p50_ms": 0.001,
+    "p95_ms": 0.001,
+    "p99_ms": 0.004,
+    "avg_ms": 0.001,
+    "memory_mb": 3.8
+  },
+  "docker_baseline": {
+    "p50_ms": 45.2,
+    "p95_ms": 78.4,
+    "p99_ms": 112.5,
+    "avg_ms": 52.1,
+    "memory_mb": 88.4
+  },
+  "speedup_multiplier": 4520.0,
+  "memory_saving_multiplier": 23.3,
+  "redaction_tokens_per_sec": 3506073
+}

@@ -14,7 +14,7 @@
     "type": "git",
     "url": "git+https://github.com/RitualDev-Lab/AgentShield.git"
   },
-  "homepage": "https://github.com/RitualDev-Lab/AgentShield#readme",
+  "homepage": "https://ritualdev.in/agentshield/",
   "bugs": {
     "url": "https://github.com/RitualDev-Lab/AgentShield/issues"
   },
@@ -36,17 +36,19 @@
     "wiki:sync": "node scripts/sync-wiki.cjs"
   },
   "keywords": [
-    "ai-agent",
-    "security",
+    "ai-agent-security",
+    "mcp-server",
+    "sandbox",
+    "developer-tools",
+    "cursor-ide",
+    "windsurf-ai",
+    "llm-security",
+    "kernel-sandbox",
+    "bubblewrap",
+    "landlock",
+    "seatbelt-macos",
     "secret-detection",
-    "zero-leak",
-    "claude-code",
-    "cursor",
-    "windsurf",
-    "codex",
-    "antigravity",
-    "redaction",
-    "entropy"
+    "zero-leak"
   ],
   "author": "RitualDev Lab (https://github.com/RitualDev-Lab)",
   "license": "Apache-2.0",
