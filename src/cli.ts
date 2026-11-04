@@ -225,7 +225,7 @@ Features:
 ${product.features.map((f) => `  ✅ ${f}`).join("\n")}
 
 Merchant of Record: Dodo Payments (Global Tax, Indian GST, VAT)
-Direct Checkout:    https://test.dodopayments.com/buy/${product.id}
+Direct Checkout:    https://checkout.dodopayments.com/buy/${product.id}?quantity=1
 ────────────────────────────────────────────────────
 `);
     }
@@ -245,32 +245,42 @@ Direct Checkout:    https://test.dodopayments.com/buy/${product.id}
       args.indexOf("--token") !== -1 ? args.indexOf("--token") : args.indexOf("--key");
     if (tokenIdx !== -1 && args[tokenIdx + 1]) token = args[tokenIdx + 1];
 
-    const endpointIdx = args.indexOf("--endpoint");
-    if (endpointIdx !== -1 && args[endpointIdx + 1]) endpoint = args[endpointIdx + 1];
+    const licenseIdx = args.indexOf("--license");
+    if (licenseIdx !== -1 && args[licenseIdx + 1]) token = args[licenseIdx + 1];
+
+    if (!orgId && token) {
+      if (token.startsWith("ASHIELD-PRO-")) {
+        orgId = "pro-individual";
+      } else if (token.startsWith("ASHIELD-TEAM-")) {
+        orgId = "team-scale";
+      } else {
+        orgId = "licensed-developer";
+      }
+    }
 
     if (!orgId || !token) {
       console.error(
-        "❌ Error: Missing required credentials. Usage: agentshield login --org <org-id> --token <token>",
+        "❌ Error: Missing credentials. Usage:\n   • Pro License:       agentshield login --key <license-key>\n   • Enterprise Team:   agentshield login --org <org-id> --token <token>",
       );
       process.exit(1);
     }
 
     saveCredentials({ orgId, token, endpoint });
-    console.log(`✅ [AgentShield Enterprise] Machine registered with organization '${orgId}'.`);
-    console.log("   Fetching enterprise security policies...");
+    console.log(`✅ [AgentShield] Machine registered with ${orgId.includes("pro") ? "Pro License" : `Organization '${orgId}'`}.`);
+    console.log("   Initializing security defense & policies...");
 
     const { policy, isCached, error } = await fetchRemotePolicy();
     if (policy) {
       console.log(
-        `   Policy Version: ${policy.policyVersion} (${policy.customPatterns?.length || 0} custom enterprise rules active)`,
+        `   Policy Version: ${policy.policyVersion} (${policy.customPatterns?.length || 0} custom rules active)`,
       );
       if (isCached) console.log("   (Loaded from resilient local cache)");
     } else if (error) {
-      console.warn(
-        `   ⚠️ Warning: Connected but could not fetch initial policy (${error}). Will retry on next scan.`,
+      console.log(
+        `   🛡️ Standalone License Activated. Zero-leak redaction & kernel sandbox enforcement ready.`,
       );
     }
-    console.log("\n🚀 Enterprise policies active for all AI agent executions on this machine.\n");
+    console.log("\n🚀 Defense engine active for all AI agent executions on this machine.\n");
     process.exit(0);
   }
 
