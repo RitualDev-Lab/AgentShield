@@ -1,5 +1,6 @@
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
+import { AgentShieldEngine } from "./engine.js";
 import type { AgentConfigAuditIssue, AgentConfigAuditReport } from "./taxonomy.js";
 
 /**
@@ -9,9 +10,11 @@ import type { AgentConfigAuditIssue, AgentConfigAuditReport } from "./taxonomy.j
  */
 export class AgentConfigAuditor {
   private rootDir: string;
+  private engine: AgentShieldEngine;
 
   constructor(rootDir: string = process.cwd()) {
     this.rootDir = rootDir;
+    this.engine = new AgentShieldEngine();
   }
 
   public auditWorkspace(): AgentConfigAuditReport {
@@ -113,22 +116,28 @@ export class AgentConfigAuditor {
 
         // Check for cleartext credentials in MCP server environment configs
         for (const [envKey, envVal] of Object.entries(env)) {
-          if (
-            typeof envVal === "string" &&
-            (envVal.startsWith("sk-") || envVal.startsWith("AKIA") || envVal.startsWith("ghp_"))
-          ) {
-            issues.push({
-              id: "AS-MCP-002",
-              file: filePath,
-              severity: "critical",
-              category: "credential_exposure",
-              title: `Hardcoded API Secret in MCP Server '${serverName}' Env: '${envKey}'`,
-              description: `Plaintext credential hardcoded inside MCP config file under '${envKey}'.`,
-              recommendation:
-                "Reference system environment variables instead of hardcoding credentials.",
-              owaspLlm: "LLM06",
-              mitreAtlas: "AML.T0024",
-            });
+          if (typeof envVal === "string") {
+            const detected = this.engine.scan(envVal);
+            if (
+              detected.length > 0 ||
+              envVal.startsWith("sk-") ||
+              envVal.startsWith("ghp_") ||
+              /^(?:AKIA|ABIA|ACCA|ASIA|AIDA|AGPA|AIPA|ANPA|ANVA|AROA|A3T)/.test(envVal)
+            ) {
+              const findingName = detected[0]?.patternName || "Hardcoded Credential";
+              issues.push({
+                id: "AS-MCP-002",
+                file: filePath,
+                severity: "critical",
+                category: "credential_exposure",
+                title: `Hardcoded API Secret in MCP Server '${serverName}' Env: '${envKey}' (${findingName})`,
+                description: `Plaintext credential hardcoded inside MCP config file under '${envKey}'.`,
+                recommendation:
+                  "Reference system environment variables instead of hardcoding credentials.",
+                owaspLlm: "LLM06",
+                mitreAtlas: "AML.T0024",
+              });
+            }
           }
         }
       }

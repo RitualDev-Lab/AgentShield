@@ -83,7 +83,7 @@ describe("Phase 4: Enterprise Compliance Bundle Generator", () => {
     assert.strictEqual(bundle.cryptographicEvidence.headMerkleRoot, entries[2].hash);
   });
 
-  it("should detect corrupted or tampered ledger entries in the attestation bundle", () => {
+  it("should detect corrupted or tampered ledger entries in the attestation bundle and fail-closed", () => {
     const key = "enterprise-master-key-xyz";
     const tempLedgerPath = join(
       process.cwd(),
@@ -107,7 +107,38 @@ describe("Phase 4: Enterprise Compliance Bundle Generator", () => {
       { organizationName: "SecureFin Corp" },
     );
 
+    // Fail-closed: Never vouch compliance on a corrupted ledger (GHSA-g3f4-67hg-mv9h)
     assert.strictEqual(bundle.cryptographicEvidence.ledgerVerificationStatus, "CORRUPTED");
+    assert.strictEqual(bundle.executiveStatus, "FINDINGS_DETECTED");
+    assert.strictEqual(bundle.complianceScore, 0);
+
+    const md = EnterpriseComplianceBundleGenerator.toExecutiveMarkdown(bundle);
+    assert(md.includes("CRITICAL INTEGRITY FAILURE"));
+    assert(!md.includes("This attestation confirms zero unauthorized credential egress"));
+  });
+
+  it("should report findings and reduce compliance score when ledger contains quarantined tripwires", () => {
+    const key = "enterprise-master-key-xyz";
+    const tempLedgerPath = join(
+      process.cwd(),
+      ".agentshield",
+      `test-bundle-quarantine-${Date.now()}.ledger`,
+    );
+    const ledger = new TamperEvidentLedger(tempLedgerPath, key);
+
+    ledger.record("curl api.test/ok", "ALLOWED", "Clean command", "developer");
+    ledger.record("cat /honeypot/canary.env", "QUARANTINED", "Honeypot canary tripped", "agent-x");
+
+    const bundle = EnterpriseComplianceBundleGenerator.generateBundle(
+      mockFleetReports,
+      ledger.getEntries(),
+      key,
+      { organizationName: "SecureFin Corp" },
+    );
+
+    assert.strictEqual(bundle.cryptographicEvidence.ledgerVerificationStatus, "VERIFIED_UNBROKEN");
+    assert.strictEqual(bundle.executiveStatus, "FINDINGS_DETECTED");
+    assert.ok(bundle.complianceScore < 100);
   });
 
   it("should format attestation package to an executive Markdown document", () => {

@@ -5,7 +5,9 @@ import {
   type ComplianceFramework,
 } from "./compliance.js";
 import type { FleetAgentTelemetryReport } from "./control-plane.js";
+import { AgentShieldEngine } from "./engine.js";
 import { type AuditLedgerEntry, TamperEvidentLedger } from "./ledger.js";
+import type { DetectedSecret } from "./types.js";
 
 export interface ComplianceBundleOptions {
   organizationName: string;
@@ -32,6 +34,8 @@ export interface ComplianceAttestationPackage {
     ledgerVerificationStatus: "VERIFIED_UNBROKEN" | "CORRUPTED" | "EMPTY";
     totalVerifiedBlocks: number;
     headMerkleRoot: string;
+    signingKeyTrust?: "AUTHENTICATED_KEY" | "DEFAULT_INSECURE_SALT";
+    verificationError?: string;
   };
   metrics: {
     activeDeveloperNodes: number;
@@ -87,18 +91,90 @@ export class EnterpriseComplianceBundleGenerator {
     const totalBlocked = fleetReports.reduce((sum, r) => sum + r.totalCommandsBlocked, 0);
     const totalRedacted = fleetReports.reduce((sum, r) => sum + r.totalSecretsRedacted, 0);
 
-    // Run compliance evaluation
-    const auditReport = ComplianceEngine.evaluate([], totalBlocked, frameworks);
+    const collectedFindings: DetectedSecret[] = [];
+    const engine = new AgentShieldEngine();
 
-    // Verify cryptographic integrity of the ledger
+    // 1. Inspect ledger entries for unmitigated leaks or quarantined incidents
+    for (const entry of allLedgerEntries) {
+      if (entry.verdict === "QUARANTINED") {
+        collectedFindings.push({
+          patternId: "canary-tripwire-quarantined",
+          patternName: "Quarantined Agent Security Tripwire",
+          category: "generic",
+          severity: "critical",
+          raw: entry.command,
+          redacted: "[QUARANTINED_ACTION]",
+          line: entry.sequence,
+          column: 1,
+          entropy: 5.0,
+        });
+      } else if (entry.verdict === "ALLOWED") {
+        const leaks = engine.scan(entry.command);
+        if (leaks.length > 0) {
+          collectedFindings.push(...leaks);
+        }
+      }
+    }
+
+    // 2. Inspect fleet telemetry for quarantined nodes
+    for (const report of fleetReports) {
+      if (report.quarantined) {
+        collectedFindings.push({
+          patternId: "quarantined-agent-node",
+          patternName: `Quarantined Developer Node: ${report.hostname || report.agentId}`,
+          category: "generic",
+          severity: "critical",
+          raw: report.agentId,
+          redacted: "[QUARANTINED_NODE]",
+          line: 1,
+          column: 1,
+          entropy: 5.0,
+        });
+      }
+    }
+
+    // 3. Verify cryptographic integrity of the ledger
     let ledgerStatus: "VERIFIED_UNBROKEN" | "CORRUPTED" | "EMPTY" = "EMPTY";
     let headMerkleRoot = "0".repeat(64);
+    let verificationError: string | undefined;
 
     if (allLedgerEntries.length > 0) {
       const verification = TamperEvidentLedger.verifyEntries(allLedgerEntries, ledgerSigningKey);
       ledgerStatus = verification.isValid ? "VERIFIED_UNBROKEN" : "CORRUPTED";
       headMerkleRoot = allLedgerEntries[allLedgerEntries.length - 1].hash;
+      verificationError = verification.error;
+
+      if (!verification.isValid) {
+        collectedFindings.push({
+          patternId: "cryptographic-ledger-tampering",
+          patternName: "Audit Ledger Cryptographic Integrity Failure",
+          category: "crypto",
+          severity: "critical",
+          raw: `CORRUPTED_LEDGER_SEQUENCE_${verification.corruptedSequence || 0}`,
+          redacted: "[AUDIT_TRAIL_TAMPERED]",
+          line: verification.corruptedSequence || 1,
+          column: 1,
+          entropy: 5.0,
+        });
+      }
     }
+
+    // Run compliance evaluation against collected findings
+    const auditReport = ComplianceEngine.evaluate(collectedFindings, totalBlocked, frameworks);
+
+    // Fail executive status and score if ledger is corrupted
+    const isCorrupted = ledgerStatus === "CORRUPTED";
+    const executiveStatus: ExecutiveAssessmentStatus = isCorrupted
+      ? "FINDINGS_DETECTED"
+      : auditReport.status;
+    const complianceScore = isCorrupted ? 0 : auditReport.score;
+
+    const isDefaultKey =
+      ledgerSigningKey === "agentshield-tamper-evident-salt-v1" ||
+      !process.env.AGENTSHIELD_LEDGER_KEY;
+    const signingKeyTrust: "AUTHENTICATED_KEY" | "DEFAULT_INSECURE_SALT" = isDefaultKey
+      ? "DEFAULT_INSECURE_SALT"
+      : "AUTHENTICATED_KEY";
 
     const bundleId = `attestation_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
     const generatedAt = new Date().toISOString();
@@ -109,6 +185,7 @@ export class EnterpriseComplianceBundleGenerator {
       ledgerEntriesCount: allLedgerEntries.length,
       headMerkleRoot,
       auditReport,
+      signingKeyTrust,
     });
     const rawEvidencePayloadSha256 = createHash("sha256").update(rawPayload).digest("hex");
 
@@ -118,12 +195,14 @@ export class EnterpriseComplianceBundleGenerator {
       organizationName: options.organizationName,
       auditorEmail: options.auditorEmail || "security-audits@ritualdev.in",
       frameworks,
-      executiveStatus: auditReport.status,
-      complianceScore: auditReport.score,
+      executiveStatus,
+      complianceScore,
       cryptographicEvidence: {
         ledgerVerificationStatus: ledgerStatus,
         totalVerifiedBlocks: allLedgerEntries.length,
         headMerkleRoot,
+        signingKeyTrust,
+        verificationError,
       },
       metrics: {
         activeDeveloperNodes: fleetReports.length,
@@ -139,6 +218,10 @@ export class EnterpriseComplianceBundleGenerator {
    * Formats the compliance package into a human-readable executive Markdown document
    */
   public static toExecutiveMarkdown(pkg: ComplianceAttestationPackage): string {
+    const isCorrupted = pkg.cryptographicEvidence.ledgerVerificationStatus === "CORRUPTED";
+    const isDefaultKey =
+      pkg.cryptographicEvidence.signingKeyTrust === "DEFAULT_INSECURE_SALT";
+
     const lines = [
       "# 🏛️ Enterprise Security & Compliance Attestation Report",
       `**Organization**: ${pkg.organizationName}`,
@@ -157,8 +240,28 @@ export class EnterpriseComplianceBundleGenerator {
       "> [!IMPORTANT]",
       `> **Scope & Limitations**: ${pkg.auditReport.scopeDisclosure.disclaimer}`,
       "",
+    ];
+
+    if (isCorrupted) {
+      lines.push(
+        "> [!CAUTION]",
+        `> **CRITICAL INTEGRITY FAILURE**: The cryptographic audit ledger chain failed verification (${pkg.cryptographicEvidence.verificationError || "Tampered block detected"}). This attestation explicitly REFUSES to certify compliance.`,
+        "",
+      );
+    }
+
+    if (isDefaultKey) {
+      lines.push(
+        "> [!WARNING]",
+        "> **SECURITY NOTICE**: Attestation verified using default developmental salt. For production SOC 2 / ISO 27001 audit defense, configure `AGENTSHIELD_LEDGER_KEY` to enforce non-falsifiable signing.",
+        "",
+      );
+    }
+
+    lines.push(
       "## 🔐 Cryptographic Ledger Verification",
       `- **HMAC Chain Status**: **${pkg.cryptographicEvidence.ledgerVerificationStatus}**`,
+      `- **Signing Key Trust**: \`${pkg.cryptographicEvidence.signingKeyTrust || "AUTHENTICATED_KEY"}\``,
       `- **Verified Audit Blocks**: ${pkg.cryptographicEvidence.totalVerifiedBlocks}`,
       `- **Head Merkle Root**: \`${pkg.cryptographicEvidence.headMerkleRoot}\``,
       "",
@@ -172,8 +275,17 @@ export class EnterpriseComplianceBundleGenerator {
         (c) => `- **[${c.framework.toUpperCase()}] ${c.controlId}** (${c.name}): **${c.status}**`,
       ),
       "",
-      "> *This attestation confirms zero unauthorized credential egress to third-party LLM inference windows.*",
-    ];
+    );
+
+    if (pkg.executiveStatus === "NO_FINDINGS_IN_ASSESSED_CONTROLS" && !isCorrupted) {
+      lines.push(
+        "> *This attestation confirms zero unauthorized credential egress to third-party LLM inference windows.*",
+      );
+    } else {
+      lines.push(
+        "> *ATTENTION: Security findings or integrity anomalies detected. Remediation required before compliance certification.*",
+      );
+    }
 
     return lines.join("\n");
   }

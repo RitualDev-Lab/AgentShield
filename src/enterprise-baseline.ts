@@ -99,7 +99,8 @@ export const LiveSecretVerifier = {
     }
 
     if (finding.patternId === "aws-access-key-id") {
-      const isFormatValid = /^(AKIA|ABIA|ACCA|ASIA)[0-9A-Z]{16}$/.test(raw);
+      const isFormatValid =
+        /^(AKIA|ABIA|ACCA|ASIA|AIDA|AGPA|AIPA|ANPA|ANVA|AROA|A3T[A-Z0-9])[0-9A-Z]{16}$/.test(raw);
       return {
         isValid: isFormatValid,
         status: isFormatValid ? "active" : "revoked",
