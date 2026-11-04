@@ -6,6 +6,9 @@ import { SarifFormatter } from "./sarif.js";
 import type { SarifLog } from "./taxonomy.js";
 import type { DetectedSecret, ScanOptions } from "./types.js";
 
+export const UNIGNORABLE_FILES_PATTERN =
+  /(?:^\.?env(?:\.(?!example|template)[a-zA-Z0-9_\-]+)?$|id_rsa|id_ed25519|\.aws[\/\\](?:credentials|config)|service-account\.json|\.pem$|\.key$)/i;
+
 export interface CiAuditOptions {
   allowEmptyDiff?: boolean;
 }
@@ -22,6 +25,7 @@ export interface CiAuditResult {
   scanError?: string;
   baseRef: string;
   diffMethod?: string;
+  configTampered?: boolean;
 }
 
 export class CiGateRunner {
@@ -46,14 +50,8 @@ export class CiGateRunner {
       throw new Error(`Invalid git base ref: '${sanitizedBase}'`);
     }
 
-    const ignoredFiles = new Set(this.config?.ci?.ignoreFiles || []);
-    const scanOptions: ScanOptions = {
-      allowlist: this.config?.allowlist || [],
-      entropyThreshold: this.config?.entropyThreshold ?? 4.5,
-      maskStyle: this.config?.maskStyle || "token",
-    };
-
     let diffFiles: string[] = [];
+    let rawDiffList: string[] = [];
     let diffArgs: string[] = [];
     let diffMethod = "";
     let diffError: string | null = null;
@@ -65,12 +63,7 @@ export class CiGateRunner {
         encoding: "utf8",
         cwd: this.rootDir,
       }).trim();
-      diffFiles = raw
-        ? raw
-            .split("\n")
-            .map((f) => f.trim())
-            .filter((f) => Boolean(f) && !ignoredFiles.has(f))
-        : [];
+      rawDiffList = raw ? raw.split("\n").map((f) => f.trim()).filter(Boolean) : [];
       diffArgs = [`${sanitizedBase}...HEAD`];
       diffMethod = `${sanitizedBase}...HEAD`;
       diffSuccess = true;
@@ -82,12 +75,7 @@ export class CiGateRunner {
           encoding: "utf8",
           cwd: this.rootDir,
         }).trim();
-        diffFiles = raw
-          ? raw
-              .split("\n")
-              .map((f) => f.trim())
-              .filter((f) => Boolean(f) && !ignoredFiles.has(f))
-          : [];
+        rawDiffList = raw ? raw.split("\n").map((f) => f.trim()).filter(Boolean) : [];
         diffArgs = ["HEAD~1", "HEAD"];
         diffMethod = "HEAD~1 HEAD";
         diffSuccess = true;
@@ -121,6 +109,55 @@ export class CiGateRunner {
         baseRef: sanitizedBase,
       };
     }
+
+    // 2. Anti-Self-Neutering Gate (GHSA-p3v4-5qw2-92rg):
+    // If PR diff touches .agentshield.json, evaluate ignore rules against base branch, NOT untrusted PR
+    let activeConfig = this.config;
+    let configTampered = false;
+
+    const configTouched = rawDiffList.some((f) =>
+      /(?:^\.?agentshield(?:\.config)?\.json$)/i.test(f),
+    );
+
+    if (configTouched) {
+      try {
+        const baseConfigRaw = execFileSync(
+          "git",
+          ["show", `${sanitizedBase}:.agentshield.json`],
+          { encoding: "utf8", cwd: this.rootDir, stdio: ["pipe", "pipe", "pipe"] },
+        ).trim();
+        activeConfig = JSON.parse(baseConfigRaw);
+        configTampered = true;
+      } catch {
+        // Base branch does not have .agentshield.json (PR introduced it)
+        // Disallow newly introduced ignoreFiles from blinding the scan on this PR
+        activeConfig = {
+          ...this.config,
+          ci: {
+            ...this.config?.ci,
+            ignoreFiles: [],
+          },
+        };
+        configTampered = true;
+      }
+    }
+
+    // 3. High-risk secret files (.env, keys, credentials) can NEVER be ignored in CI
+    const rawIgnored = activeConfig?.ci?.ignoreFiles || [];
+    const safeIgnored = new Set(
+      rawIgnored.filter((file) => {
+        if (file === ".env.example" || file === ".env.template") return true;
+        return !UNIGNORABLE_FILES_PATTERN.test(file);
+      }),
+    );
+
+    diffFiles = rawDiffList.filter((f) => !safeIgnored.has(f));
+
+    const scanOptions: ScanOptions = {
+      allowlist: activeConfig?.allowlist || [],
+      entropyThreshold: activeConfig?.entropyThreshold ?? 4.5,
+      maskStyle: activeConfig?.maskStyle || "token",
+    };
 
     const allFindings: Array<DetectedSecret & { file: string }> = [];
     let criticalCount = 0;
@@ -168,6 +205,12 @@ export class CiGateRunner {
     // Generate markdown report
     const reportLines: string[] = ["## 🛡️ AgentShield CI/CD Security Gate Report\n"];
 
+    if (configTampered) {
+      reportLines.push(
+        `> ⚠️ **Security Notice (Anti-Tampering Gate)**: This pull request modifies AgentShield configuration files. Ignore rules were evaluated strictly against the trusted base branch (\`${sanitizedBase}\`) to prevent self-neutering bypasses.\n`,
+      );
+    }
+
     if (passed) {
       if (diffFiles.length === 0) {
         reportLines.push("### ℹ️ 0 Modified Files Audited");
@@ -211,6 +254,7 @@ export class CiGateRunner {
       sarifLog,
       baseRef: sanitizedBase,
       diffMethod,
+      configTampered,
     };
   }
 }
