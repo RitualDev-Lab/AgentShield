@@ -25,32 +25,27 @@ jobs:
         with:
           node-version: 22
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: 9
-
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm ci || npm install
 
       - name: Run Tests
-        run: pnpm test
+        run: npm test
 
       - name: Build AgentShield
-        run: pnpm run build
+        run: npm run build
 
       - name: Package Distribution Tarball
         run: |
           npm pack
           mkdir -p release-artifacts
-          cp agentshield-*.tgz release-artifacts/
+          cp ritualdev-lab-agentshield-*.tgz release-artifacts/ || cp agentshield-*.tgz release-artifacts/
 
       - name: Generate subject for provenance
         id: hash
         run: |
           set -euo pipefail
           cd release-artifacts
-          files=$(ls agentshield-*.tgz)
+          files=$(ls *.tgz)
           echo "hashes=$(sha256sum $files | base64 -w0)" >> "${GITHUB_OUTPUT}"
 
   provenance:
