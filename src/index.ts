@@ -40,3 +40,6 @@ export * from "./github-app.js";
 export * from "./badge-generator.js";
 export * from "./dodo-payments.js";
 export * from "./transparency-ledger.js";
+export * from "./ebpf-lsm.js";
+export * from "./distributed-key-broker.js";
+export * from "./siem-streamer.js";
