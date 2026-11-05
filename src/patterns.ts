@@ -41,8 +41,7 @@ export const BUILTIN_PATTERNS: SecretPattern[] = [
     name: "AWS Access Key ID",
     category: "cloud",
     severity: "critical",
-    regex:
-      /\b((?:AKIA|ABIA|ACCA|ASIA|AIDA|AGPA|AIPA|ANPA|ANVA|AROA|A3T[A-Z0-9])[0-9A-Z]{16})\b/g,
+    regex: /\b((?:AKIA|ABIA|ACCA|ASIA|AIDA|AGPA|AIPA|ANPA|ANVA|AROA|A3T[A-Z0-9])[0-9A-Z]{16})\b/g,
     description: "Amazon Web Services Access Key ID or IAM Identifier",
   },
   {

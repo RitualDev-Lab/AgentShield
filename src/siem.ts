@@ -78,7 +78,7 @@ export class SiemExporter {
    */
   public static async forwardToDatadog(
     event: SiemEvent,
-    config: { apiKey: string; site?: string; service?: string }
+    config: { apiKey: string; site?: string; service?: string },
   ): Promise<{ delivered: boolean; statusCode?: number; error?: string }> {
     const site = config.site || "datadoghq.com";
     const url = `https://http-intake.logs.${site}/api/v2/logs`;
@@ -112,13 +112,15 @@ export class SiemExporter {
    */
   public static async forwardToSplunk(
     event: SiemEvent,
-    config: { hecUrl: string; token: string; index?: string }
+    config: { hecUrl: string; token: string; index?: string },
   ): Promise<{ delivered: boolean; statusCode?: number; error?: string }> {
     let base = config.hecUrl.trim();
     while (base.endsWith("/")) {
       base = base.slice(0, -1);
     }
-    const url = base.endsWith("/services/collector/event") ? base : `${base}/services/collector/event`;
+    const url = base.endsWith("/services/collector/event")
+      ? base
+      : `${base}/services/collector/event`;
     try {
       const payload = {
         time: Math.floor(Date.now() / 1000),
@@ -147,7 +149,12 @@ export class SiemExporter {
    */
   public static async forwardToWebhook(
     event: SiemEvent,
-    config: { url: string; secret?: string; format?: "json" | "cef" | "syslog"; headers?: Record<string, string> }
+    config: {
+      url: string;
+      secret?: string;
+      format?: "json" | "cef" | "syslog";
+      headers?: Record<string, string>;
+    },
   ): Promise<{ delivered: boolean; statusCode?: number; error?: string }> {
     const format = config.format || "json";
     let body: string;
@@ -171,7 +178,8 @@ export class SiemExporter {
 
     if (config.secret) {
       const { createHmac } = await import("node:crypto");
-      headers["X-AgentShield-Signature"] = `sha256=${createHmac("sha256", config.secret).update(body).digest("hex")}`;
+      headers["X-AgentShield-Signature"] =
+        `sha256=${createHmac("sha256", config.secret).update(body).digest("hex")}`;
     }
 
     try {

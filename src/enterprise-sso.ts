@@ -235,11 +235,13 @@ export class DeviceAuthorizationFlow {
    * If remote endpoint is specified, issues POST to oauth endpoint.
    * Otherwise provisions standard RitualDev SSO verification session.
    */
-  public static async initiate(options: {
-    endpoint?: string;
-    orgId?: string;
-    provider?: string;
-  } = {}): Promise<DeviceAuthorizationResponse> {
+  public static async initiate(
+    options: {
+      endpoint?: string;
+      orgId?: string;
+      provider?: string;
+    } = {},
+  ): Promise<DeviceAuthorizationResponse> {
     const { randomBytes } = await import("node:crypto");
     const deviceCode = `ashield_dev_${randomBytes(24).toString("hex")}`;
     const userCode = this.generateUserCode();
@@ -248,15 +250,18 @@ export class DeviceAuthorizationFlow {
 
     if (options.endpoint) {
       try {
-        const res = await fetch(`${trimTrailingSlash(options.endpoint)}/oauth/v2/device/authorize`, {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: new URLSearchParams({
-            client_id: "agentshield-cli",
-            scope: "openid profile email rbac:rules",
-            ...(options.orgId ? { org_id: options.orgId } : {}),
-          }),
-        });
+        const res = await fetch(
+          `${trimTrailingSlash(options.endpoint)}/oauth/v2/device/authorize`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: new URLSearchParams({
+              client_id: "agentshield-cli",
+              scope: "openid profile email rbac:rules",
+              ...(options.orgId ? { org_id: options.orgId } : {}),
+            }),
+          },
+        );
         if (res.ok) {
           return (await res.json()) as DeviceAuthorizationResponse;
         }
@@ -271,7 +276,7 @@ export class DeviceAuthorizationFlow {
       verification_uri: verificationUri,
       verification_uri_complete: verificationUriComplete,
       expires_in: 900, // 15 minutes
-      interval: 3,     // 3 seconds
+      interval: 3, // 3 seconds
     };
   }
 
@@ -285,7 +290,7 @@ export class DeviceAuthorizationFlow {
       interval?: number;
       timeoutMs?: number;
       onPoll?: () => void;
-    } = {}
+    } = {},
   ): Promise<DeviceTokenPollResult> {
     const intervalSec = options.interval || 3;
     const timeoutMs = options.timeoutMs || 300_000; // 5 min default

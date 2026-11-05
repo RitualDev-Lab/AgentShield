@@ -105,7 +105,8 @@ export function validateReDoSSafety(pattern: string): { safe: boolean; reason?: 
   if (disjunctionWithRepetitionLeft.test(pattern)) {
     return {
       safe: false,
-      reason: "Catastrophic backtracking risk: Disjunction with nested repetition quantifiers (e.g. (a+|b)+)",
+      reason:
+        "Catastrophic backtracking risk: Disjunction with nested repetition quantifiers (e.g. (a+|b)+)",
     };
   }
 
@@ -113,7 +114,8 @@ export function validateReDoSSafety(pattern: string): { safe: boolean; reason?: 
   if (disjunctionWithRepetitionRight.test(pattern)) {
     return {
       safe: false,
-      reason: "Catastrophic backtracking risk: Disjunction with nested repetition quantifiers (e.g. (a|b+)+)",
+      reason:
+        "Catastrophic backtracking risk: Disjunction with nested repetition quantifiers (e.g. (a|b+)+)",
     };
   }
 

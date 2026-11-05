@@ -63,7 +63,12 @@ export class CiGateRunner {
         encoding: "utf8",
         cwd: this.rootDir,
       }).trim();
-      rawDiffList = raw ? raw.split("\n").map((f) => f.trim()).filter(Boolean) : [];
+      rawDiffList = raw
+        ? raw
+            .split("\n")
+            .map((f) => f.trim())
+            .filter(Boolean)
+        : [];
       diffArgs = [`${sanitizedBase}...HEAD`];
       diffMethod = `${sanitizedBase}...HEAD`;
       diffSuccess = true;
@@ -75,7 +80,12 @@ export class CiGateRunner {
           encoding: "utf8",
           cwd: this.rootDir,
         }).trim();
-        rawDiffList = raw ? raw.split("\n").map((f) => f.trim()).filter(Boolean) : [];
+        rawDiffList = raw
+          ? raw
+              .split("\n")
+              .map((f) => f.trim())
+              .filter(Boolean)
+          : [];
         diffArgs = ["HEAD~1", "HEAD"];
         diffMethod = "HEAD~1 HEAD";
         diffSuccess = true;
@@ -121,11 +131,11 @@ export class CiGateRunner {
 
     if (configTouched) {
       try {
-        const baseConfigRaw = execFileSync(
-          "git",
-          ["show", `${sanitizedBase}:.agentshield.json`],
-          { encoding: "utf8", cwd: this.rootDir, stdio: ["pipe", "pipe", "pipe"] },
-        ).trim();
+        const baseConfigRaw = execFileSync("git", ["show", `${sanitizedBase}:.agentshield.json`], {
+          encoding: "utf8",
+          cwd: this.rootDir,
+          stdio: ["pipe", "pipe", "pipe"],
+        }).trim();
         activeConfig = JSON.parse(baseConfigRaw);
         configTampered = true;
       } catch {

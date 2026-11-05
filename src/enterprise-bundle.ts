@@ -219,8 +219,7 @@ export class EnterpriseComplianceBundleGenerator {
    */
   public static toExecutiveMarkdown(pkg: ComplianceAttestationPackage): string {
     const isCorrupted = pkg.cryptographicEvidence.ledgerVerificationStatus === "CORRUPTED";
-    const isDefaultKey =
-      pkg.cryptographicEvidence.signingKeyTrust === "DEFAULT_INSECURE_SALT";
+    const isDefaultKey = pkg.cryptographicEvidence.signingKeyTrust === "DEFAULT_INSECURE_SALT";
 
     const lines = [
       "# 🏛️ Enterprise Security & Compliance Attestation Report",
