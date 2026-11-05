@@ -1,75 +1,63 @@
-# Security Policy & Community Bug Bounty Program
+# Security Policy & Vulnerability Disclosure
 
-## 🛡️ Commitment to Security & Formal Threat Model
-
-**AgentShield** provides boundary-safe secret defense, in-memory surrogate token rehydration, and command sandboxing for autonomous AI agents. We treat the security of our regex engine, streaming boundary windowing, Shannon entropy tokenizer, AST sandbox, and kernel isolation with the highest priority.
-
-For an exhaustive analysis of trust boundaries, in-scope threat vectors, out-of-scope non-goals, and verifiable mathematical invariants, please consult our formal **[Threat Model & Verifiable Claims](THREAT_MODEL.md)**.
-
-We actively reward ethical security researchers, white-hat hackers, and community developers who discover bypasses, jailbreaks, or sandbox escapes through our **Community Vulnerability & Bug Bounty Program**.
+RitualDev Studio takes the security of autonomous AI infrastructure, secret defense runtimes, and developer tooling with utmost seriousness.
 
 ---
 
-## 🏆 Vulnerability Bounty Reward Tiers
+## 🛡️ Supported Versions
 
-Bounties are paid directly via **Dodo Payments / UPI / GitHub Sponsors** from the **AgentShield Security Defense Fund**:
+We actively provide security updates, regression patches, and zero-day mitigations for the following versions:
 
-| Severity Tier | Qualifying Vulnerabilities | Bounty Reward (USD) | Recognition |
-| :--- | :--- | :--- | :--- |
-| **🚨 Critical** | • Full AST Shell Sandbox Breakout (executing forbidden commands)<br>• Arbitrary OS code execution from untrusted LLM prompt inputs<br>• Tamper-evident write-ahead audit ledger forgery | **\$250 – \$500** | Hall of Fame ★ Top Hero + Custom Hall Badge + Release Notes |
-| **⚠️ High** | • Deterministic bypass of secret redaction for major cloud API keys (OpenAI, AWS, Anthropic, Stripe)<br>• Stdio streaming inter-chunk leakage without redaction<br>• Enterprise SSO JWT token bypass or privilege escalation | **\$100 – \$200** | Hall of Fame + Security Advisory Credit |
-| **🟡 Medium** | • Regular expression denial-of-service (ReDoS) leading to agent crash<br>• Obfuscated ANSI-C escape subshell bypass not caught by sandbox<br>• Environment variable leak through unorthodox shell redirection | **\$50** | Security Advisory Credit |
-| **🔵 Low / Informational** | • Minor configuration weaknesses or false-positive edge cases | Recognition | Contributor Credit |
+| Version | Supported | Minimum Engine | SLA Coverage |
+| :--- | :---: | :---: | :--- |
+| **0.2.x** | ✅ **Active** | Node.js >= 20.0.0 | **Critical & High: < 24 Hours** |
+| 0.1.x | ⚠️ End-of-Life | Node.js >= 18.0.0 | Upgrade to v0.2.x recommended |
 
 ---
 
-## 🧪 Local PoC Verification Runner (`bounty-verify`)
+## ⏱️ Guaranteed 24-Hour Response SLA
 
-Before reporting, you can locally verify whether your exploit payload or bypass executes against the AgentShield engine:
-
-```bash
-# Run local PoC exploit check
-npx @ritualdev-lab/agentshield bounty-verify <exploit-file-or-command>
-
-# Example: Testing command sandbox evasion
-npx @ritualdev-lab/agentshield bounty-verify "cat .env"
-```
+We commit to the following response timeline for all reported vulnerabilities:
+- **Initial Triage & Acknowledgment**: **< 24 Hours** (guaranteed).
+- **Vulnerability Reproduction & Severity Assessment**: **< 48 Hours**.
+- **Security Advisory Drafting & Patch Release**: **< 72 Hours** for Critical/High CVEs.
 
 ---
 
-## 📦 Supported Versions
+## 🚨 Reporting a Vulnerability
 
-Only the latest active major and minor releases receive security patches, bug fixes, and bounty eligibility:
+Please **DO NOT** create public GitHub issues or discussions for undisclosed security vulnerabilities.
 
-| Version | Supported | Bounty Eligible |
-| :--- | :---: | :---: |
-| `0.1.x` | :white_check_mark: | :white_check_mark: Yes |
-| `< 0.1` | :x: | :x: No |
+### Option 1: GitHub Private Security Advisory (Preferred)
+Submit a report privately via GitHub's Coordinated Vulnerability Disclosure:
+👉 **[Report a Security Advisory on GitHub](https://github.com/RitualDev-Lab/AgentShield/security/advisories/new)**
 
----
+### Option 2: Direct Security Team Dispatch
+Email our engineering response team:
+- **Email**: [`developer@ritualdev.com`](mailto:developer@ritualdev.com)
+- **Subject**: `[SECURITY VULNERABILITY] @ritualdev-lab/agentshield`
+- **PGP Encryption**: Available upon request.
 
-## 🚨 Submitting a Security Vulnerability
-
-**Please DO NOT report security vulnerabilities through public GitHub issues, discussions, or social media.**
-
-### Coordinated Submission Process:
-1. **GitHub Private Security Advisory (Preferred):**
-   - Submit through [AgentShield Security Advisory](https://github.com/RitualDev-Lab/AgentShield/security/advisories/new).
-2. **Encrypted Email:**
-   - Email reproduction details to **`security@ritualdev.lab`** or RitualDev Lab maintainers.
-
-### Submission Requirements:
-- **Title**: Clear description of the vulnerability (e.g. `[Sandbox Bypass] Bash brace expansion evades .env read block`).
-- **Reproducible PoC**: Minimal shell script, payload, or file that demonstrates the leak/breakout.
-- **Environment**: Node.js version, OS (Linux, macOS, Windows), and agent runtime (Cursor, Claude Code, etc.).
-- **Payment Details**: Dodo Payments email, PayPal, or UPI ID for bounty disbursement.
+Please include:
+1. Proof-of-Concept (PoC) code or reproduction script.
+2. Attack vector taxonomy (e.g. CWE-77, ReDoS, Sandbox Bypass, Proc Environ Exfiltration).
+3. Impact assessment on host environment or client agent runtime.
 
 ---
 
-## ⏱️ Response Timeline & SLA
+## 🏛️ Safe Harbor Commitment
 
-- **Acknowledgment:** Within **24 hours**.
-- **Triage & Reproducibility:** Within **48 hours**.
-- **Fix & Patch Release:** Within **5 business days** for Critical, **10 business days** for High.
-- **Bounty Disbursement:** Immediately upon confirmation and merge of the mitigation patch.
-- **Coordinated Disclosure:** 90-day window with public credit in CVE / GitHub Advisory notes.
+RitualDev Studio will **never** pursue legal action against security researchers, ethical hackers, or academic teams who:
+- Act in good faith to identify vulnerabilities.
+- Provide us reasonable time to release a patch before public disclosure.
+- Avoid accessing, destroying, or exfiltrating user data or production environments.
+
+Researchers reporting verified vulnerabilities will be credited on our **[Security Hall of Fame](https://ritualdev.in/trust)**.
+
+---
+
+## 📜 Compliance & Audit Attestations
+
+For SOC 2 Type II, ISO 27001, and India DPDP Act 2023 compliance verification:
+- **Trust Portal**: [https://ritualdev.in/trust](https://ritualdev.in/trust)
+- **Interactive Playground**: [https://ritualdev.in/playground](https://ritualdev.in/playground)

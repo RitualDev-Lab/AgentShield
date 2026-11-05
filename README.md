@@ -7,6 +7,8 @@
 [![GitHub Stars](https://img.shields.io/github/stars/RitualDev-Lab/AgentShield?style=for-the-badge&logo=github&color=8b5cf6)](https://github.com/RitualDev-Lab/AgentShield/stargazers)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg?style=for-the-badge)](LICENSE)
 [![CI Status](https://img.shields.io/github/actions/workflow/status/RitualDev-Lab/AgentShield/test.yml?branch=main&style=for-the-badge&logo=github-actions&label=Tests)](https://github.com/RitualDev-Lab/AgentShield/actions/workflows/test.yml)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/RitualDev-Lab/AgentShield/badge)](https://securityscorecards.dev/viewer/?repo=github.com/RitualDev-Lab/AgentShield)
+[![SLSA Level 3](https://img.shields.io/badge/SLSA-Level%203-00F59B?style=for-the-badge&logo=linuxfoundation)](https://slsa.dev)
 [![Node Runtime](https://img.shields.io/badge/Node-%3E%3D20.0-emerald.svg?style=for-the-badge&logo=nodedotjs)](https://nodejs.org)
 
 
