@@ -97,7 +97,13 @@ async function main() {
     process.exit(0);
   }
 
-  if (!command || command === "--help" || command === "-h" || args.includes("--help") || args.includes("-h")) {
+  if (
+    !command ||
+    command === "--help" ||
+    command === "-h" ||
+    args.includes("--help") ||
+    args.includes("-h")
+  ) {
     printHelp();
     process.exit(0);
   }
@@ -290,7 +296,10 @@ Direct verification link:
           const { spawn } = await import("node:child_process");
           const targetUrl = parsedUrl.href;
           if (process.platform === "win32") {
-            spawn("cmd.exe", ["/c", "start", '""', targetUrl], { detached: true, stdio: "ignore" }).unref();
+            spawn("cmd.exe", ["/c", "start", '""', targetUrl], {
+              detached: true,
+              stdio: "ignore",
+            }).unref();
           } else if (process.platform === "darwin") {
             spawn("open", [targetUrl], { detached: true, stdio: "ignore" }).unref();
           } else {
@@ -355,7 +364,9 @@ Direct verification link:
     }
 
     saveCredentials({ orgId, token, endpoint });
-    console.log(`✅ [AgentShield] Machine registered with ${orgId.includes("pro") ? "Pro License" : `Organization '${orgId}'`}.`);
+    console.log(
+      `✅ [AgentShield] Machine registered with ${orgId.includes("pro") ? "Pro License" : `Organization '${orgId}'`}.`,
+    );
     console.log("   Initializing security defense & policies...");
 
     const { policy, isCached, error } = await fetchRemotePolicy();
@@ -425,7 +436,8 @@ Direct verification link:
     const { SiemExporter } = await import("./siem.js");
 
     const formatIdx = args.indexOf("--format");
-    const format = (formatIdx !== -1 && (args[formatIdx + 1] as "cef" | "syslog" | "json")) || "cef";
+    const format =
+      (formatIdx !== -1 && (args[formatIdx + 1] as "cef" | "syslog" | "json")) || "cef";
 
     if (subAction === "export") {
       const fileIdx = args.indexOf("--file");
@@ -446,7 +458,9 @@ Direct verification link:
           process.exit(0);
         }
 
-        console.log(`📦 Exporting ${findings.length} incident event(s) in [${format.toUpperCase()}] format:\n`);
+        console.log(
+          `📦 Exporting ${findings.length} incident event(s) in [${format.toUpperCase()}] format:\n`,
+        );
         const exporter = new SiemExporter({ format });
         for (const finding of findings) {
           // Explicitly sanitize finding to break taint flow and prevent clear-text secret logging
@@ -455,7 +469,9 @@ Direct verification link:
             raw: "[REDACTED_BY_AGENTSHIELD]",
             redacted: finding.redacted || "[REDACTED]",
           };
-          const event = SiemExporter.createSecretLeakEvent(safeFinding, { source: "AgentShield-CLI" });
+          const event = SiemExporter.createSecretLeakEvent(safeFinding, {
+            source: "AgentShield-CLI",
+          });
           const formattedOutput = exporter.exportEvent(event, format);
           process.stdout.write(`${formattedOutput}\n`);
         }
@@ -478,7 +494,9 @@ Direct verification link:
         const formattedSample = exporter.exportEvent(sampleEvent, format);
         process.stdout.write(`${formattedSample}\n`);
         console.log(`\n💡 Tip: Provide a file to scan and export live findings:`);
-        console.log(`   npx @ritualdev-lab/agentshield siem export --file <path> --format ${format}\n`);
+        console.log(
+          `   npx @ritualdev-lab/agentshield siem export --file <path> --format ${format}\n`,
+        );
       }
       process.exit(0);
     }
@@ -491,7 +509,11 @@ Direct verification link:
       const targetUrl = urlIdx !== -1 ? args[urlIdx + 1] : undefined;
 
       const keyIdx = args.indexOf("--key");
-      const apiKey = (keyIdx !== -1 ? args[keyIdx + 1] : undefined) || process.env.DD_API_KEY || process.env.SPLUNK_TOKEN || "test_api_key_token";
+      const apiKey =
+        (keyIdx !== -1 ? args[keyIdx + 1] : undefined) ||
+        process.env.DD_API_KEY ||
+        process.env.SPLUNK_TOKEN ||
+        "test_api_key_token";
 
       const sampleFinding = {
         file: "src/autonomous_agent.py",
@@ -515,27 +537,39 @@ Direct verification link:
         const result = await SiemExporter.forwardToDatadog(testEvent, { apiKey, site });
         const latency = Date.now() - startTime;
         if (result.delivered) {
-          console.log(`✅ [Datadog Logs API] Delivered successfully (HTTP ${result.statusCode}, ${latency}ms)`);
+          console.log(
+            `✅ [Datadog Logs API] Delivered successfully (HTTP ${result.statusCode}, ${latency}ms)`,
+          );
         } else {
-          console.log(`⚠️ [Datadog Logs API] Dispatch attempted (HTTP ${result.statusCode || "N/A"}: ${result.error || "Check API Key permissions"})`);
+          console.log(
+            `⚠️ [Datadog Logs API] Dispatch attempted (HTTP ${result.statusCode || "N/A"}: ${result.error || "Check API Key permissions"})`,
+          );
         }
       } else if (target === "splunk") {
         const hecUrl = targetUrl || process.env.SPLUNK_HEC_URL || "https://localhost:8088";
         const result = await SiemExporter.forwardToSplunk(testEvent, { hecUrl, token: apiKey });
         const latency = Date.now() - startTime;
         if (result.delivered) {
-          console.log(`✅ [Splunk HEC] Delivered successfully (HTTP ${result.statusCode}, ${latency}ms)`);
+          console.log(
+            `✅ [Splunk HEC] Delivered successfully (HTTP ${result.statusCode}, ${latency}ms)`,
+          );
         } else {
-          console.log(`⚠️ [Splunk HEC] Dispatch attempted (HTTP ${result.statusCode || "N/A"}: ${result.error || "Check HEC URL & token"})`);
+          console.log(
+            `⚠️ [Splunk HEC] Dispatch attempted (HTTP ${result.statusCode || "N/A"}: ${result.error || "Check HEC URL & token"})`,
+          );
         }
       } else {
         const webhookUrl = targetUrl || "https://ritualdev.in/api/v1/telemetry";
         const result = await SiemExporter.forwardToWebhook(testEvent, { url: webhookUrl, format });
         const latency = Date.now() - startTime;
         if (result.delivered) {
-          console.log(`✅ [SIEM Webhook] Delivered successfully (HTTP ${result.statusCode}, ${latency}ms)`);
+          console.log(
+            `✅ [SIEM Webhook] Delivered successfully (HTTP ${result.statusCode}, ${latency}ms)`,
+          );
         } else {
-          console.log(`⚠️ [SIEM Webhook] Dispatch attempted (HTTP ${result.statusCode || "N/A"}: ${result.error || "Check endpoint connectivity"})`);
+          console.log(
+            `⚠️ [SIEM Webhook] Dispatch attempted (HTTP ${result.statusCode || "N/A"}: ${result.error || "Check endpoint connectivity"})`,
+          );
         }
       }
       process.exit(0);

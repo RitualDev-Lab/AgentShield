@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { AgentCommandSandbox } from "../src/sandbox.js";
-import { sanitizeProcessEnvironment } from "../src/interceptor.js";
 import { UNIGNORABLE_FILES_PATTERN } from "../src/ci.js";
-import { validateReDoSSafety, parseCustomPatterns } from "../src/config.js";
+import { parseCustomPatterns, validateReDoSSafety } from "../src/config.js";
+import { sanitizeProcessEnvironment } from "../src/interceptor.js";
+import { AgentCommandSandbox } from "../src/sandbox.js";
 
 describe("GHSA Vulnerability Patches Suite", () => {
   describe("GHSA-92f2-4677-rmvh: Environment Secrets & /proc/self/environ Defense", () => {

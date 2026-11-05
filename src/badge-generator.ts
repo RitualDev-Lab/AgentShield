@@ -27,7 +27,6 @@ export interface BadgeOptions {
   logo?: boolean;
 }
 
-// biome-ignore lint/complexity/noStaticOnlyClass: utility class for generating verified badges
 export class VerifiedBadgeGenerator {
   private static readonly BADGE_SECRET =
     process.env.AGENTSHIELD_BADGE_SECRET || "agentshield_verified_salt_2026";
