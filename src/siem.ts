@@ -74,6 +74,116 @@ export class SiemExporter {
   }
 
   /**
+   * Forwards incident event directly to Datadog Logs API via HTTPS
+   */
+  public static async forwardToDatadog(
+    event: SiemEvent,
+    config: { apiKey: string; site?: string; service?: string }
+  ): Promise<{ delivered: boolean; statusCode?: number; error?: string }> {
+    const site = config.site || "datadoghq.com";
+    const url = `https://http-intake.logs.${site}/api/v2/logs`;
+    try {
+      const payload = [
+        {
+          ddsource: "agentshield",
+          ddtags: `env:production,audit:zero-leak,severity:${event.severity}`,
+          service: config.service || "agentshield-defense",
+          message: SiemExporter.toCef(event),
+          ...event,
+        },
+      ];
+      const res = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "DD-API-KEY": config.apiKey,
+          "User-Agent": "AgentShield-SIEM/1.0",
+        },
+        body: JSON.stringify(payload),
+      });
+      return { delivered: res.ok, statusCode: res.status };
+    } catch (err: unknown) {
+      return { delivered: false, error: err instanceof Error ? err.message : String(err) };
+    }
+  }
+
+  /**
+   * Forwards incident event directly to Splunk HTTP Event Collector (HEC)
+   */
+  public static async forwardToSplunk(
+    event: SiemEvent,
+    config: { hecUrl: string; token: string; index?: string }
+  ): Promise<{ delivered: boolean; statusCode?: number; error?: string }> {
+    const base = config.hecUrl.replace(/\/+$/, "");
+    const url = base.endsWith("/services/collector/event") ? base : `${base}/services/collector/event`;
+    try {
+      const payload = {
+        time: Math.floor(Date.now() / 1000),
+        source: "agentshield",
+        sourcetype: "agentshield:incident",
+        index: config.index || "security",
+        event,
+      };
+      const res = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Splunk ${config.token}`,
+          "User-Agent": "AgentShield-SIEM/1.0",
+        },
+        body: JSON.stringify(payload),
+      });
+      return { delivered: res.ok, statusCode: res.status };
+    } catch (err: unknown) {
+      return { delivered: false, error: err instanceof Error ? err.message : String(err) };
+    }
+  }
+
+  /**
+   * Forwards incident event to CloudWatch HTTPS endpoint or generic SIEM Webhook
+   */
+  public static async forwardToWebhook(
+    event: SiemEvent,
+    config: { url: string; secret?: string; format?: "json" | "cef" | "syslog"; headers?: Record<string, string> }
+  ): Promise<{ delivered: boolean; statusCode?: number; error?: string }> {
+    const format = config.format || "json";
+    let body: string;
+    let contentType = "application/json";
+
+    if (format === "cef") {
+      body = SiemExporter.toCef(event);
+      contentType = "text/plain";
+    } else if (format === "syslog") {
+      body = SiemExporter.toSyslog(event);
+      contentType = "text/plain";
+    } else {
+      body = JSON.stringify(event);
+    }
+
+    const headers: Record<string, string> = {
+      "Content-Type": contentType,
+      "User-Agent": "AgentShield-SIEM/1.0",
+      ...(config.headers || {}),
+    };
+
+    if (config.secret) {
+      const { createHmac } = await import("node:crypto");
+      headers["X-AgentShield-Signature"] = `sha256=${createHmac("sha256", config.secret).update(body).digest("hex")}`;
+    }
+
+    try {
+      const res = await fetch(config.url, {
+        method: "POST",
+        headers,
+        body,
+      });
+      return { delivered: res.ok, statusCode: res.status };
+    } catch (err: unknown) {
+      return { delivered: false, error: err instanceof Error ? err.message : String(err) };
+    }
+  }
+
+  /**
    * Builds a SIEM event object from a secret finding
    */
   public static createSecretLeakEvent(
