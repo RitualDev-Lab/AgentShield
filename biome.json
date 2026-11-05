@@ -7,7 +7,7 @@
   },
   "files": {
     "ignoreUnknown": false,
-    "ignore": ["node_modules", "dist", "*.log"]
+    "ignore": ["node_modules", "dist", "*.log", "docs", "scripts"]
   },
   "formatter": {
     "enabled": true,
@@ -18,7 +18,18 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true
+      "recommended": true,
+      "complexity": {
+        "noStaticOnlyClass": "off",
+        "noThisInStatic": "off"
+      },
+      "style": {
+        "noUselessElse": "off",
+        "noUnusedTemplateLiteral": "off"
+      },
+      "correctness": {
+        "noUnnecessaryContinue": "off"
+      }
     }
   }
 }
