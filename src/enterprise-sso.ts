@@ -1,6 +1,14 @@
 import { createHmac } from "node:crypto";
 import { type SiemEvent, SiemExporter } from "./siem.js";
 
+function trimTrailingSlash(url: string): string {
+  let u = url.trim();
+  while (u.endsWith("/")) {
+    u = u.slice(0, -1);
+  }
+  return u;
+}
+
 export interface WebhookSubscription {
   id: string;
   url: string;
@@ -209,15 +217,15 @@ export class DeviceAuthorizationFlow {
 
   /**
    * Generates a standard RFC 8628 user code in format XXXX-XXXX
+   * Uses cryptographically secure randomInt to eliminate modulo reduction bias.
    */
   public static generateUserCode(): string {
-    const { randomBytes } = require("node:crypto");
-    const bytes = randomBytes(8);
+    const { randomInt } = require("node:crypto");
     let part1 = "";
     let part2 = "";
     for (let i = 0; i < 4; i++) {
-      part1 += this.CHARSET[bytes[i] % this.CHARSET.length];
-      part2 += this.CHARSET[bytes[i + 4] % this.CHARSET.length];
+      part1 += this.CHARSET[randomInt(0, this.CHARSET.length)];
+      part2 += this.CHARSET[randomInt(0, this.CHARSET.length)];
     }
     return `${part1}-${part2}`;
   }
@@ -240,7 +248,7 @@ export class DeviceAuthorizationFlow {
 
     if (options.endpoint) {
       try {
-        const res = await fetch(`${options.endpoint.replace(/\/+$/, "")}/oauth/v2/device/authorize`, {
+        const res = await fetch(`${trimTrailingSlash(options.endpoint)}/oauth/v2/device/authorize`, {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
           body: new URLSearchParams({
@@ -284,7 +292,7 @@ export class DeviceAuthorizationFlow {
     const startTime = Date.now();
 
     const targetUrl = options.endpoint
-      ? `${options.endpoint.replace(/\/+$/, "")}/oauth/v2/token`
+      ? `${trimTrailingSlash(options.endpoint)}/oauth/v2/token`
       : "https://ritualdev.in/api/device";
 
     while (Date.now() - startTime < timeoutMs) {

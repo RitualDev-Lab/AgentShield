@@ -11,7 +11,7 @@ import {
   mergeRemotePolicyIntoConfig,
   saveCredentials,
 } from "./remote-policy.js";
-import type { ScanOptions } from "./types.js";
+import type { DetectedSecret, ScanOptions } from "./types.js";
 import { AGENTSHIELD_VERSION } from "./version.js";
 
 function printBanner() {
@@ -283,16 +283,20 @@ Direct verification link:
 ════════════════════════════════════════════════════════════════════════
 `);
 
-      // Attempt to launch browser automatically
+      // Attempt to launch browser automatically with safe argument separation
       try {
-        const { exec } = await import("node:child_process");
-        const openCmd =
-          process.platform === "win32"
-            ? `start "" "${session.verification_uri_complete}"`
-            : process.platform === "darwin"
-              ? `open "${session.verification_uri_complete}"`
-              : `xdg-open "${session.verification_uri_complete}"`;
-        exec(openCmd);
+        const parsedUrl = new URL(session.verification_uri_complete);
+        if (parsedUrl.protocol === "https:" || parsedUrl.protocol === "http:") {
+          const { spawn } = await import("node:child_process");
+          const targetUrl = parsedUrl.href;
+          if (process.platform === "win32") {
+            spawn("cmd.exe", ["/c", "start", '""', targetUrl], { detached: true, stdio: "ignore" }).unref();
+          } else if (process.platform === "darwin") {
+            spawn("open", [targetUrl], { detached: true, stdio: "ignore" }).unref();
+          } else {
+            spawn("xdg-open", [targetUrl], { detached: true, stdio: "ignore" }).unref();
+          }
+        }
       } catch {
         // silent fallback if browser launcher unavailable
       }
@@ -445,16 +449,23 @@ Direct verification link:
         console.log(`📦 Exporting ${findings.length} incident event(s) in [${format.toUpperCase()}] format:\n`);
         const exporter = new SiemExporter({ format });
         for (const finding of findings) {
-          const event = SiemExporter.createSecretLeakEvent(finding, { source: "AgentShield-CLI" });
-          console.log(exporter.exportEvent(event, format));
+          // Explicitly sanitize finding to break taint flow and prevent clear-text secret logging
+          const safeFinding: DetectedSecret = {
+            ...finding,
+            raw: "[REDACTED_BY_AGENTSHIELD]",
+            redacted: finding.redacted || "[REDACTED]",
+          };
+          const event = SiemExporter.createSecretLeakEvent(safeFinding, { source: "AgentShield-CLI" });
+          const formattedOutput = exporter.exportEvent(event, format);
+          process.stdout.write(`${formattedOutput}\n`);
         }
       } else {
         // Export synthetic reference finding
-        const sampleFinding = {
+        const sampleFinding: DetectedSecret = {
           file: targetFile || "src/auth/config.ts",
           line: 42,
           column: 15,
-          raw: "AKIAIOSFODNN7EXAMPLE",
+          raw: "[SYNTHETIC_MOCK_TOKEN]",
           redacted: "apiKey: [AGENTSHIELD_REDACTED:AWS_ACCESS_KEY:a1b2c3d4e5f6]",
           patternId: "aws-access-key",
           patternName: "AWS Access Key ID",
@@ -464,7 +475,8 @@ Direct verification link:
         const sampleEvent = SiemExporter.createSecretLeakEvent(sampleFinding);
         const exporter = new SiemExporter({ format });
         console.log(`📦 Sample SIEM Incident Event [${format.toUpperCase()}]:\n`);
-        console.log(exporter.exportEvent(sampleEvent, format));
+        const formattedSample = exporter.exportEvent(sampleEvent, format);
+        process.stdout.write(`${formattedSample}\n`);
         console.log(`\n💡 Tip: Provide a file to scan and export live findings:`);
         console.log(`   npx @ritualdev-lab/agentshield siem export --file <path> --format ${format}\n`);
       }

@@ -114,7 +114,10 @@ export class SiemExporter {
     event: SiemEvent,
     config: { hecUrl: string; token: string; index?: string }
   ): Promise<{ delivered: boolean; statusCode?: number; error?: string }> {
-    const base = config.hecUrl.replace(/\/+$/, "");
+    let base = config.hecUrl.trim();
+    while (base.endsWith("/")) {
+      base = base.slice(0, -1);
+    }
     const url = base.endsWith("/services/collector/event") ? base : `${base}/services/collector/event`;
     try {
       const payload = {
