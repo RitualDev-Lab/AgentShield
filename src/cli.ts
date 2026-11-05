@@ -69,6 +69,7 @@ Options:
   --style <token|hash|asterisk>          Redaction format (default: token)
   --labs, --experimental                 Enable experimental labs & enterprise control plane features
   --json                                 Output findings in structured JSON
+  --version, -v                          Show version number
   --help, -h                             Show this help message
 `);
 }
@@ -82,7 +83,18 @@ async function main() {
     process.env.RITUAL_AIR_GAPPED = "1";
   }
 
-  if (!command || command === "--help" || command === "-h") {
+  if (
+    command === "--version" ||
+    command === "-v" ||
+    command === "version" ||
+    args.includes("--version") ||
+    args.includes("-v")
+  ) {
+    console.log(AGENTSHIELD_VERSION);
+    process.exit(0);
+  }
+
+  if (!command || command === "--help" || command === "-h" || args.includes("--help") || args.includes("-h")) {
     printHelp();
     process.exit(0);
   }
