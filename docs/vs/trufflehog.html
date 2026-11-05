@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgentShield vs TruffleHog — In-Flight Prompt Redaction vs Verified Secret Scanners</title>
+  <meta name="description" content="Technical comparison between AgentShield and TruffleHog. Discover why token verification alone cannot protect LLM context windows and how in-flight surrogate redaction eliminates prompt injection leaks.">
+  <meta name="keywords" content="AgentShield vs TruffleHog, TruffleHog alternative for AI agents, prompt redaction, LLM secret defense, AI agent security">
+  <link rel="canonical" href="https://agentshield.ritualdev.in/vs/trufflehog.html">
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <link rel="alternate" type="application/rss+xml" title="AgentShield Security Updates" href="../feed.xml">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://agentshield.ritualdev.in/vs/trufflehog.html">
+  <meta property="og:title" content="AgentShield vs TruffleHog — In-Flight Prompt Redaction vs Verified Secret Scanners">
+  <meta property="og:description" content="Why verified API token scanning must be coupled with in-flight surrogate prompt redaction for AI coding agents.">
+  <meta property="og:image" content="https://agentshield.ritualdev.in/og-image.jpg">
+
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Article",
+        "headline": "AgentShield vs TruffleHog: Verified Secret Scanning vs In-Flight Prompt Redaction",
+        "description": "How AgentShield solves AI agent credential leakage that post-scan verification tools like TruffleHog cannot intercept.",
+        "author": {
+          "@type": "Organization",
+          "name": "RitualDev Lab",
+          "url": "https://github.com/RitualDev-Lab"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "RitualDev Lab",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://agentshield.ritualdev.in/favicon.svg"
+          }
+        },
+        "datePublished": "2026-10-15T00:00:00Z",
+        "dateModified": "2026-11-06T00:00:00Z"
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "How does AgentShield differ from TruffleHog?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "TruffleHog specializes in finding secrets in git history and verifying if those credentials are valid against 700+ APIs. AgentShield specializes in preventing AI coding agents from ever seeing or exfiltrating credentials during live inference and bash tool execution."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What is in-flight surrogate prompt redaction?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "AgentShield intercepts prompt text and tool arguments before they reach external LLMs, replacing sensitive API tokens and passwords with deterministic SHA-256 tokens that allow LLM reasoning without exposing raw secrets."
+            }
+          }
+        ]
+      }
+    ]
+  }
+  </script>
+
+  <!-- Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #07090e;
+      --card-bg: rgba(13, 17, 23, 0.8);
+      --border: rgba(139, 92, 246, 0.2);
+      --primary: #8b5cf6;
+      --accent: #06b6d4;
+      --emerald: #10b981;
+      --text: #f3f4f6;
+      --text-muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      line-height: 1.6;
+      padding: 0 1rem;
+    }
+    .container { max-width: 900px; margin: 0 auto; padding: 3rem 0; }
+    header { text-align: center; margin-bottom: 3rem; }
+    .badge {
+      display: inline-block;
+      padding: 0.35rem 0.85rem;
+      border-radius: 9999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      background: rgba(139, 92, 246, 0.15);
+      color: var(--primary);
+      border: 1px solid var(--border);
+      margin-bottom: 1rem;
+    }
+    h1 { font-size: 2.25rem; font-weight: 800; line-height: 1.25; margin-bottom: 1rem; }
+    p.lead { font-size: 1.15rem; color: var(--text-muted); max-width: 720px; margin: 0 auto; }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    th, td { padding: 1rem; text-align: left; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
+    th { font-weight: 700; color: var(--accent); }
+    td.check { color: var(--emerald); font-weight: bold; }
+    td.cross { color: #ef4444; font-weight: bold; }
+    code { font-family: 'JetBrains Mono', monospace; font-size: 0.9em; background: rgba(255, 255, 255, 0.06); padding: 0.2rem 0.4rem; border-radius: 4px; }
+    .btn {
+      display: inline-block;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 600;
+      text-decoration: none;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: #fff;
+      transition: transform 0.2s;
+    }
+    .btn:hover { transform: translateY(-2px); }
+    footer { text-align: center; padding: 2rem 0; color: var(--text-muted); font-size: 0.9rem; border-top: 1px solid var(--border); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="badge">Security Deep Dive</div>
+      <h1>AgentShield vs TruffleHog</h1>
+      <p class="lead">Verified API token discovery vs live in-flight prompt surrogate redaction and execution containment.</p>
+    </header>
+
+    <div class="card">
+      <h2>Executive Summary</h2>
+      <p style="margin-top: 0.75rem; color: var(--text-muted);">
+        TruffleHog is a world-class secret scanner that crawls git commits, S3 buckets, and filesystems to find exposed tokens and verify their validity against live SaaS endpoints.
+      </p>
+      <p style="margin-top: 0.75rem; color: var(--text-muted);">
+        However, when an autonomous coding agent (Claude Code, Cursor, Windsurf) runs locally, it frequently opens <code>.env</code> files or executes bash subshells. TruffleHog's live API pinging does not solve the problem of tokens entering third-party LLM inference streams. <strong>AgentShield</strong> operates inline, dynamically substituting real secrets with deterministic SHA-256 surrogate tokens so models can write correct code without ever seeing confidential credentials.
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>Capability Comparison Matrix</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Security Vector</th>
+            <th>TruffleHog</th>
+            <th>AgentShield</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Live API Credential Verification (Online)</td>
+            <td class="check">✓ Yes (700+ APIs)</td>
+            <td class="cross">✗ No (Offline-first)</td>
+          </tr>
+          <tr>
+            <td>Interactive AST Execution Sandbox</td>
+            <td class="cross">✗ No</td>
+            <td class="check">✓ Yes (Real-time blocking)</td>
+          </tr>
+          <tr>
+            <td>Surrogate Token LLM Prompt Redaction</td>
+            <td class="cross">✗ No</td>
+            <td class="check">✓ Yes (In-flight substitution)</td>
+          </tr>
+          <tr>
+            <td>Claude Code / Cursor / Windsurf IDE Hooks</td>
+            <td class="cross">✗ No</td>
+            <td class="check">✓ Yes (1-Click Integration)</td>
+          </tr>
+          <tr>
+            <td>Zero External Telemetry / Strict Air-Gap</td>
+            <td class="cross">✗ No (Pings remote APIs)</td>
+            <td class="check">✓ Yes (100% Workstation Local)</td>
+          </tr>
+          <tr>
+            <td>Git Pre-Commit &amp; File Tree Scanning</td>
+            <td class="check">✓ Yes</td>
+            <td class="check">✓ Yes (Built-in)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>Architectural Complementarity</h2>
+      <p style="margin-top: 0.75rem; color: var(--text-muted);">
+        Securing an enterprise AI development workflow requires defense-in-depth:
+      </p>
+      <ul style="margin: 1rem 0 1rem 1.5rem; color: var(--text-muted);">
+        <li><strong>Deploy TruffleHog</strong> in your central CI/CD pipelines to alert on verified credentials leaked in public or internal repositories.</li>
+        <li><strong>Deploy AgentShield</strong> on developer workstations and agent runtimes to prevent AI models from accessing local environment files, environment variables, or exfiltrating credentials via subshells.</li>
+      </ul>
+    </div>
+
+    <div style="text-align: center; margin: 3rem 0;">
+      <a href="../#quickstart" class="btn">Protect Your AI Agents with AgentShield</a>
+      <p style="margin-top: 0.75rem; font-size: 0.85rem; color: var(--text-muted);">
+        Ready for Claude Code, Cursor, Windsurf, LangGraph, and AutoGen.
+      </p>
+    </div>
+
+    <footer>
+      <p>&copy; 2026 RitualDev Lab. Released under Apache-2.0 License. <a href="../" style="color: var(--accent);">Back to AgentShield Home</a></p>
+    </footer>
+  </div>
+</body>
+</html>

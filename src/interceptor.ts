@@ -298,6 +298,75 @@ export function createRedactingStream(
  * High-Assurance Agent Stdio Interceptor:
  * Replaces pure regex blocklists with real-time stream scrubbing and OS-level containment.
  */
+/**
+ * Sanitizes the host environment before passing it to sandboxed agent child processes.
+ * Strips or redacts any variables containing secret keywords (KEY, SECRET, TOKEN, PASSWORD, etc.)
+ * to prevent cleartext credential leaks via /proc/self/environ or shell parameter expansion.
+ */
+export function sanitizeProcessEnvironment(
+  sourceEnv: NodeJS.ProcessEnv = process.env,
+  customAllowlist: string[] = [],
+): NodeJS.ProcessEnv {
+  const safeEnv: NodeJS.ProcessEnv = {};
+
+  const ALWAYS_ALLOWED = new Set([
+    "PATH",
+    "NODE_PATH",
+    "HOME",
+    "USER",
+    "USERNAME",
+    "LOGNAME",
+    "SHELL",
+    "TERM",
+    "TMPDIR",
+    "TEMP",
+    "TMP",
+    "PWD",
+    "LANG",
+    "LC_ALL",
+    "LC_CTYPE",
+    "TZ",
+    "SHLVL",
+    "EDITOR",
+    "VISUAL",
+    "COLORTERM",
+    "FORCE_COLOR",
+    "NODE_ENV",
+    "SYSTEMROOT",
+    "WINDIR",
+    "COMSPEC",
+    "PATHEXT",
+    "OS",
+    "PROCESSOR_ARCHITECTURE",
+  ]);
+
+  const SENSITIVE_KEY_PATTERN =
+    /(?:KEY|SECRET|TOKEN|PASSWORD|PASSWD|AUTH|CREDENTIAL|PRIVATE|APIKEY|ACCESS|WEBHOOK|SIGNING|HASH|BEARER|SSH|CERT|PGPASS|DATABASE_URL|CONN_STR)/i;
+
+  for (const [key, val] of Object.entries(sourceEnv)) {
+    if (val === undefined) continue;
+
+    if (customAllowlist.includes(key)) {
+      safeEnv[key] = val;
+      continue;
+    }
+
+    if (ALWAYS_ALLOWED.has(key.toUpperCase())) {
+      safeEnv[key] = val;
+      continue;
+    }
+
+    if (SENSITIVE_KEY_PATTERN.test(key)) {
+      safeEnv[key] = "[REDACTED_BY_AGENTSHIELD_ENV_GATE]";
+      continue;
+    }
+
+    safeEnv[key] = val;
+  }
+
+  return safeEnv;
+}
+
 export class AgentStdioInterceptor {
   private engine: AgentShieldEngine;
   private sandbox: AgentCommandSandbox;
@@ -415,6 +484,7 @@ export class AgentStdioInterceptor {
         child = spawn(execCmd, {
           shell: true,
           cwd: options.workspaceDir || process.cwd(),
+          env: sanitizeProcessEnvironment(process.env),
           stdio: ["inherit", "pipe", "pipe"],
         });
       } catch (err: unknown) {

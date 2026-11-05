@@ -58,7 +58,7 @@ export const SPONSORED_PRODUCTS: Record<string, SponsoredProductTier> = {
     ],
   },
   "pro-developer": {
-    id: "pdt_ritual_pro_individual",
+    id: "pdt_0NrFSkF5XLgBppfQRxgXN",
     name: "Ritual Pro Individual Developer",
     description:
       "Cloud log sync, multi-machine profiles, priority MCP generation, and native menu-bar status widget.",
@@ -72,7 +72,7 @@ export const SPONSORED_PRODUCTS: Record<string, SponsoredProductTier> = {
     ],
   },
   "team-scale": {
-    id: "pdt_ritual_team_scale",
+    id: "pdt_0NrFSmrXT8zU2u5BKGJ7y",
     name: "Ritual Team & CI/CD Governance",
     description:
       "Multi-seat team policy enforcement, Slack mutation approvals, and shared Redis token-saving cache.",

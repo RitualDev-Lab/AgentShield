@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>AgentShield Security Updates &amp; Changelog</title>
+    <link>https://agentshield.ritualdev.in/</link>
+    <description>Enterprise zero-leak secret defense, interactive AST shell sandbox, and CI/CD security gate updates for Claude Code, Cursor, Windsurf, and autonomous AI agents.</description>
+    <language>en-us</language>
+    <lastBuildDate>Thu, 06 Nov 2026 00:00:00 GMT</lastBuildDate>
+    <atom:link href="https://agentshield.ritualdev.in/feed.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>AgentShield v0.2.1 Released: Multi-Architecture Container Images &amp; PyPI Package</title>
+      <link>https://agentshield.ritualdev.in/#releases</link>
+      <guid>https://agentshield.ritualdev.in/releases/0.2.1</guid>
+      <pubDate>Thu, 06 Nov 2026 00:00:00 GMT</pubDate>
+      <description>Released official Python package (agentshield-defense) on PyPI, multi-arch Docker images on GHCR, and real-time prompt redaction for LangGraph, CrewAI, AutoGen, and LlamaIndex.</description>
+    </item>
+    <item>
+      <title>Advisory GHSA-92f2-4677-rmvh: Environment Secrets Leakage via /proc/self/environ</title>
+      <link>https://agentshield.ritualdev.in/#security</link>
+      <guid>https://agentshield.ritualdev.in/advisories/GHSA-92f2-4677-rmvh</guid>
+      <pubDate>Wed, 05 Nov 2026 00:00:00 GMT</pubDate>
+      <description>Interception mitigation for AI agent /proc/self/environ access and shell variable expansion leak vectors.</description>
+    </item>
+    <item>
+      <title>Advisory GHSA-p3v4-5qw2-92rg: CI Secret Gate Self-Neutering via ignoreFiles bypasses</title>
+      <link>https://agentshield.ritualdev.in/#security</link>
+      <guid>https://agentshield.ritualdev.in/advisories/GHSA-p3v4-5qw2-92rg</guid>
+      <pubDate>Tue, 04 Nov 2026 00:00:00 GMT</pubDate>
+      <description>AST sandbox enforcement blocking ignoreFiles tampering during autonomous agent task runs.</description>
+    </item>
+    <item>
+      <title>Advisory GHSA-g5mq-fjr3-39qp: ReDoS Exponential Backtracking in secret regex engines</title>
+      <link>https://agentshield.ritualdev.in/#security</link>
+      <guid>https://agentshield.ritualdev.in/advisories/GHSA-g5mq-fjr3-39qp</guid>
+      <pubDate>Mon, 03 Nov 2026 00:00:00 GMT</pubDate>
+      <description>Linear-time automata and Shannon entropy tokenization preventing ReDoS denial-of-service attacks.</description>
+    </item>
+  </channel>
+</rss>

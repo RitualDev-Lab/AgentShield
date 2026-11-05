@@ -1,6 +1,6 @@
 {
   "name": "@ritualdev-lab/agentshield",
-  "version": "0.1.4",
+  "version": "0.2.1",
   "description": "Enterprise-grade Zero-Leak Secret Defense & Sandbox for Autonomous AI Coding Agents",
   "type": "module",
   "bin": {
@@ -14,7 +14,7 @@
     "type": "git",
     "url": "git+https://github.com/RitualDev-Lab/AgentShield.git"
   },
-  "homepage": "https://github.com/RitualDev-Lab/AgentShield#readme",
+  "homepage": "https://ritualdev.in/agentshield/",
   "bugs": {
     "url": "https://github.com/RitualDev-Lab/AgentShield/issues"
   },
@@ -30,31 +30,33 @@
     "dev": "tsup --watch",
     "test": "tsx --test",
     "benchmark": "tsx src/cli.ts benchmark",
-    "prepublishOnly": "pnpm run build && pnpm test && npm pack --dry-run",
+    "prepublishOnly": "npm run build && npm test && npm pack --dry-run",
     "lint": "biome lint .",
     "format": "biome format --write .",
     "wiki:sync": "node scripts/sync-wiki.cjs"
   },
   "keywords": [
-    "ai-agent",
-    "security",
+    "ai-agent-security",
+    "mcp-server",
+    "sandbox",
+    "developer-tools",
+    "cursor-ide",
+    "windsurf-ai",
+    "llm-security",
+    "kernel-sandbox",
+    "bubblewrap",
+    "landlock",
+    "seatbelt-macos",
     "secret-detection",
-    "zero-leak",
-    "claude-code",
-    "cursor",
-    "windsurf",
-    "codex",
-    "antigravity",
-    "redaction",
-    "entropy"
+    "zero-leak"
   ],
   "author": "RitualDev Lab (https://github.com/RitualDev-Lab)",
   "license": "Apache-2.0",
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
-    "@types/node": "^22.10.1",
+    "@types/node": "^26.6.6",
     "tsup": "^8.3.5",
     "tsx": "^4.19.2",
-    "typescript": "^5.7.2"
+    "typescript": "^7.0.2"
   }
 }

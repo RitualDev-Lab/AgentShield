@@ -76,6 +76,50 @@ export function loadConfig(rootDir: string = process.cwd()): AgentShieldConfig |
   return null;
 }
 
+/**
+ * Static analyzer for Catastrophic Backtracking (ReDoS) vulnerability detection.
+ * Validates custom regex patterns against polynomial and exponential backtracking constructs
+ * (nested quantifiers like (a+)+ or disjunctions with nested repetition like (a+|b)+).
+ */
+export function validateReDoSSafety(pattern: string): { safe: boolean; reason?: string } {
+  if (!pattern || typeof pattern !== "string") {
+    return { safe: false, reason: "Pattern must be a non-empty string" };
+  }
+
+  // 1. Guard against oversized regex patterns
+  if (pattern.length > 500) {
+    return { safe: false, reason: "Pattern exceeds maximum allowed length of 500 characters" };
+  }
+
+  // 2. Detect nested quantifiers (e.g. (a+)+, (a*)*, (?:[a-z]+)+, (a{1,}){2,})
+  const nestedQuantifiers = /\((?:\?:)?[^)]*(\+|\*|\{\d+,?\d*\})\)(\+|\*|\{\d+,?\d*\})/;
+  if (nestedQuantifiers.test(pattern)) {
+    return {
+      safe: false,
+      reason: "Catastrophic backtracking risk: Nested quantifiers detected (e.g. (a+)+ or (a*)*)",
+    };
+  }
+
+  // 3. Detect overlapping disjunction with repetition (e.g. (a+|b)+ or (a|b+)+)
+  const disjunctionWithRepetitionLeft = /\((?:\?:)?[^)]*(\+|\*)[^)]*\|[^)]*\)(\+|\*|\{\d+,?\d*\})/;
+  if (disjunctionWithRepetitionLeft.test(pattern)) {
+    return {
+      safe: false,
+      reason: "Catastrophic backtracking risk: Disjunction with nested repetition quantifiers (e.g. (a+|b)+)",
+    };
+  }
+
+  const disjunctionWithRepetitionRight = /\((?:\?:)?[^)]*\|[^)]*(\+|\*)[^)]*\)(\+|\*|\{\d+,?\d*\})/;
+  if (disjunctionWithRepetitionRight.test(pattern)) {
+    return {
+      safe: false,
+      reason: "Catastrophic backtracking risk: Disjunction with nested repetition quantifiers (e.g. (a|b+)+)",
+    };
+  }
+
+  return { safe: true };
+}
+
 export function parseCustomPatterns(config: AgentShieldConfig | null): SecretPattern[] {
   if (!config?.customPatterns || !Array.isArray(config.customPatterns)) {
     return [];
@@ -83,6 +127,15 @@ export function parseCustomPatterns(config: AgentShieldConfig | null): SecretPat
 
   const patterns: SecretPattern[] = [];
   for (const item of config.customPatterns) {
+    // ReDoS safety check (GHSA-g5mq-fjr3-39qp)
+    const safetyCheck = validateReDoSSafety(item.regex);
+    if (!safetyCheck.safe) {
+      console.warn(
+        `🚨 [AgentShield ReDoS Guard] Rejected unsafe customPattern '${item.id}': ${safetyCheck.reason}`,
+      );
+      continue;
+    }
+
     try {
       patterns.push({
         id: item.id,

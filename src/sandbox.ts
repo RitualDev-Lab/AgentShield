@@ -150,6 +150,26 @@ const DANGEROUS_COMMAND_PATTERNS = [
     reason: "Blocked potential secret exfiltration via external network transfer.",
     category: "credential_exfiltration" as const,
   },
+  // 7. Dumping runtime environment or process memory via /proc/ virtual filesystem (/proc/self/environ, /proc/$$/environ, etc.)
+  {
+    test: (cmd: string) =>
+      /(?:^|[\s'"\/\\=:]|HEAD:)\/proc\/(?:self|thread-self|\$\$|\d+|1)\/(?:environ|cmdline|mem|maps|fd)/i.test(
+        cmd,
+      ),
+    reason:
+      "Blocked attempt to dump process environment or read memory from kernel virtual filesystem (/proc/self/environ).",
+    category: "env_dump" as const,
+  },
+  // 8. Direct echo / printf reflection of sensitive environment variables into terminal stdout
+  {
+    test: (cmd: string) =>
+      /(?:^|[|;&]\s*)(?:echo|printf|print|write-host|Write-Output)\b.*?(?:\$(?:\{)?[A-Z0-9_]*(?:KEY|SECRET|TOKEN|PASSWORD|PASSWD|AUTH|CREDENTIAL|PRIVATE|APIKEY|ACCESS|WEBHOOK|PGPASS|DATABASE_URL|CONN_STR)[A-Z0-9_]*(?:\})?|\$Env:(?:[A-Z0-9_]*(?:KEY|SECRET|TOKEN|PASSWORD|PASSWD|AUTH|CREDENTIAL|PRIVATE|APIKEY|ACCESS|WEBHOOK|PGPASS|DATABASE_URL|CONN_STR)[A-Z0-9_]*))\b/i.test(
+        cmd,
+      ),
+    reason:
+      "Blocked attempt to echo or printf sensitive environment variable credentials directly into agent terminal context.",
+    category: "secret_echo" as const,
+  },
 ];
 
 export class AgentCommandSandbox {
@@ -175,7 +195,9 @@ export class AgentCommandSandbox {
       },
       {
         test: (cmd: string) =>
-          /\b(?:\/proc\/(?:1\/ns|1\/environ|sys|kcore)|\/dev\/(?:mem|kmem|port))\b/i.test(cmd),
+          /\b(?:\/proc\/(?:1\/ns|(?:self|thread-self|\$\$|\d+|1)\/environ|sys|kcore)|\/dev\/(?:mem|kmem|port))\b/i.test(
+            cmd,
+          ),
         reason: "Blocked attempt to access sensitive kernel virtual filesystems or device memory.",
       },
       {

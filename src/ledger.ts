@@ -1,5 +1,5 @@
 import { createHmac } from "node:crypto";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 
 export interface AuditLedgerEntry {
@@ -96,8 +96,7 @@ export class TamperEvidentLedger {
     }
     const line = `${JSON.stringify(entry)}\n`;
     try {
-      const existing = existsSync(this.ledgerPath) ? readFileSync(this.ledgerPath, "utf8") : "";
-      writeFileSync(this.ledgerPath, existing + line, "utf8");
+      appendFileSync(this.ledgerPath, line, "utf8");
     } catch {
       // Fallback in-memory
     }

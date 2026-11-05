@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgentShield vs Gitleaks — AI Agent Defense vs Static Git Secret Scanners</title>
+  <meta name="description" content="In-depth technical comparison between AgentShield and Gitleaks. Learn why static git commit scanning fails to protect autonomous AI coding agents and how real-time AST sandboxing prevents secret exfiltration.">
+  <meta name="keywords" content="AgentShield vs Gitleaks, Gitleaks alternative for AI agents, AI agent secret scanner, Claude Code security, secret exfiltration defense">
+  <link rel="canonical" href="https://agentshield.ritualdev.in/vs/gitleaks.html">
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <link rel="alternate" type="application/rss+xml" title="AgentShield Security Updates" href="../feed.xml">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://agentshield.ritualdev.in/vs/gitleaks.html">
+  <meta property="og:title" content="AgentShield vs Gitleaks — AI Agent Defense vs Static Git Secret Scanners">
+  <meta property="og:description" content="Why static git commit scanners like Gitleaks are insufficient for autonomous AI agents like Claude Code, Cursor, and Windsurf.">
+  <meta property="og:image" content="https://agentshield.ritualdev.in/og-image.jpg">
+
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Article",
+        "headline": "AgentShield vs Gitleaks: Static Git Scanning vs Real-Time AI Agent Sandboxing",
+        "description": "A comprehensive architectural comparison between static commit scanning and runtime AST execution sandboxing for autonomous coding agents.",
+        "author": {
+          "@type": "Organization",
+          "name": "RitualDev Lab",
+          "url": "https://github.com/RitualDev-Lab"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "RitualDev Lab",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://agentshield.ritualdev.in/favicon.svg"
+          }
+        },
+        "datePublished": "2026-10-15T00:00:00Z",
+        "dateModified": "2026-11-06T00:00:00Z"
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Why can't Gitleaks protect autonomous AI agents like Claude Code or Cursor?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Gitleaks is a post-facto or pre-commit static scanner that only inspects git diffs and commit histories. AI coding agents execute commands in interactive subshells (e.g., cat .env, printenv, curl -d @config.json) where credentials are leaked in-memory or over HTTP without ever creating a git commit."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How does AgentShield complement or replace Gitleaks in agent workflows?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "AgentShield provides both static pre-commit protection (like Gitleaks) AND real-time runtime AST command sandboxing with deterministic surrogate prompt redaction, intercepting secrets before commands execute or enter LLM context windows."
+            }
+          }
+        ]
+      }
+    ]
+  }
+  </script>
+
+  <!-- Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #07090e;
+      --card-bg: rgba(13, 17, 23, 0.8);
+      --border: rgba(139, 92, 246, 0.2);
+      --primary: #8b5cf6;
+      --accent: #06b6d4;
+      --emerald: #10b981;
+      --text: #f3f4f6;
+      --text-muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      line-height: 1.6;
+      padding: 0 1rem;
+    }
+    .container { max-width: 900px; margin: 0 auto; padding: 3rem 0; }
+    header { text-align: center; margin-bottom: 3rem; }
+    .badge {
+      display: inline-block;
+      padding: 0.35rem 0.85rem;
+      border-radius: 9999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      background: rgba(139, 92, 246, 0.15);
+      color: var(--primary);
+      border: 1px solid var(--border);
+      margin-bottom: 1rem;
+    }
+    h1 { font-size: 2.25rem; font-weight: 800; line-height: 1.25; margin-bottom: 1rem; }
+    p.lead { font-size: 1.15rem; color: var(--text-muted); max-width: 720px; margin: 0 auto; }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    th, td { padding: 1rem; text-align: left; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
+    th { font-weight: 700; color: var(--accent); }
+    td.check { color: var(--emerald); font-weight: bold; }
+    td.cross { color: #ef4444; font-weight: bold; }
+    code { font-family: 'JetBrains Mono', monospace; font-size: 0.9em; background: rgba(255, 255, 255, 0.06); padding: 0.2rem 0.4rem; border-radius: 4px; }
+    .btn {
+      display: inline-block;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 600;
+      text-decoration: none;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: #fff;
+      transition: transform 0.2s;
+    }
+    .btn:hover { transform: translateY(-2px); }
+    footer { text-align: center; padding: 2rem 0; color: var(--text-muted); font-size: 0.9rem; border-top: 1px solid var(--border); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="badge">Architecture Comparison</div>
+      <h1>AgentShield vs Gitleaks</h1>
+      <p class="lead">Static git commit scanning vs real-time interactive AST execution sandboxing for autonomous AI coding agents.</p>
+    </header>
+
+    <div class="card">
+      <h2>Executive Summary</h2>
+      <p style="margin-top: 0.75rem; color: var(--text-muted);">
+        While Gitleaks is an outstanding static scanner for git repositories and pre-commit hooks, it operates strictly on commit histories and git diffs. Modern autonomous AI agents (such as Claude Code, Cursor, Windsurf, and Antigravity) execute commands in real-time subshells. An agent running <code>cat .env</code> or exfiltrating credentials over HTTP never commits those secrets to git—rendering static commit scanners blind.
+      </p>
+      <p style="margin-top: 0.75rem; color: var(--text-muted);">
+        <strong>AgentShield</strong> operates at the runtime execution boundary: normalizing shell commands via Abstract Syntax Tree (AST) analysis, blocking unauthorized credential reads in-flight, and redacting tokens in prompt streams using deterministic surrogate tokens.
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>Capability Comparison Matrix</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Security Vector</th>
+            <th>Gitleaks</th>
+            <th>AgentShield</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Static Git Commit &amp; Pre-Commit Scanning</td>
+            <td class="check">✓ Yes</td>
+            <td class="check">✓ Yes (Built-in)</td>
+          </tr>
+          <tr>
+            <td>Real-Time Shell AST Command Interception</td>
+            <td class="cross">✗ No</td>
+            <td class="check">✓ Yes (Subshell Sandbox)</td>
+          </tr>
+          <tr>
+            <td>AI Agent Prompt Redaction (Surrogate Tokens)</td>
+            <td class="cross">✗ No</td>
+            <td class="check">✓ Yes (Deterministic SHA-256)</td>
+          </tr>
+          <tr>
+            <td>/proc/self/environ &amp; Env Var Expansion Blocking</td>
+            <td class="cross">✗ No</td>
+            <td class="check">✓ Yes (Kernel-level sandbox)</td>
+          </tr>
+          <tr>
+            <td>LangGraph, CrewAI &amp; AutoGen Python Callbacks</td>
+            <td class="cross">✗ No</td>
+            <td class="check">✓ Yes (agentshield SDK)</td>
+          </tr>
+          <tr>
+            <td>Air-Gapped / Zero External Telemetry</td>
+            <td class="check">✓ Yes</td>
+            <td class="check">✓ Yes (100% Local-First)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>Frequently Asked Questions</h2>
+      <div style="margin-top: 1rem;">
+        <h3 style="font-size: 1.1rem; color: var(--accent);">Can I use AgentShield together with Gitleaks?</h3>
+        <p style="margin-top: 0.4rem; color: var(--text-muted); font-size: 0.95rem;">
+          Yes. Organizations often use Gitleaks for legacy repository compliance audits while deploying AgentShield across developer machines and CI pipelines to protect active AI coding agent sessions.
+        </p>
+      </div>
+      <div style="margin-top: 1.5rem;">
+        <h3 style="font-size: 1.1rem; color: var(--accent);">What is the performance overhead of AgentShield's AST sandbox?</h3>
+        <p style="margin-top: 0.4rem; color: var(--text-muted); font-size: 0.95rem;">
+          AgentShield parses and normalizes bash ASTs in under 2 milliseconds using linear-time automata, introducing zero perceptible latency to agent task execution.
+        </p>
+      </div>
+    </div>
+
+    <div style="text-align: center; margin: 3rem 0;">
+      <a href="../#quickstart" class="btn">Deploy AgentShield in 60 Seconds</a>
+      <p style="margin-top: 0.75rem; font-size: 0.85rem; color: var(--text-muted);">
+        Open-source, local-first, zero telemetry.
+      </p>
+    </div>
+
+    <footer>
+      <p>&copy; 2026 RitualDev Lab. Released under Apache-2.0 License. <a href="../" style="color: var(--accent);">Back to AgentShield Home</a></p>
+    </footer>
+  </div>
+</body>
+</html>

@@ -51,6 +51,26 @@ describe("AgentShield Detection & Redaction Engine", () => {
     assert.ok(!result.sanitizedText.includes("9AF7XK2MP4VL8WQ1"));
   });
 
+  test("detects and redacts AWS AIDA-format access key IDs and IAM identifiers (GHSA-g3f4-67hg-mv9h)", () => {
+    const aidaToken = ["AIDA", "1234567890ABCDEF"].join("");
+    const text = `aws_iam_user_key = "${aidaToken}"`;
+    const result = engine.scanAndRedact(text);
+
+    assert.strictEqual(result.hasSecrets, true);
+    assert.strictEqual(result.findings[0].patternId, "aws-access-key-id");
+    assert.ok(!result.sanitizedText.includes("1234567890ABCDEF"));
+    assert.ok(result.sanitizedText.includes("[AGENT_SHIELD:AWS_ACCESS_KEY_ID:"));
+
+    // Verify other standard AWS IAM prefixes
+    for (const prefix of ["ASIA", "AROA", "AGPA", "AIPA", "ABIA"]) {
+      const token = [prefix, "1234567890ABCDEF"].join("");
+      const scan = engine.scanAndRedact(`export AWS_KEY=${token}`);
+      assert.strictEqual(scan.hasSecrets, true, `Failed to detect AWS prefix ${prefix}`);
+      assert.strictEqual(scan.findings[0].patternId, "aws-access-key-id");
+      assert.ok(!scan.sanitizedText.includes("1234567890ABCDEF"));
+    }
+  });
+
   test("detects and redacts Stripe live keys", () => {
     const sampleToken = ["sk_live_", "MockStripeKey1234567890123456789012345"].join("");
     const text = `stripe.init('${sampleToken}');`;
