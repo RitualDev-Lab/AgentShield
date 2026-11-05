@@ -64,7 +64,7 @@ describe("Phase 3 (AgentShield): Distributed Cryptographic Key Broker", () => {
     const brokerPodA = new DistributedKeyBroker({ backend: "local_airgapped", clusterSecret });
     const brokerPodB = new DistributedKeyBroker({ backend: "local_airgapped", clusterSecret });
 
-    const key = "AKIAIOSFODNN7EXAMPLE";
+    const key = "mock_aws_key_id_deterministic_123";
     const surrogateA = await brokerPodA.getOrGenerateSurrogate(key, "aws");
     const surrogateB = await brokerPodB.getOrGenerateSurrogate(key, "aws");
 
