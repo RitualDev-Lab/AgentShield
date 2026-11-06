@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="assets/logo.png" alt="AgentShield Logo" width="130" />
+
 # 🛡️ AgentShield
 
 ### **Boundary-Safe Secret Defense & Shell Sandbox for Autonomous AI Coding Agents**
