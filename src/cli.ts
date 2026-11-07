@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync, statSync, readdirSync } from "node:fs";
 import { platform } from "node:os";
 import { join } from "node:path";
 import { loadConfig, parseCustomPatterns } from "./config.js";
@@ -687,7 +687,32 @@ Direct verification link:
       process.exit(1);
     }
 
-    const content = readFileSync(targetFile, "utf8");
+    let content = "";
+    if (statSync(targetFile).isDirectory()) {
+      const files: string[] = [];
+      const walk = (dir: string) => {
+        try {
+          for (const entry of readdirSync(dir, { withFileTypes: true })) {
+            if (entry.name === ".git" || entry.name === "node_modules" || entry.name === "dist") continue;
+            const full = join(dir, entry.name);
+            if (entry.isDirectory()) walk(full);
+            else if (entry.isFile()) files.push(full);
+          }
+        } catch {}
+      };
+      walk(targetFile);
+      content = files
+        .map((f) => {
+          try {
+            return `// FILE: ${f}\n` + readFileSync(f, "utf8");
+          } catch {
+            return "";
+          }
+        })
+        .join("\n\n");
+    } else {
+      content = readFileSync(targetFile, "utf8");
+    }
     const isJson = args.includes("--json");
     const includeRaw = args.includes("--include-raw");
 
@@ -962,7 +987,32 @@ Direct verification link:
       process.exit(1);
     }
 
-    const content = readFileSync(targetFile, "utf8");
+    let content = "";
+    if (statSync(targetFile).isDirectory()) {
+      const files: string[] = [];
+      const walk = (dir: string) => {
+        try {
+          for (const entry of readdirSync(dir, { withFileTypes: true })) {
+            if (entry.name === ".git" || entry.name === "node_modules" || entry.name === "dist") continue;
+            const full = join(dir, entry.name);
+            if (entry.isDirectory()) walk(full);
+            else if (entry.isFile()) files.push(full);
+          }
+        } catch {}
+      };
+      walk(targetFile);
+      content = files
+        .map((f) => {
+          try {
+            return `// FILE: ${f}\n` + readFileSync(f, "utf8");
+          } catch {
+            return "";
+          }
+        })
+        .join("\n\n");
+    } else {
+      content = readFileSync(targetFile, "utf8");
+    }
     const scan = engine.scanAndRedact(content);
 
     const { ComplianceEngine } = await import("./compliance.js");
