@@ -1,5 +1,5 @@
 # ─── Stage 1: Build & Compile ──────────────────────────────────────────
-FROM node:22-slim AS builder
+FROM node:22-slim@sha256:43ac6c60b8f89723f746e8a92ce91abd5017e627ce1ddfe4238355d3a30b772c AS builder
 
 WORKDIR /build
 
@@ -12,7 +12,7 @@ RUN pnpm run build
 RUN pnpm prune --prod
 
 # ─── Stage 2: Distroless Minimal Non-Root Runtime ──────────────────────
-FROM gcr.io/distroless/nodejs20-debian12:nonroot AS runtime
+FROM gcr.io/distroless/nodejs20-debian12:nonroot@sha256:a6dd456208a5482cc23ce75d5a9fa1eb0337c8651811e5f8f307bfeb15a51fb7 AS runtime
 
 LABEL maintainer="RitualDev Lab <team@ritualdev.com>"
 LABEL org.opencontainers.image.title="AgentShield"

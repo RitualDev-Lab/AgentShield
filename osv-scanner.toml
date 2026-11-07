@@ -1,0 +1,6 @@
+# OpenSSF OSV-Scanner Configuration for AgentShield
+# See: https://google.github.io/osv-scanner/configuration/
+
+[[IgnoredVulns]]
+id = "GHSA-g7r4-m6w7-qqqr"
+reason = "Dev dependency esbuild (bundled in tsup) is used exclusively during offline build/transpilation, not as a Windows development HTTP file server with servedir."
