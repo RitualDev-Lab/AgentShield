@@ -9,6 +9,8 @@ on:
   release:
     types: [created]
 
+permissions: read-all
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -18,21 +20,27 @@ jobs:
       hashes: ${{ steps.hash.outputs.hashes }}
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2 # v4.0.0
+        with:
+          version: 9
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
         with:
           node-version: 22
+          cache: "pnpm"
 
       - name: Install dependencies
-        run: npm ci || npm install
+        run: pnpm install --frozen-lockfile
 
       - name: Run Tests
-        run: npm test
+        run: pnpm test
 
       - name: Build AgentShield
-        run: npm run build
+        run: pnpm run build
 
       - name: Package Distribution Tarball
         run: |

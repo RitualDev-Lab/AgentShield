@@ -5,28 +5,30 @@ on:
     types: [opened, synchronize, reopened]
     branches: [main]
 
-permissions:
-  contents: read
-  pull-requests: write
-  issues: write
+permissions: read-all
 
 jobs:
   audit-pr:
     name: Zero-Leak PR Gate & Review Bot
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+      security-events: write
     steps:
       - name: Checkout PR Code
-        uses: actions/checkout@v7
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 0
 
       - name: Setup Node.js 22
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
         with:
           node-version: 22
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v3
+        uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2 # v4.0.0
         with:
           version: 9
 
@@ -52,7 +54,7 @@ jobs:
           sarif_file: ".agentshield.sarif"
 
       - name: Upload SARIF to GitHub Code Scanning
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@b56ba49b26e50535fa1e7f7db0f4f7b4bf65d80d # v3.28.10
         if: always() && hashFiles('.agentshield.sarif') != ''
         continue-on-error: true
         with:
