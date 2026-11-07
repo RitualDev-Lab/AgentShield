@@ -1,0 +1,23 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.ritualdev-lab/agentshield",
+  "title": "AgentShield Enterprise Zero-Leak Secret Defense & Kernel Sandbox",
+  "description": "Kernel-level OS sandbox (Bubblewrap, Landlock, Seatbelt, AppContainer) and secret firewall preventing autonomous AI coding agents from leaking credentials or altering host state",
+  "version": "0.2.1",
+  "status": "active",
+  "repository": {
+    "url": "https://github.com/RitualDev-Lab/AgentShield",
+    "source": "github"
+  },
+  "website": "https://ritualdev.in/agentshield",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "@ritualdev-lab/agentshield",
+      "version": "0.2.1",
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ]
+}

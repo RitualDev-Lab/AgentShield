@@ -1,0 +1,24 @@
+startCommand:
+  type: stdio
+  configSchema:
+    type: object
+    properties:
+      mode:
+        type: string
+        enum: ["STRICT", "PERMISSIVE", "AUDIT"]
+        default: "STRICT"
+        title: "Enforcement Mode"
+        description: "Sandbox enforcement level for command execution"
+      redactSecrets:
+        type: boolean
+        default: true
+        title: "Redact Secrets"
+        description: "Automatically mask API tokens, credentials, and high-entropy secrets"
+  commandFunction: |-
+    (config) => ({
+      command: 'npx',
+      args: ['-y', '@ritualdev-lab/agentshield', 'sidecar']
+    })
+  exampleConfig:
+    mode: "STRICT"
+    redactSecrets: true
