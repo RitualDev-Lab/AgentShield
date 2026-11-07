@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { existsSync, readFileSync, writeFileSync, statSync, readdirSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { platform } from "node:os";
 import { join } from "node:path";
 import { loadConfig, parseCustomPatterns } from "./config.js";
@@ -693,7 +693,8 @@ Direct verification link:
       const walk = (dir: string) => {
         try {
           for (const entry of readdirSync(dir, { withFileTypes: true })) {
-            if (entry.name === ".git" || entry.name === "node_modules" || entry.name === "dist") continue;
+            if (entry.name === ".git" || entry.name === "node_modules" || entry.name === "dist")
+              continue;
             const full = join(dir, entry.name);
             if (entry.isDirectory()) walk(full);
             else if (entry.isFile()) files.push(full);
@@ -704,7 +705,7 @@ Direct verification link:
       content = files
         .map((f) => {
           try {
-            return `// FILE: ${f}\n` + readFileSync(f, "utf8");
+            return `// FILE: ${f}\n${readFileSync(f, "utf8")}`;
           } catch {
             return "";
           }
@@ -993,7 +994,8 @@ Direct verification link:
       const walk = (dir: string) => {
         try {
           for (const entry of readdirSync(dir, { withFileTypes: true })) {
-            if (entry.name === ".git" || entry.name === "node_modules" || entry.name === "dist") continue;
+            if (entry.name === ".git" || entry.name === "node_modules" || entry.name === "dist")
+              continue;
             const full = join(dir, entry.name);
             if (entry.isDirectory()) walk(full);
             else if (entry.isFile()) files.push(full);
@@ -1004,7 +1006,7 @@ Direct verification link:
       content = files
         .map((f) => {
           try {
-            return `// FILE: ${f}\n` + readFileSync(f, "utf8");
+            return `// FILE: ${f}\n${readFileSync(f, "utf8")}`;
           } catch {
             return "";
           }
