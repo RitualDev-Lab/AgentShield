@@ -1,5 +1,5 @@
-import { describe, it } from "node:test";
 import assert from "node:assert/strict";
+import { describe, it } from "node:test";
 import { SurrogateManager } from "../src/surrogate.js";
 
 describe("Phase 1: AgentShield In-Memory Volatile Surrogate Redactor", () => {
