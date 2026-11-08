@@ -45,3 +45,5 @@ export * from "./ebpf-lsm.js";
 export * from "./distributed-key-broker.js";
 export * from "./siem-streamer.js";
 export * from "./daemon.js";
+export * from "./macos-esf.js";
+export * from "./windows-wfp.js";
