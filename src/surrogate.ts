@@ -29,7 +29,10 @@ const DETERMINISTIC_CREDENTIAL_PATTERNS: Array<{
   { name: "openai_api_key", regex: /\bsk-[a-zA-Z0-9]{48}\b/ },
   { name: "anthropic_api_key", regex: /\bsk-ant-[a-zA-Z0-9_\-]{80,}\b/ },
   { name: "bearer_token", regex: /\bBearer\s+([a-zA-Z0-9_\-\.]{24,})\b/i },
-  { name: "generic_api_key_flag", regex: /(?:--api[-_]?key|--token|--secret)[=\s]+(["']?)([a-zA-Z0-9_\-\.]{16,})\1/i },
+  {
+    name: "generic_api_key_flag",
+    regex: /(?:--api[-_]?key|--token|--secret)[=\s]+(["']?)([a-zA-Z0-9_\-\.]{16,})\1/i,
+  },
 ];
 
 /**
@@ -50,13 +53,10 @@ export class SurrogateManager {
   /**
    * Generates or retrieves an existing volatile decoy surrogate token for a given secret.
    */
-  public getOrCreateSurrogate(
-    original: string,
-    category = "generic_secret",
-    entropy = 0,
-  ): string {
-    if (this.reverseMap.has(original)) {
-      return this.reverseMap.get(original)!;
+  public getOrCreateSurrogate(original: string, category = "generic_secret", entropy = 0): string {
+    const existing = this.reverseMap.get(original);
+    if (existing) {
+      return existing;
     }
 
     const surrogate = `${this.prefix}_${randomUUID().replace(/-/g, "").toUpperCase()}`;
@@ -141,7 +141,8 @@ export class SurrogateManager {
         const target = captured || match;
         if (typeof target !== "string" || isLikelyFalsePositive(target)) return match;
         const surrogate = this.getOrCreateSurrogate(target, pattern.name, 5.0);
-        detectedMappings.push(this.forwardMap.get(surrogate)!);
+        const mapping = this.forwardMap.get(surrogate);
+        if (mapping) detectedMappings.push(mapping);
         return match.replace(target, surrogate);
       });
     }
@@ -151,7 +152,8 @@ export class SurrogateManager {
       sanitized = sanitized.replace(p.pattern, (match) => {
         if (isLikelyFalsePositive(match)) return match;
         const surrogate = this.getOrCreateSurrogate(match, p.name, 4.8);
-        detectedMappings.push(this.forwardMap.get(surrogate)!);
+        const mapping = this.forwardMap.get(surrogate);
+        if (mapping) detectedMappings.push(mapping);
         return surrogate;
       });
     }
@@ -170,7 +172,8 @@ export class SurrogateManager {
         if (isSecret && !this.reverseMap.has(candidate)) {
           const surrogate = this.getOrCreateSurrogate(candidate, "high_entropy_secret", entropy);
           sanitized = sanitized.replaceAll(candidate, surrogate);
-          detectedMappings.push(this.forwardMap.get(surrogate)!);
+          const mapping = this.forwardMap.get(surrogate);
+          if (mapping) detectedMappings.push(mapping);
         }
       }
       tokenMatch = tokenRegex.exec(content);

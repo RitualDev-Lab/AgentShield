@@ -31,7 +31,7 @@ describe("Phase 1: AgentShield In-Memory Volatile Surrogate Redactor", () => {
 
   it("replaces OpenAI and Anthropic API keys with surrogates", () => {
     const manager = new SurrogateManager();
-    const openaiKey = "sk-" + "a".repeat(48);
+    const openaiKey = `sk-${"a".repeat(48)}`;
     const cmd = `export OPENAI_API_KEY=${openaiKey}`;
     const res = manager.redactWithSurrogates(cmd);
 
