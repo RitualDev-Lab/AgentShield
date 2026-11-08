@@ -20,13 +20,13 @@ describe("Phase 1: AgentShield In-Memory Volatile Surrogate Redactor", () => {
 
   it("replaces GitHub personal access tokens with surrogate decoys", () => {
     const manager = new SurrogateManager();
-    const token = ["ghp_", "1234567890abcdefghijklmnopqrstuv"].join("");
+    const token = ["ghp_", "mockTokenForTestingOnly12345678ABCD"].join("");
     const cmd = `git clone https://${token}@github.com/org/repo.git`;
     const res = manager.redactWithSurrogates(cmd);
 
     assert.equal(res.surrogatesCount, 1);
     assert.match(res.sanitized, /RD_SURROGATE_[0-9A-F]{32}/);
-    assert.doesNotMatch(res.sanitized, /1234567890abcdef/);
+    assert.doesNotMatch(res.sanitized, /mockTokenForTestingOnly/);
     assert.equal(manager.restoreSurrogates(res.sanitized), cmd);
   });
 
