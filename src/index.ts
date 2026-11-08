@@ -11,6 +11,7 @@ export * from "./ci.js";
 export * from "./version.js";
 export * from "./sidecar.js";
 export * from "./egress-filter.js";
+export * from "./surrogate.js";
 export * from "./top-monitor.js";
 export * from "./mcp-wrapper.js";
 
