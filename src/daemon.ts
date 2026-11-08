@@ -324,12 +324,13 @@ export class AgentShieldDaemon {
       }
 
       this.sendResponse(socket, { id, ok: false, error: `Unknown daemon action: ${action}` });
-    } catch (err: any) {
-      this.sendResponse(socket, { ok: false, error: `Malformed IPC message: ${err.message}` });
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      this.sendResponse(socket, { ok: false, error: `Malformed IPC message: ${errMsg}` });
     }
   }
 
-  private sendResponse(socket: net.Socket, data: any): void {
+  private sendResponse(socket: net.Socket, data: Record<string, unknown>): void {
     if (socket.writable) {
       socket.write(`${JSON.stringify(data)}\n`);
     }
@@ -415,7 +416,7 @@ export class AgentShieldDaemonClient {
   private socketPath: string;
   private pendingRequests: Map<
     string,
-    { resolve: (val: any) => void; reject: (err: any) => void }
+    { resolve: (val: Record<string, unknown>) => void; reject: (err: unknown) => void }
   > = new Map();
   private incomingBuffer = "";
 
@@ -460,7 +461,7 @@ export class AgentShieldDaemonClient {
     this.pendingRequests.clear();
   }
 
-  public async ping(): Promise<any> {
+  public async ping(): Promise<Record<string, unknown>> {
     return this.sendRequest({ action: "PING" });
   }
 
@@ -479,7 +480,7 @@ export class AgentShieldDaemonClient {
       ownerId: options.ownerId,
       leaseTtlMs: options.leaseTtlMs,
     });
-    return res.ok ? res.lock : null;
+    return res.ok ? (res.lock as DaemonLockHandle) : null;
   }
 
   public async releaseLock(
@@ -499,7 +500,7 @@ export class AgentShieldDaemonClient {
   public async streamOtelMetric(
     metricName: string,
     value: number,
-    attributes: Record<string, any> = {},
+    attributes: Record<string, string | number | boolean> = {},
     type: "counter" | "histogram" | "gauge" | "audit_event" = "counter",
   ): Promise<string | null> {
     const res = await this.sendRequest({
@@ -509,14 +510,14 @@ export class AgentShieldDaemonClient {
       attributes,
       type,
     });
-    return res.ok ? res.metricId : null;
+    return res.ok ? (res.metricId as string) : null;
   }
 
-  public async getMetricsSummary(): Promise<any> {
+  public async getMetricsSummary(): Promise<Record<string, unknown>> {
     return this.sendRequest({ action: "GET_METRICS" });
   }
 
-  private sendRequest(payload: any): Promise<any> {
+  private sendRequest(payload: Record<string, unknown>): Promise<Record<string, unknown>> {
     if (!this.socket || !this.socket.writable) {
       return Promise.reject(new Error("AgentShieldDaemonClient is not connected"));
     }
@@ -526,7 +527,7 @@ export class AgentShieldDaemonClient {
 
     return new Promise((resolve, reject) => {
       this.pendingRequests.set(requestId, { resolve, reject });
-      this.socket!.write(`${JSON.stringify(msg)}\n`);
+      this.socket?.write(`${JSON.stringify(msg)}\n`);
     });
   }
 
@@ -543,9 +544,11 @@ export class AgentShieldDaemonClient {
           try {
             const parsed = JSON.parse(line);
             if (parsed.id && this.pendingRequests.has(parsed.id)) {
-              const { resolve } = this.pendingRequests.get(parsed.id)!;
-              this.pendingRequests.delete(parsed.id);
-              resolve(parsed);
+              const req = this.pendingRequests.get(parsed.id);
+              if (req) {
+                this.pendingRequests.delete(parsed.id);
+                req.resolve(parsed);
+              }
             }
           } catch {
             // ignore malformed response frames
