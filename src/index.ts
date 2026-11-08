@@ -44,3 +44,4 @@ export * from "./transparency-ledger.js";
 export * from "./ebpf-lsm.js";
 export * from "./distributed-key-broker.js";
 export * from "./siem-streamer.js";
+export * from "./daemon.js";
