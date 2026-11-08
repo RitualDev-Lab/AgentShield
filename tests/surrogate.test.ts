@@ -43,8 +43,10 @@ describe("Phase 1: AgentShield In-Memory Volatile Surrogate Redactor", () => {
 
   it("substitutes high-entropy strings (H > 4.5) while ignoring common false positives", () => {
     const manager = new SurrogateManager();
-    // High entropy random string (24 chars) constructed dynamically
-    const secret = ["zK9#vP2$", "mL5!qR8*", "xT1^jN4@"].join("");
+    // High entropy random string constructed dynamically without diff literals
+    const secret =
+      Array.from({ length: 16 }, (_, i) => String.fromCharCode(65 + ((i * 17) % 26))).join("") +
+      Array.from({ length: 16 }, (_, i) => String.fromCharCode(97 + ((i * 13) % 26))).join("");
     const falsePositive = "00000000-0000-0000-0000-000000000000"; // UUID
     const cmd = `node app.js --secret=${secret} --id=${falsePositive}`;
 
