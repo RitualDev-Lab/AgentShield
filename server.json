@@ -3,7 +3,7 @@
   "name": "io.github.ritualdev-lab/agentshield",
   "title": "AgentShield Enterprise Zero-Leak Secret Defense & Kernel Sandbox",
   "description": "Enterprise Zero-Leak Secret Defense & Kernel Sandbox for Autonomous AI Agents",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "status": "active",
   "repository": {
     "url": "https://github.com/RitualDev-Lab/AgentShield",
@@ -14,7 +14,7 @@
     {
       "registryType": "npm",
       "identifier": "@ritualdev-lab/agentshield",
-      "version": "0.2.1",
+      "version": "0.2.2",
       "transport": {
         "type": "stdio"
       }
