@@ -26,6 +26,7 @@ function printHelp() {
   printBanner();
   console.log(`
 Usage:
+  npx @ritualdev-lab/agentshield demo                   Run 10-second live attack & redaction demo
   npx @ritualdev-lab/agentshield scan <file-path>       Scan a file for leaked secrets
   npx @ritualdev-lab/agentshield redact <file-path>     Redact secrets and print sanitized text
   npx @ritualdev-lab/agentshield stream                 Redact secrets from piped stdin (for terminal hooks)
@@ -219,7 +220,7 @@ Audit file ready for compliance officer review.
     try {
       const checkout = await dodo.createCheckoutSession({
         tierId: selectedTierKey,
-        returnUrl: "https://ritual.dev/welcome-pro",
+        returnUrl: "https://ritualdev.in/pricing",
       });
 
       console.log(`
@@ -1369,6 +1370,10 @@ Direct verification link:
     process.stdin.on("end", () => {
       process.exit(0);
     });
+  } else if (command === "demo") {
+    const { runAgentShieldDemo } = await import("./demo.js");
+    runAgentShieldDemo();
+    process.exit(0);
   } else {
     console.error(`❌ Unknown command '${command}'. Run 'agentshield --help' for usage.`);
     process.exit(1);

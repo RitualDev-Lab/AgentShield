@@ -1,6 +1,6 @@
 {
   "name": "@ritualdev-lab/agentshield",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "mcpName": "io.github.RitualDev-Lab/agentshield",
   "description": "Enterprise-grade Zero-Leak Secret Defense & Sandbox for Autonomous AI Coding Agents",
   "type": "module",
