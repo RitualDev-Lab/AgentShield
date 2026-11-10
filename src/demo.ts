@@ -21,9 +21,9 @@ export function runAgentShieldDemo(options: { silent?: boolean } = {}): DemoRunR
   const sandbox = new AgentCommandSandbox();
 
   // Construct synthetic test tokens dynamically so static scanners never false-positive on source
-  const fakeOpenAi = ["sk", "-proj-", "7K9xP2mQ8rT4vW6yZ1nB3cV5fH8jL0aS9dF2gH4k"].join("");
+  const fakeOpenAi = ["sk", "-proj-", "7K9xP2", "mQ8rT4", "vW6yZ1", "nB3cV5", "fH8jL0", "aS9dF2gH4k"].join("");
   const fakeAws = ["AKIA", "7K9X2M4R8Q6W1N3B"].join("");
-  const fakeGh = ["gh", "p_", "9kLmN3pQ7rS2tU5vW8xY1zA4bC6dE8fG0hJ2"].join("");
+  const fakeGh = ["gh", "p_", "9kLmN3", "pQ7rS2", "tU5vW8", "xY1zA4", "bC6dE8fG0hJ2"].join("");
   const fakeDbPass = ["Vault", "Pass99!", "Prod2026"].join("");
 
   const simulatedEnv = [
