@@ -66,6 +66,8 @@ export function runAgentShieldDemo(options: { silent?: boolean } = {}): DemoRunR
     console.log("⚡ Protect Claude Code or Cursor in 1 command:");
     console.log("   npx @ritualdev-lab/agentshield init-claude");
     console.log("   npx @ritualdev-lab/agentshield init-cursor");
+    console.log("🏢 Need Team CI/CD Gates ($19/seat) or Cloud Relay ($29/mo)?");
+    console.log("   npx @ritualdev-lab/agentshield upgrade --tier team");
     console.log("★  Star on GitHub: https://github.com/RitualDev-Lab/AgentShield\n");
   }
 
