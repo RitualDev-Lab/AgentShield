@@ -47,3 +47,4 @@ export * from "./siem-streamer.js";
 export * from "./daemon.js";
 export * from "./macos-esf.js";
 export * from "./windows-wfp.js";
+export * from "./zygote-pool.js";
