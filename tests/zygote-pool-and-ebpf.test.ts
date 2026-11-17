@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { ZygoteProcessPool, LINUX_CLONE3_FLAGS } from "../src/zygote-pool.js";
-import { EbpfLsmController } from "../src/ebpf-lsm.js";
+import { LINUX_CLONE3_FLAGS, ZygoteProcessPool } from "../src/zygote-pool.js";
+import { EbpfLsmController, type EbpfLsmEvent } from "../src/ebpf-lsm.js";
 
 describe("Phase 2: AgentShield Runtime Kernel Hardening & Zygote Process Pool", () => {
   it("initializes Zygote pool with pre-warmed workers and valid clone3 container flags", () => {
@@ -93,7 +93,7 @@ describe("Phase 2: AgentShield Runtime Kernel Hardening & Zygote Process Pool", 
 
   it("intercepts sys_enter_openat for sensitive credential stores via eBPF probe", () => {
     const ebpf = new EbpfLsmController();
-    const events: any[] = [];
+    const events: EbpfLsmEvent[] = [];
     ebpf.onEvent((ev) => events.push(ev));
 
     // Blocked access to .env

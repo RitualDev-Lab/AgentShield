@@ -13,12 +13,12 @@ import { EbpfLsmController, type EbpfLsmStatus } from "./ebpf-lsm.js";
  * Linux clone3 flags for container isolation
  */
 export const LINUX_CLONE3_FLAGS = {
-  CLONE_NEWPID: 0x20000000,       // New PID namespace (isolated process table)
-  CLONE_NEWNET: 0x40000000,       // New network namespace (loopback-only / no egress)
-  CLONE_NEWNS: 0x00020000,        // New mount namespace (private tmpfs / unshared filesystem)
-  CLONE_NEWIPC: 0x08000000,       // New IPC namespace (isolated SysV & POSIX message queues)
-  CLONE_NEWUTS: 0x04000000,       // New UTS namespace (isolated hostname / domainname)
-  CLONE_NEWCGROUP: 0x02000000,    // New cgroup namespace (resource limits)
+  CLONE_NEWPID: 0x20000000, // New PID namespace (isolated process table)
+  CLONE_NEWNET: 0x40000000, // New network namespace (loopback-only / no egress)
+  CLONE_NEWNS: 0x00020000, // New mount namespace (private tmpfs / unshared filesystem)
+  CLONE_NEWIPC: 0x08000000, // New IPC namespace (isolated SysV & POSIX message queues)
+  CLONE_NEWUTS: 0x04000000, // New UTS namespace (isolated hostname / domainname)
+  CLONE_NEWCGROUP: 0x02000000, // New cgroup namespace (resource limits)
 };
 
 export type ZygoteWorkerState = "idle" | "busy" | "recycling" | "terminated";
@@ -118,9 +118,9 @@ export class ZygoteWorker {
       } else {
         output = { executed: true, taskId };
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       success = false;
-      error = err.message || "Zygote execution error";
+      error = (err as Error)?.message || "Zygote execution error";
     }
 
     const endNs = process.hrtime.bigint();
@@ -171,12 +171,13 @@ export class ZygoteProcessPool extends EventEmitter {
       enableEbpfLsm: config.enableEbpfLsm ?? true,
       cloneFlags:
         config.cloneFlags ??
-        (LINUX_CLONE3_FLAGS.CLONE_NEWPID |
+        LINUX_CLONE3_FLAGS.CLONE_NEWPID |
           LINUX_CLONE3_FLAGS.CLONE_NEWNET |
-          LINUX_CLONE3_FLAGS.CLONE_NEWNS),
+          LINUX_CLONE3_FLAGS.CLONE_NEWNS,
     };
 
-    this.ebpfController = ebpfController || (this.config.enableEbpfLsm ? new EbpfLsmController() : undefined);
+    this.ebpfController =
+      ebpfController || (this.config.enableEbpfLsm ? new EbpfLsmController() : undefined);
     this.initializePool();
   }
 
