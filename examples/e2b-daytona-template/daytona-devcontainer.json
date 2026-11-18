@@ -1,0 +1,41 @@
+{
+  "name": "AgentShield + DBShield Secure Cloud Sandbox (Daytona / DevContainer)",
+  "build": {
+    "dockerfile": "e2b.Dockerfile",
+    "context": "."
+  },
+  "remoteUser": "agent",
+  "containerEnv": {
+    "RITUAL_AIR_GAPPED": "1",
+    "AGENTSHIELD_AIR_GAPPED": "1",
+    "AGENTSHIELD_MODE": "strict",
+    "DBSHIELD_SAFETY_TIER": "STRICT"
+  },
+  "runArgs": [
+    "--cap-drop=ALL",
+    "--security-opt=no-new-privileges:true",
+    "--read-only",
+    "--tmpfs=/tmp:rw,noexec,nosuid,size=256m"
+  ],
+  "forwardPorts": [5433, 4310],
+  "portsAttributes": {
+    "5433": {
+      "label": "DBShield PostgreSQL Wire Proxy",
+      "onAutoForward": "silent"
+    },
+    "4310": {
+      "label": "SkillPrism MCP Context Compactor",
+      "onAutoForward": "silent"
+    }
+  },
+  "postCreateCommand": "agentshield doctor --json > /tmp/agentshield-doctor.json || true",
+  "customizations": {
+    "vscode": {
+      "extensions": ["ritualdev-lab.agentshield-defense"],
+      "settings": {
+        "agentshield.airGappedMode": true,
+        "agentshield.strictLeakBlocking": true
+      }
+    }
+  }
+}
