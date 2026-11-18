@@ -24,10 +24,10 @@ $ node print-config.js | npx @ritualdev-lab/agentshield stream
 ```
 
 <p align="center">
-  <img src="docs/terminal-demo.svg" alt="AgentShield Terminal Sandbox Demo" width="820" />
+  <img src="assets/demo.gif" alt="AgentShield Live Terminal Demo" width="820" />
 </p>
 
-> Want to record a fresh 15-second terminal GIF? Run [`vhs assets/demo.tape`](assets/demo.tape) with [Charm VHS](https://github.com/charmbracelet/vhs).
+> Recorded with [Charm VHS](https://github.com/charmbracelet/vhs) from [`assets/demo.tape`](assets/demo.tape).
 
 ---
 
