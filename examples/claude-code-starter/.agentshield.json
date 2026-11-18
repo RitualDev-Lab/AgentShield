@@ -1,0 +1,6 @@
+{
+  "mode": "strict",
+  "redactStyle": "token",
+  "blockSensitiveFiles": true,
+  "airGapped": true
+}

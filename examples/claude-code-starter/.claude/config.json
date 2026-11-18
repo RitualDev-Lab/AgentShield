@@ -1,0 +1,5 @@
+{
+  "hooks": {
+    "PreToolUse": "npx @ritualdev-lab/agentshield@>=0.2.2 exec \"$TOOL_COMMAND\""
+  }
+}

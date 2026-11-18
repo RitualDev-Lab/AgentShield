@@ -26,6 +26,7 @@ function printHelp() {
   printBanner();
   console.log(`
 Usage:
+  npx @ritualdev-lab/agentshield up [--config ritual.policy.yaml] [--dry-run] Boot unified 3-layer stack (AgentShield + DBShield + SkillPrism)
   npx @ritualdev-lab/agentshield demo                   Run 10-second live attack & redaction demo
   npx @ritualdev-lab/agentshield doctor [--json]        Diagnose OS sandbox (Landlock/bwrap/Seatbelt/DPAPI) & Ed25519 keys
   npx @ritualdev-lab/agentshield scan <file-path>       Scan a file for leaked secrets
@@ -111,6 +112,136 @@ async function main() {
   ) {
     printHelp();
     process.exit(0);
+  }
+
+  if (command === "up") {
+    const {
+      generateDefaultRitualPolicyYaml,
+      loadRitualPolicyFile,
+      resolveOrchestrationPlan,
+    } = await import("./policy-manifest.js");
+
+    const cfgIdx = args.indexOf("--config");
+    const configPath =
+      cfgIdx !== -1 && args[cfgIdx + 1] ? args[cfgIdx + 1] : "ritual.policy.yaml";
+    const isDryRun = args.includes("--dry-run");
+    const isJson = args.includes("--json");
+    const isInit = args.includes("--init");
+
+    if (isInit) {
+      writeFileSync(configPath, generateDefaultRitualPolicyYaml(), "utf8");
+      if (isJson) {
+        console.log(JSON.stringify({ created: configPath, status: "initialized" }, null, 2));
+      } else {
+        console.log(`✅ Created unified policy manifest: ${configPath}`);
+        console.log(`   Validate with: npx @ritualdev-lab/agentshield up --config ${configPath} --dry-run`);
+      }
+      process.exit(0);
+    }
+
+    try {
+      const { resolvedPath, validation } = loadRitualPolicyFile(configPath);
+      if (!validation.valid) {
+        if (isJson) {
+          console.error(
+            JSON.stringify(
+              { valid: false, configPath: resolvedPath, errors: validation.errors },
+              null,
+              2,
+            ),
+          );
+        } else {
+          console.error(`❌ Invalid ritual.policy.yaml (${resolvedPath}):`);
+          for (const err of validation.errors) {
+            console.error(`   • ${err}`);
+          }
+        }
+        process.exit(1);
+      }
+
+      const plan = resolveOrchestrationPlan(validation.manifest, resolvedPath);
+
+      if (isDryRun) {
+        if (isJson) {
+          console.log(
+            JSON.stringify(
+              {
+                valid: true,
+                dryRun: true,
+                warnings: validation.warnings,
+                plan,
+              },
+              null,
+              2,
+            ),
+          );
+        } else {
+          printBanner();
+          console.log(`📋 Unified Policy Validated: ${plan.policyName} (v${plan.version})`);
+          console.log(`   Config:     ${plan.configPath}`);
+          console.log(`   Air-Gapped: ${plan.airGapped ? "ENABLED (strict offline)" : "disabled"}`);
+          console.log(`   Layers:     ${plan.layersEnabled.join(", ") || "none"}`);
+          for (const step of plan.steps) {
+            console.log(`   ▶ [${step.layer}] ${step.summary}`);
+            console.log(`     cmd: ${step.command} ${step.args.join(" ")}`);
+          }
+          for (const w of validation.warnings) {
+            console.log(`   ⚠️ ${w}`);
+          }
+          console.log("\n✅ Dry-run complete. Omit --dry-run to start enabled defense layers.");
+        }
+        process.exit(0);
+      }
+
+      // Live orchestration: verify local sandbox health first, then launch background proxies
+      const { runSandboxDoctor } = await import("./doctor.js");
+      const { spawn } = await import("node:child_process");
+      const children: Array<ReturnType<typeof spawn>> = [];
+
+      if (validation.manifest.agentshield.enabled) {
+        const doc = runSandboxDoctor();
+        console.log(
+          `🛡️ [agentshield] OS sandbox ready (${doc.platform} / ${doc.overallStatus}) — mode=${validation.manifest.agentshield.mode}`,
+        );
+      }
+
+      const npxBin = process.platform === "win32" ? "npx.cmd" : "npx";
+      for (const step of plan.steps) {
+        if (step.layer === "agentshield") continue;
+        console.log(`🚀 [${step.layer}] Launching ${step.summary}...`);
+        const child = spawn(npxBin, step.args, {
+          stdio: "inherit",
+          env: { ...process.env, ...step.env },
+        });
+        children.push(child);
+      }
+
+      const shutdown = () => {
+        for (const c of children) {
+          try {
+            c.kill("SIGTERM");
+          } catch {
+            // ignore
+          }
+        }
+        process.exit(0);
+      };
+      process.on("SIGINT", shutdown);
+      process.on("SIGTERM", shutdown);
+
+      if (children.length === 0) {
+        process.exit(0);
+      }
+      return;
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      if (isJson) {
+        console.error(JSON.stringify({ valid: false, error: msg }, null, 2));
+      } else {
+        console.error(`❌ agentshield up failed: ${msg}`);
+      }
+      process.exit(1);
+    }
   }
 
   if (command === "doctor") {
