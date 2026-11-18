@@ -5,11 +5,23 @@ import * as os from "node:os";
 import * as path from "node:path";
 import { AGENTSHIELD_VERSION } from "./version.js";
 
+export interface PeerCredentials {
+  uid?: number;
+  gid?: number;
+  pid?: number;
+}
+
 export interface DaemonConfig {
   socketPath?: string;
   authSecret?: string;
   tokenFilePath?: string;
   maxRingBufferEntries?: number;
+  /** Restrict IPC connections to these POSIX UIDs (defaults to [process.getuid()] on POSIX) */
+  allowedUids?: number[];
+  /** Optional custom peer credential resolver (SO_PEERCRED / LOCAL_PEERCRED hook for OS & testing) */
+  peerCredentialResolver?: (socket: net.Socket) => PeerCredentials | null;
+  /** Enforce strict peer credential verification on every IPC connection (default: true when resolver or POSIX UID policy active) */
+  requirePeerCredentials?: boolean;
 }
 
 export interface OtelMetricRecord {
@@ -78,12 +90,24 @@ export class AgentShieldDaemon {
   private activeLocks: Map<string, DaemonLockHandle> = new Map();
   private otelRingBuffer: OtelMetricRecord[] = [];
   private maxRingBufferEntries: number;
-  private clientSessions: Map<net.Socket, { authenticated: boolean; id: string }> = new Map();
+  private allowedUids: number[];
+  private peerCredentialResolver?: (socket: net.Socket) => PeerCredentials | null;
+  private requirePeerCredentials: boolean;
+  private activePolicyOverrides: Record<string, unknown> = {};
+  private clientSessions: Map<
+    net.Socket,
+    { authenticated: boolean; id: string; peer?: PeerCredentials | null }
+  > = new Map();
 
   constructor(config: DaemonConfig = {}) {
     this.socketPath = config.socketPath || getDefaultSocketPath();
     this.authSecret = config.authSecret || crypto.randomBytes(32).toString("hex");
     this.maxRingBufferEntries = config.maxRingBufferEntries || 2000;
+    const currentUid = typeof process.getuid === "function" ? process.getuid() : undefined;
+    this.allowedUids = config.allowedUids ?? (currentUid !== undefined ? [currentUid] : []);
+    this.peerCredentialResolver = config.peerCredentialResolver;
+    this.requirePeerCredentials =
+      config.requirePeerCredentials ?? Boolean(config.peerCredentialResolver);
 
     const defaultTokenDir = path.join(os.homedir(), ".agentshield");
     this.tokenFilePath = config.tokenFilePath || path.join(defaultTokenDir, "daemon.token");
@@ -162,7 +186,11 @@ export class AgentShieldDaemon {
     this.clientSessions.clear();
 
     await new Promise<void>((resolve) => {
-      this.server?.close(() => resolve());
+      const timer = setTimeout(() => resolve(), 250);
+      this.server?.close(() => {
+        clearTimeout(timer);
+        resolve();
+      });
     });
     this.server = null;
 
@@ -192,9 +220,61 @@ export class AgentShieldDaemon {
     return [...this.otelRingBuffer];
   }
 
+  private verifyPeerCredentials(socket: net.Socket): {
+    allowed: boolean;
+    peer: PeerCredentials | null;
+    reason?: string;
+  } {
+    if (!this.peerCredentialResolver) {
+      return {
+        allowed: !this.requirePeerCredentials,
+        peer: null,
+        reason: this.requirePeerCredentials ? "Missing peer credential resolver" : undefined,
+      };
+    }
+    const peer = this.peerCredentialResolver(socket);
+    if (!peer) {
+      return {
+        allowed: false,
+        peer: null,
+        reason: "EACCES: Unable to verify IPC peer credentials (SO_PEERCRED)",
+      };
+    }
+    if (
+      this.allowedUids.length > 0 &&
+      (peer.uid === undefined || !this.allowedUids.includes(peer.uid))
+    ) {
+      return {
+        allowed: false,
+        peer,
+        reason: `EACCES: Unauthorized IPC peer UID ${peer.uid ?? "unknown"} rejected (allowed: ${this.allowedUids.join(",")})`,
+      };
+    }
+    return { allowed: true, peer };
+  }
+
+  private timingSafeTokenMatch(supplied: string): boolean {
+    const a = Buffer.from(supplied, "utf8");
+    const b = Buffer.from(this.authSecret, "utf8");
+    if (a.length !== b.length) return false;
+    return crypto.timingSafeEqual(a, b);
+  }
+
   private handleConnection(socket: net.Socket): void {
+    const peerCheck = this.verifyPeerCredentials(socket);
+    if (!peerCheck.allowed) {
+      socket.on("error", () => {});
+      this.sendResponse(socket, {
+        ok: false,
+        code: "EACCES",
+        error: peerCheck.reason || "EACCES: Peer credential verification failed",
+      });
+      socket.end(() => socket.destroy());
+      return;
+    }
+
     const sessionId = crypto.randomUUID().slice(0, 8);
-    this.clientSessions.set(socket, { authenticated: false, id: sessionId });
+    this.clientSessions.set(socket, { authenticated: false, id: sessionId, peer: peerCheck.peer });
 
     let buffer = "";
 
@@ -243,13 +323,24 @@ export class AgentShieldDaemon {
         return;
       }
 
-      // 2. AUTH handshake
+      // 2. AUTH handshake (timing-safe token verification)
       if (action === "AUTH") {
-        if (msg.token && msg.token === this.authSecret) {
+        if (typeof msg.token === "string" && this.timingSafeTokenMatch(msg.token)) {
           session.authenticated = true;
-          this.sendResponse(socket, { id, ok: true, message: "Authenticated successfully" });
+          this.sendResponse(socket, {
+            id,
+            ok: true,
+            message: "Authenticated successfully",
+            peerUid: session.peer?.uid,
+            peerPid: session.peer?.pid,
+          });
         } else {
-          this.sendResponse(socket, { id, ok: false, error: "Invalid authentication token" });
+          this.sendResponse(socket, {
+            id,
+            ok: false,
+            code: "EACCES",
+            error: "EACCES: Invalid authentication token",
+          });
         }
         return;
       }
@@ -259,8 +350,20 @@ export class AgentShieldDaemon {
         this.sendResponse(socket, {
           id,
           ok: false,
+          code: "EACCES",
           error: "Unauthorized: AUTH handshake required before command execution",
         });
+        return;
+      }
+
+      // 2b. POLICY_SET (requires authenticated, peer-verified session)
+      if (action === "POLICY_SET") {
+        if (msg.policy && typeof msg.policy === "object") {
+          this.activePolicyOverrides = { ...this.activePolicyOverrides, ...msg.policy };
+          this.sendResponse(socket, { id, ok: true, policy: this.activePolicyOverrides });
+        } else {
+          this.sendResponse(socket, { id, ok: false, error: "Missing policy object" });
+        }
         return;
       }
 
