@@ -27,6 +27,10 @@ inputs:
     description: "Path to export OASIS SARIF 2.1.0 report (for GitHub Code Scanning upload-sarif)"
     required: false
     default: ".agentshield.sarif"
+  strict:
+    description: "Enforce immutable security root policy (--strict) preventing untrusted PR ignore rules from neutering secret scans (default: true)"
+    required: false
+    default: "true"
 
 runs:
   using: "composite"
@@ -40,9 +44,13 @@ runs:
         INPUT_POST_PR_COMMENT: ${{ inputs.post_pr_comment }}
         INPUT_ANNOTATE_DIFF: ${{ inputs.annotate_diff }}
         INPUT_SARIF_FILE: ${{ inputs.sarif_file }}
+        INPUT_STRICT: ${{ inputs.strict }}
         ACTION_PATH: ${{ github.action_path }}
       run: |
         EXTRA_FLAGS=""
+        if [ "$INPUT_STRICT" = "true" ]; then
+          EXTRA_FLAGS="$EXTRA_FLAGS --strict"
+        fi
         if [ "$INPUT_ANNOTATE_DIFF" = "true" ]; then
           EXTRA_FLAGS="$EXTRA_FLAGS --annotate"
         fi

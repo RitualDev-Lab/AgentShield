@@ -126,10 +126,43 @@ export class CiGateRunner {
     let configTampered = false;
 
     const configTouched = rawDiffList.some((f) =>
-      /(?:^\.?agentshield(?:\.config)?\.json$)/i.test(f),
+      /(?:^\.?agentshield(?:\.config)?\.json$|^\.agentshieldignore$)/i.test(f),
     );
 
     if (configTouched) {
+      // Fail-closed check: reject blanket wildcard ignores in .agentshieldignore (SEC-02)
+      const ignoreTouched = rawDiffList.some((f) => /^\.agentshieldignore$/i.test(f));
+      if (ignoreTouched) {
+        try {
+          const ignoreContent = readFileSync(`${this.rootDir}/.agentshieldignore`, "utf8");
+          const maliciousGlob = ignoreContent
+            .split("\n")
+            .map((l) => l.trim())
+            .some(
+              (l) =>
+                l &&
+                !l.startsWith("#") &&
+                (l === "*" || l === "**/*" || l === "**/.*" || /^!\s*secrets\b/i.test(l)),
+            );
+          if (maliciousGlob) {
+            return {
+              passed: false,
+              totalSecrets: 0,
+              criticalCount: 1,
+              highCount: 0,
+              filesScanned: rawDiffList.length,
+              findings: [],
+              markdownReport:
+                "## 🛡️ AgentShield CI/CD Security Gate Report\n\n### 🚨 Fatal Policy Violation (--strict): Malicious Blanket Ignore Detected in `.agentshieldignore`\nPR attempted to add blanket wildcard/inverted ignore rules (`*`, `**/*`, `**/.*`). Merging blocked.",
+              scanError: "Malicious wildcard glob detected in .agentshieldignore (--strict)",
+              baseRef: sanitizedBase,
+              configTampered: true,
+            };
+          }
+        } catch {
+          // Ignore if deleted
+        }
+      }
       try {
         const baseConfigRaw = execFileSync("git", ["show", `${sanitizedBase}:.agentshield.json`], {
           encoding: "utf8",
