@@ -4,7 +4,7 @@ import { defineConfig } from "tsup";
 const pkg = JSON.parse(readFileSync("./package.json", "utf-8"));
 
 export default defineConfig({
-  entry: ["src/index.ts", "src/cli.ts"],
+  entry: ["src/index.ts", "src/cli.ts", "src/core-redactor.ts"],
   format: ["esm"],
   dts: false,
   clean: true,
