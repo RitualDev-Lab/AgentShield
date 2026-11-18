@@ -1,0 +1,27 @@
+# RitualDev-Lab Unified 3-Layer AI Agent Defense Policy
+# Boot with: npx @ritualdev-lab/agentshield up --config examples/ritual.policy.yaml --dry-run
+version: "1.0"
+name: "ritual-defense-stack"
+airGapped: true
+
+agentshield:
+  enabled: true
+  mode: strict
+  sandboxProfile: strict
+  redactPii: true
+  ledgerPath: ".agentshield/audit-ledger.jsonl"
+
+dbshield:
+  enabled: true
+  listenPort: 5433
+  targetUrl: "postgres://127.0.0.1:5432/postgres"
+  safetyTier: STRICT
+  requireChatOpsApproval: true
+  maxEstimatedCost: 50000
+
+skillprism:
+  enabled: true
+  listenPort: 4310
+  maxActiveSkills: 8
+  promptGuard: true
+  redisSentinelFallback: true
