@@ -10,6 +10,10 @@
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js",
+    "./core-redactor": "./dist/core-redactor.js"
+  },
   "icon": "assets/logo.png",
   "files": ["dist", "README.md", "LICENSE", "SKILL.md", "action.yml", "assets/logo.png"],
   "repository": {

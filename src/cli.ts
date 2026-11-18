@@ -27,10 +27,14 @@ function printHelp() {
   console.log(`
 Usage:
   npx @ritualdev-lab/agentshield demo                   Run 10-second live attack & redaction demo
+  npx @ritualdev-lab/agentshield doctor [--json]        Diagnose OS sandbox (Landlock/bwrap/Seatbelt/DPAPI) & Ed25519 keys
   npx @ritualdev-lab/agentshield scan <file-path>       Scan a file for leaked secrets
   npx @ritualdev-lab/agentshield redact <file-path>     Redact secrets and print sanitized text
   npx @ritualdev-lab/agentshield stream                 Redact secrets from piped stdin (for terminal hooks)
   npx @ritualdev-lab/agentshield exec <command>         Safely sandbox & intercept agent bash command
+  npx @ritualdev-lab/agentshield db-proxy [args...]     Launch DBShield SQL firewall proxy (@ritualdev-lab/dbshield)
+  npx @ritualdev-lab/agentshield compact [args...]      Launch SkillPrism context & token compactor (@ritualdev-lab/skillprism)
+  npx @ritualdev-lab/agentshield ledger verify [path]   Verify Ed25519 hardware-sealed & hash-chained audit ledger
   npx @ritualdev-lab/agentshield hook install           Install automatic git pre-commit leak shield (.git/hooks)
   npx @ritualdev-lab/agentshield hook uninstall         Uninstall automatic git pre-commit leak shield
   npx @ritualdev-lab/agentshield hook husky             Configure AgentShield for Husky (.husky/pre-commit)
@@ -107,6 +111,55 @@ async function main() {
   ) {
     printHelp();
     process.exit(0);
+  }
+
+  if (command === "doctor") {
+    const { formatDoctorReport, runSandboxDoctor } = await import("./doctor.js");
+    const report = runSandboxDoctor();
+    if (args.includes("--json")) {
+      console.log(JSON.stringify(report, null, 2));
+    } else {
+      printBanner();
+      console.log(formatDoctorReport(report));
+    }
+    process.exit(report.overallStatus === "ACTION_REQUIRED" ? 1 : 0);
+  }
+
+  if (command === "db-proxy" || command === "compact") {
+    const targetPkg =
+      command === "db-proxy" ? "@ritualdev-lab/dbshield" : "@ritualdev-lab/skillprism";
+    const passthroughArgs = args.slice(1);
+    const delegatedArgs =
+      command === "db-proxy" && passthroughArgs.length === 0 ? ["proxy"] : passthroughArgs;
+
+    if (args.includes("--dry-run")) {
+      console.log(
+        JSON.stringify(
+          {
+            routedCommand: command,
+            targetPackage: targetPkg,
+            execArgs: ["npx", "-y", targetPkg, ...delegatedArgs],
+          },
+          null,
+          2,
+        ),
+      );
+      process.exit(0);
+    }
+
+    const { spawnSync } = await import("node:child_process");
+    const npxBin = process.platform === "win32" ? "npx.cmd" : "npx";
+    const child = spawnSync(npxBin, ["-y", targetPkg, ...delegatedArgs], {
+      stdio: "inherit",
+      env: process.env,
+    });
+    if (child.error) {
+      console.error(
+        `❌ Failed to launch ${targetPkg}: ${child.error.message}\n   Install directly: npm i -g ${targetPkg}`,
+      );
+      process.exit(1);
+    }
+    process.exit(child.status ?? 0);
   }
 
   if (command === "report") {
@@ -1139,23 +1192,51 @@ Direct verification link:
       process.exit(0);
     });
   } else if (command === "ledger") {
-    if (!isLabs) {
-      console.error(
-        "❌ Error: 'ledger' is an experimental tamper-evident audit ledger. Pass --labs or --experimental to enable.",
-      );
-      process.exit(1);
-    }
-    const subCmd = args.filter((a) => !a.startsWith("--"))[1];
+    const positional = args.filter((a, idx) => {
+      if (a.startsWith("--")) return false;
+      const prev = args[idx - 1];
+      if (prev === "--pub-key" || prev === "--key") return false;
+      return true;
+    });
+    const subCmd = positional[1];
+    const customLedgerPath = positional[2];
+    const pubKeyIdx = args.indexOf("--pub-key");
+    const pubKeyPath = pubKeyIdx !== -1 ? args[pubKeyIdx + 1] : undefined;
+    const isJson = args.includes("--json");
+
     const { TamperEvidentLedger } = await import("./ledger.js");
-    const ledger = new TamperEvidentLedger();
+    const ledger = new TamperEvidentLedger(customLedgerPath);
 
     if (subCmd === "verify") {
-      const result = ledger.verifyChain();
+      let result: import("./ledger.js").LedgerVerificationResult;
+      if (pubKeyPath) {
+        if (!existsSync(pubKeyPath)) {
+          console.error(`❌ Error: Public key file '${pubKeyPath}' does not exist.`);
+          process.exit(1);
+        }
+        const pubKeyPem = readFileSync(pubKeyPath, "utf8");
+        result = TamperEvidentLedger.verifyWithPublicKey(ledger.getEntries(), pubKeyPem);
+      } else {
+        result = ledger.verifyChain();
+      }
+
+      if (isJson) {
+        console.log(JSON.stringify(result, null, 2));
+        process.exit(result.isValid ? 0 : 1);
+      }
+
       printBanner();
       if (result.isValid) {
+        const asymmetricInfo =
+          result.verifiedAsymmetricEntries && result.verifiedAsymmetricEntries > 0
+            ? ` (${result.verifiedAsymmetricEntries} Ed25519 hardware-sealed signature(s) verified)`
+            : "";
         console.log(
-          `✅ [LEDGER INTEGRITY VERIFIED] ${result.totalEntries} block(s) checked. Cryptographic HMAC chain is 100% intact.`,
+          `✅ [LEDGER INTEGRITY VERIFIED] ${result.totalEntries} block(s) checked${asymmetricInfo}. Cryptographic audit chain is 100% intact.`,
         );
+        if (result.publicKeyFingerprint) {
+          console.log(`   Signer Fingerprint: ${result.publicKeyFingerprint}`);
+        }
         process.exit(0);
       } else {
         console.error(
@@ -1166,7 +1247,7 @@ Direct verification link:
       }
     } else {
       console.error(
-        "❌ Unknown ledger action. Use 'npx @ritualdev-lab/agentshield ledger verify'.",
+        "❌ Unknown ledger action. Use 'npx @ritualdev-lab/agentshield ledger verify [path] [--pub-key <pem>]'.",
       );
       process.exit(1);
     }
