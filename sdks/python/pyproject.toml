@@ -19,6 +19,16 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Topic :: Security",
 ]
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=9.2.0"
+]
+langchain = [
+    "langchain-core>=1.8.3",
+    "langgraph>=1.2.23"
+]
 
 [project.urls]
 Homepage = "https://agentshield.ritualdev.in/"
