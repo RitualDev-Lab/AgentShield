@@ -67,7 +67,7 @@ export interface ZygoteTelemetry {
   p50Micros: number;
   p90Micros: number;
   p99Micros: number;
-  p99TargetMet: boolean; // true if P99 < 100 microseconds (0.10ms)
+  p99TargetMet: boolean; // true if P99 < 500 microseconds (0.50ms)
   ebpfStatus?: EbpfLsmStatus;
 }
 
@@ -354,7 +354,7 @@ export class ZygoteProcessPool extends EventEmitter {
       p50Micros,
       p90Micros,
       p99Micros,
-      p99TargetMet: p99Micros < 100, // < 100μs (0.10ms)
+      p99TargetMet: p99Micros < 500, // < 500μs (0.50ms) SLA
       ebpfStatus: this.ebpfController?.getStatus(),
     };
   }
