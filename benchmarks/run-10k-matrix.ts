@@ -144,51 +144,27 @@ export async function runBenchmarkMatrix(
   const results: BenchmarkMetric[] = [];
   try {
     results.push(
-      await measureScenario(
-        "core_redactor_mixed",
-        iterations,
-        warmup,
-        maxP99Ms,
-        (i) => {
-          redactText(i % 2 === 0 ? cleanPayload : secretPayload);
-        },
-      ),
+      await measureScenario("core_redactor_mixed", iterations, warmup, maxP99Ms, (i) => {
+        redactText(i % 2 === 0 ? cleanPayload : secretPayload);
+      }),
     );
 
     results.push(
-      await measureScenario(
-        "engine_scan_and_redact",
-        iterations,
-        warmup,
-        maxP99Ms,
-        (i) => {
-          engine.scanAndRedact(i % 2 === 0 ? cleanPayload : secretPayload);
-        },
-      ),
+      await measureScenario("engine_scan_and_redact", iterations, warmup, maxP99Ms, (i) => {
+        engine.scanAndRedact(i % 2 === 0 ? cleanPayload : secretPayload);
+      }),
     );
 
     results.push(
-      await measureScenario(
-        "sandbox_command_inspect",
-        iterations,
-        warmup,
-        maxP99Ms,
-        (i) => {
-          sandbox.inspectCommand(i % 2 === 0 ? "git status --short" : "cat .env && printenv");
-        },
-      ),
+      await measureScenario("sandbox_command_inspect", iterations, warmup, maxP99Ms, (i) => {
+        sandbox.inspectCommand(i % 2 === 0 ? "git status --short" : "cat .env && printenv");
+      }),
     );
 
     results.push(
-      await measureScenario(
-        "zygote_pool_dispatch",
-        iterations,
-        warmup,
-        maxP99Ms,
-        async () => {
-          await zygotePool.dispatch({ action: "inspect", command: "ls -la" });
-        },
-      ),
+      await measureScenario("zygote_pool_dispatch", iterations, warmup, maxP99Ms, async () => {
+        await zygotePool.dispatch({ action: "inspect", command: "ls -la" });
+      }),
     );
   } finally {
     zygotePool.shutdown();
@@ -226,7 +202,8 @@ export async function runBenchmarkMatrix(
 }
 
 const isMain =
-  process.argv[1] !== undefined && resolve(process.argv[1]) === resolve(fileURLToPath(import.meta.url));
+  process.argv[1] !== undefined &&
+  resolve(process.argv[1]) === resolve(fileURLToPath(import.meta.url));
 
 if (isMain) {
   const args = process.argv.slice(2);

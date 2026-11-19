@@ -52,3 +52,4 @@ export * from "./macos-esf.js";
 export * from "./windows-wfp.js";
 export * from "./zygote-pool.js";
 export * from "./policy-manifest.js";
+export * from "./mcp-server.js";

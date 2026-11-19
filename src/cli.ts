@@ -114,16 +114,18 @@ async function main() {
     process.exit(0);
   }
 
+  if (command === "mcp") {
+    const { runAgentShieldMcpStdio } = await import("./mcp-server.js");
+    await runAgentShieldMcpStdio();
+    return;
+  }
+
   if (command === "up") {
-    const {
-      generateDefaultRitualPolicyYaml,
-      loadRitualPolicyFile,
-      resolveOrchestrationPlan,
-    } = await import("./policy-manifest.js");
+    const { generateDefaultRitualPolicyYaml, loadRitualPolicyFile, resolveOrchestrationPlan } =
+      await import("./policy-manifest.js");
 
     const cfgIdx = args.indexOf("--config");
-    const configPath =
-      cfgIdx !== -1 && args[cfgIdx + 1] ? args[cfgIdx + 1] : "ritual.policy.yaml";
+    const configPath = cfgIdx !== -1 && args[cfgIdx + 1] ? args[cfgIdx + 1] : "ritual.policy.yaml";
     const isDryRun = args.includes("--dry-run");
     const isJson = args.includes("--json");
     const isInit = args.includes("--init");
@@ -134,7 +136,9 @@ async function main() {
         console.log(JSON.stringify({ created: configPath, status: "initialized" }, null, 2));
       } else {
         console.log(`✅ Created unified policy manifest: ${configPath}`);
-        console.log(`   Validate with: npx @ritualdev-lab/agentshield up --config ${configPath} --dry-run`);
+        console.log(
+          `   Validate with: npx @ritualdev-lab/agentshield up --config ${configPath} --dry-run`,
+        );
       }
       process.exit(0);
     }
