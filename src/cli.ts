@@ -114,6 +114,12 @@ async function main() {
     process.exit(0);
   }
 
+  if (command === "mcp") {
+    const { runAgentShieldMcpStdio } = await import("./mcp-server.js");
+    await runAgentShieldMcpStdio();
+    return;
+  }
+
   if (command === "up") {
     const {
       generateDefaultRitualPolicyYaml,

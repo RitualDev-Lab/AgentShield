@@ -11,10 +11,12 @@ use_cases:
   - AI Security Proxy & Redactor
   - CI/CD Security Compliance
 getting_started:
-  - "Wrap an upstream MCP server with security guardrails: wrap <command>"
-  - "Verify local cryptographic audit ledger: agentshield ledger verify"
+  - "Scan text for secrets and credentials: agentshield_scan text: 'AKIAIOSFODNN7EXAMPLE'"
+  - "Verify local cryptographic audit ledger: agentshield_verify_ledger"
+  - "Inspect host OS sandbox readiness: agentshield_doctor"
   - "Tool: agentshield_scan: Scans prompt text or tool outputs for 60+ credential patterns and high-entropy secrets"
-  - "Tool: agentshield_wrap: Sandboxes upstream tool invocations with strict read-only filesystem barriers"
+  - "Tool: agentshield_verify_ledger: Verifies HMAC-SHA256 and Ed25519 tamper-evident audit ledger"
+  - "Tool: agentshield_doctor: Inspects active OS kernel sandbox mechanisms (Landlock, Seatbelt, AppContainer)"
 tags:
   - security
   - ai-agents
@@ -32,19 +34,11 @@ npm: "@ritualdev-lab/agentshield"
 pypi: agentshield-defense
 transport: stdio
 command: npx
-args: ["-y", "@ritualdev-lab/agentshield"]
+args: ["-y", "@ritualdev-lab/agentshield", "mcp"]
 pricing:
   type: freemium
   license: Apache-2.0
-environment_variables:
-  - name: AGENTSHIELD_AIR_GAPPED
-    required: false
-    docs_url: https://ritualdev.in/agentshield
-    description: Set to '1' to enforce strict local offline operation with zero telemetry.
-  - name: AGENTSHIELD_AUDIT_LOG
-    required: false
-    docs_url: https://ritualdev.in/agentshield
-    description: Custom file path for the tamper-evident HMAC-SHA256 audit ledger.
+environment_variables: []
 ---
 
 # AgentShield MCP Security Server
@@ -62,23 +56,14 @@ environment_variables:
   "mcpServers": {
     "agentshield": {
       "command": "npx",
-      "args": ["-y", "@ritualdev-lab/agentshield"]
+      "args": ["-y", "@ritualdev-lab/agentshield", "mcp"]
     }
   }
 }
 ```
 
-## Wrapping Any MCP Server
+## Exposed Tools
 
-Protect any third-party MCP server in Claude Desktop or Cursor without changing upstream code:
-
-```json
-{
-  "mcpServers": {
-    "github-protected": {
-      "command": "npx",
-      "args": ["-y", "@ritualdev-lab/agentshield", "wrap", "npx", "-y", "@modelcontextprotocol/server-github"]
-    }
-  }
-}
-```
+1. `agentshield_scan`: Scan prompt text or tool outputs for 60+ sensitive credential formats (AWS keys, OpenAI tokens, SSH keys) and high-entropy secrets.
+2. `agentshield_verify_ledger`: Verify the local HMAC-SHA256 and Ed25519 tamper-evident audit ledger for compliance.
+3. `agentshield_doctor`: Inspect host OS kernel sandbox capabilities (Linux Landlock/bwrap, macOS Seatbelt, Windows AppContainer) and security readiness.
