@@ -375,11 +375,11 @@ export function resolveOrchestrationPlan(
     layersEnabled.push("dbshield");
     steps.push({
       layer: "dbshield",
-      packageName: "@ritualdev-lab/dbshield",
+      packageName: "@ritualdev-lab/dbshield@0.2.1",
       command: "npx",
       args: [
         "-y",
-        "@ritualdev-lab/dbshield",
+        "@ritualdev-lab/dbshield@0.2.1",
         "proxy",
         "--port",
         String(manifest.dbshield.listenPort),
@@ -402,11 +402,11 @@ export function resolveOrchestrationPlan(
     layersEnabled.push("skillprism");
     steps.push({
       layer: "skillprism",
-      packageName: "@ritualdev-lab/skillprism",
+      packageName: "@ritualdev-lab/skillprism@0.1.0",
       command: "npx",
       args: [
         "-y",
-        "@ritualdev-lab/skillprism",
+        "@ritualdev-lab/skillprism@0.1.0",
         "proxy",
         "--port",
         String(manifest.skillprism.listenPort),

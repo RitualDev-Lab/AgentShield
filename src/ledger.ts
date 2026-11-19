@@ -1,5 +1,6 @@
-import { createHmac, sign, verify } from "node:crypto";
-import { appendFileSync, existsSync, mkdirSync, readFileSync } from "node:fs";
+import { createHmac, randomBytes, sign, verify } from "node:crypto";
+import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { homedir } from "node:os";
 import { dirname, join } from "node:path";
 import {
   type KeystoreBackend,
@@ -39,6 +40,49 @@ export interface LedgerOptions {
   legacyHmacOnly?: boolean;
 }
 
+let cachedLedgerKey: string | null = null;
+
+/**
+ * Resolves or generates a secure per-installation ledger secret key.
+ * Never falls back to a public static salt.
+ */
+export function getOrCreateLocalLedgerKey(): string {
+  if (process.env.AGENTSHIELD_LEDGER_KEY) {
+    return process.env.AGENTSHIELD_LEDGER_KEY;
+  }
+  if (cachedLedgerKey) {
+    return cachedLedgerKey;
+  }
+
+  const globalDir = join(homedir(), ".agentshield");
+  const keyFile = join(globalDir, "ledger.key");
+
+  try {
+    if (existsSync(keyFile)) {
+      const savedKey = readFileSync(keyFile, "utf-8").trim();
+      if (savedKey.length >= 32) {
+        cachedLedgerKey = savedKey;
+        return savedKey;
+      }
+    }
+  } catch {
+    // fallback to generation
+  }
+
+  // Generate per-installation cryptographically secure random key
+  const generated = randomBytes(32).toString("hex");
+  cachedLedgerKey = generated;
+  try {
+    if (!existsSync(globalDir)) {
+      mkdirSync(globalDir, { recursive: true, mode: 0o700 });
+    }
+    writeFileSync(keyFile, generated, { encoding: "utf-8", mode: 0o600 });
+  } catch {
+    // If filesystem write fails, return in-memory generated key
+  }
+  return generated;
+}
+
 /**
  * Cryptographic Tamper-Evident Write-Ahead Audit Ledger:
  * Stores append-only audit events with sequential hash-chaining AND asymmetric Ed25519 signatures
@@ -57,7 +101,7 @@ export class TamperEvidentLedger {
 
   constructor(
     ledgerPath: string = join(process.cwd(), ".agentshield", "audit.ledger"),
-    secretKey: string = process.env.AGENTSHIELD_LEDGER_KEY || "agentshield-tamper-evident-salt-v1",
+    secretKey: string = getOrCreateLocalLedgerKey(),
     options: LedgerOptions = {},
   ) {
     this.ledgerPath = ledgerPath;
@@ -274,7 +318,7 @@ export class TamperEvidentLedger {
    */
   public static verifyEntries(
     entries: AuditLedgerEntry[],
-    secretKey: string = process.env.AGENTSHIELD_LEDGER_KEY || "agentshield-tamper-evident-salt-v1",
+    secretKey: string = getOrCreateLocalLedgerKey(),
     publicKeyPem?: string,
   ): LedgerVerificationResult {
     let prevHash = TamperEvidentLedger.GENESIS_HASH;
