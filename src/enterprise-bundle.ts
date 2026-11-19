@@ -6,7 +6,7 @@ import {
 } from "./compliance.js";
 import type { FleetAgentTelemetryReport } from "./control-plane.js";
 import { AgentShieldEngine } from "./engine.js";
-import { type AuditLedgerEntry, TamperEvidentLedger } from "./ledger.js";
+import { type AuditLedgerEntry, TamperEvidentLedger, getOrCreateLocalLedgerKey } from "./ledger.js";
 import type { DetectedSecret } from "./types.js";
 
 export interface ComplianceBundleOptions {
@@ -83,8 +83,7 @@ export class EnterpriseComplianceBundleGenerator {
   public static generateBundle(
     fleetReports: FleetAgentTelemetryReport[],
     allLedgerEntries: AuditLedgerEntry[] = [],
-    ledgerSigningKey: string = process.env.AGENTSHIELD_LEDGER_KEY ||
-      "agentshield-tamper-evident-salt-v1",
+    ledgerSigningKey: string = process.env.AGENTSHIELD_LEDGER_KEY || getOrCreateLocalLedgerKey(),
     options: ComplianceBundleOptions = { organizationName: "Enterprise Organization" },
   ): ComplianceAttestationPackage {
     const frameworks = options.frameworks || ["soc2", "pci_dss", "hipaa", "iso27001"];
@@ -169,9 +168,7 @@ export class EnterpriseComplianceBundleGenerator {
       : auditReport.status;
     const complianceScore = isCorrupted ? 0 : auditReport.score;
 
-    const isDefaultKey =
-      ledgerSigningKey === "agentshield-tamper-evident-salt-v1" ||
-      !process.env.AGENTSHIELD_LEDGER_KEY;
+    const isDefaultKey = !ledgerSigningKey || ledgerSigningKey.length < 16;
     const signingKeyTrust: "AUTHENTICATED_KEY" | "DEFAULT_INSECURE_SALT" = isDefaultKey
       ? "DEFAULT_INSECURE_SALT"
       : "AUTHENTICATED_KEY";

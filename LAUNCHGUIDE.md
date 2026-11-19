@@ -31,14 +31,25 @@ documentation_url: https://ritualdev.in/agentshield
 repository: https://github.com/RitualDev-Lab/AgentShield
 homepage: https://ritualdev.in/agentshield
 npm: "@ritualdev-lab/agentshield"
-pypi: agentshield-defense
 transport: stdio
 command: npx
 args: ["-y", "@ritualdev-lab/agentshield", "mcp"]
 pricing:
   type: freemium
   license: Apache-2.0
-environment_variables: []
+environment_variables:
+  - name: AGENTSHIELD_AIR_GAPPED
+    description: Run strictly offline with zero external network connectivity (default: 1).
+    required: false
+    docs_url: https://ritualdev.in/agentshield#air-gapped
+  - name: AGENTSHIELD_LEDGER_KEY
+    description: Custom 32-byte secret key used to sign the append-only cryptographic audit ledger. Auto-generated on first run if omitted.
+    required: false
+    docs_url: https://ritualdev.in/agentshield#audit-ledger
+  - name: AGENTSHIELD_TOKEN
+    description: Optional enterprise organization or license token for central policy synchronization.
+    required: false
+    docs_url: https://ritualdev.in/agentshield#enterprise
 ---
 
 # AgentShield MCP Security Server

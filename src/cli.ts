@@ -103,6 +103,12 @@ async function main() {
     process.exit(0);
   }
 
+  if (command === "mcp" || (args.length === 0 && !process.stdin.isTTY)) {
+    const { runAgentShieldMcpStdio } = await import("./mcp-server.js");
+    await runAgentShieldMcpStdio();
+    return;
+  }
+
   if (
     !command ||
     command === "--help" ||
@@ -112,12 +118,6 @@ async function main() {
   ) {
     printHelp();
     process.exit(0);
-  }
-
-  if (command === "mcp") {
-    const { runAgentShieldMcpStdio } = await import("./mcp-server.js");
-    await runAgentShieldMcpStdio();
-    return;
   }
 
   if (command === "up") {
@@ -262,7 +262,7 @@ async function main() {
 
   if (command === "db-proxy" || command === "compact") {
     const targetPkg =
-      command === "db-proxy" ? "@ritualdev-lab/dbshield" : "@ritualdev-lab/skillprism";
+      command === "db-proxy" ? "@ritualdev-lab/dbshield@0.2.1" : "@ritualdev-lab/skillprism@0.1.0";
     const passthroughArgs = args.slice(1);
     const delegatedArgs =
       command === "db-proxy" && passthroughArgs.length === 0 ? ["proxy"] : passthroughArgs;
@@ -272,7 +272,8 @@ async function main() {
         JSON.stringify(
           {
             routedCommand: command,
-            targetPackage: targetPkg,
+            targetPackage:
+              command === "db-proxy" ? "@ritualdev-lab/dbshield" : "@ritualdev-lab/skillprism",
             execArgs: ["npx", "-y", targetPkg, ...delegatedArgs],
           },
           null,
@@ -336,7 +337,7 @@ async function main() {
     }
 
     const { EnterpriseComplianceBundleGenerator } = await import("./enterprise-bundle.js");
-    const { TamperEvidentLedger } = await import("./ledger.js");
+    const { TamperEvidentLedger, getOrCreateLocalLedgerKey } = await import("./ledger.js");
 
     const ledgerPath = join(process.cwd(), ".agentshield", "audit.ledger.jsonl");
     const ledger = new TamperEvidentLedger(ledgerPath);
@@ -350,7 +351,7 @@ async function main() {
     const bundle = EnterpriseComplianceBundleGenerator.generateBundle(
       [],
       ledgerEntries,
-      process.env.AGENTSHIELD_LEDGER_KEY || "agentshield-tamper-evident-salt-v1",
+      process.env.AGENTSHIELD_LEDGER_KEY || getOrCreateLocalLedgerKey(),
       { organizationName: orgName, frameworks },
     );
 
@@ -527,13 +528,34 @@ Direct verification link:
 
     const orgIdx = args.indexOf("--org");
     if (orgIdx !== -1 && args[orgIdx + 1]) orgId = args[orgIdx + 1];
+    orgId = orgId || process.env.AGENTSHIELD_ORG_ID || "";
 
     const tokenIdx =
       args.indexOf("--token") !== -1 ? args.indexOf("--token") : args.indexOf("--key");
-    if (tokenIdx !== -1 && args[tokenIdx + 1]) token = args[tokenIdx + 1];
+    if (tokenIdx !== -1 && args[tokenIdx + 1]) {
+      console.warn(
+        "⚠️  Security Notice: Passing tokens via CLI arguments can expose them in process listings (ps). We recommend setting AGENTSHIELD_TOKEN env var or using 'agentshield login --stdin'.",
+      );
+      token = args[tokenIdx + 1];
+    }
 
     const licenseIdx = args.indexOf("--license");
-    if (licenseIdx !== -1 && args[licenseIdx + 1]) token = args[licenseIdx + 1];
+    if (licenseIdx !== -1 && args[licenseIdx + 1]) {
+      console.warn(
+        "⚠️  Security Notice: Passing license keys via CLI arguments can expose them in process listings (ps). We recommend setting AGENTSHIELD_LICENSE_KEY env var or using 'agentshield login --stdin'.",
+      );
+      token = args[licenseIdx + 1];
+    }
+
+    if (args.includes("--stdin") && !token) {
+      try {
+        token = readFileSync(0, "utf-8").trim();
+      } catch {
+        // silent fallback
+      }
+    }
+
+    token = token || process.env.AGENTSHIELD_TOKEN || process.env.AGENTSHIELD_LICENSE_KEY || "";
 
     if (!orgId && token) {
       if (token.startsWith("ASHIELD-PRO-")) {
@@ -701,8 +723,15 @@ Direct verification link:
       const apiKey =
         (keyIdx !== -1 ? args[keyIdx + 1] : undefined) ||
         process.env.DD_API_KEY ||
-        process.env.SPLUNK_TOKEN ||
-        "test_api_key_token";
+        process.env.SPLUNK_TOKEN;
+
+      if ((target === "datadog" || target === "splunk") && !apiKey) {
+        console.error(
+          `❌ Error: API key or token is required for ${target.toUpperCase()} SIEM test.\n` +
+            `   Please provide --key <key> or set ${target === "datadog" ? "DD_API_KEY" : "SPLUNK_TOKEN"} env var.`,
+        );
+        process.exit(1);
+      }
 
       const sampleFinding = {
         file: "src/autonomous_agent.py",
@@ -748,7 +777,15 @@ Direct verification link:
           );
         }
       } else {
-        const webhookUrl = targetUrl || "https://ritualdev.in/api/v1/telemetry";
+        const webhookUrl = targetUrl || process.env.SIEM_WEBHOOK_URL;
+        if (!webhookUrl) {
+          console.error(
+            "❌ Error: Missing target webhook URL for SIEM testing.\n" +
+              "   Please provide --url <url> or set SIEM_WEBHOOK_URL environment variable.\n" +
+              "   (AgentShield is 100% local by default and never dispatches telemetry without an explicit target endpoint).",
+          );
+          process.exit(1);
+        }
         const result = await SiemExporter.forwardToWebhook(testEvent, { url: webhookUrl, format });
         const latency = Date.now() - startTime;
         if (result.delivered) {
@@ -802,7 +839,7 @@ Direct verification link:
     const outPath = outIdx !== -1 ? args[outIdx + 1] : null;
 
     const { EnterpriseComplianceBundleGenerator } = await import("./enterprise-bundle.js");
-    const { TamperEvidentLedger } = await import("./ledger.js");
+    const { TamperEvidentLedger, getOrCreateLocalLedgerKey } = await import("./ledger.js");
 
     // Load ledger entries from local workspace ledger if available
     const ledgerPath = join(process.cwd(), ".agentshield", "audit.ledger.jsonl");
@@ -817,7 +854,7 @@ Direct verification link:
     const bundle = EnterpriseComplianceBundleGenerator.generateBundle(
       [],
       ledgerEntries,
-      process.env.AGENTSHIELD_LEDGER_KEY || "agentshield-tamper-evident-salt-v1",
+      process.env.AGENTSHIELD_LEDGER_KEY || getOrCreateLocalLedgerKey(),
       { organizationName: orgName },
     );
 
