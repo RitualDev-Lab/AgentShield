@@ -23,7 +23,11 @@ export function createAgentShieldMcpServer(): McpServer {
     "Scan prompt text, source code, or tool output for 60+ sensitive credential formats (AWS keys, OpenAI tokens, SSH keys, database URIs) and high-entropy secrets.",
     {
       text: z.string().describe("The text, prompt, or code snippet to scan for sensitive data"),
-      redact: z.boolean().optional().default(true).describe("Whether to return sanitized text with detected credentials redacted"),
+      redact: z
+        .boolean()
+        .optional()
+        .default(true)
+        .describe("Whether to return sanitized text with detected credentials redacted"),
     },
     async ({ text, redact }) => {
       const result = engine.scanAndRedact(text);
@@ -43,12 +47,12 @@ export function createAgentShieldMcpServer(): McpServer {
                 sanitizedText: redact ? result.sanitizedText : undefined,
               },
               null,
-              2
+              2,
             ),
           },
         ],
       };
-    }
+    },
   );
 
   // Tool 2: agentshield_verify_ledger — Cryptographic audit ledger verification
@@ -71,12 +75,12 @@ export function createAgentShieldMcpServer(): McpServer {
                 integrityStatus: "Chain intact; zero unverified mutations or truncations detected",
               },
               null,
-              2
+              2,
             ),
           },
         ],
       };
-    }
+    },
   );
 
   // Tool 3: agentshield_doctor — Kernel sandboxing readiness check
@@ -98,17 +102,17 @@ export function createAgentShieldMcpServer(): McpServer {
                   process.platform === "linux"
                     ? "Linux Landlock + Bubblewrap"
                     : process.platform === "darwin"
-                    ? "macOS Seatbelt (sandbox-exec)"
-                    : "Windows AppContainer / JobObject",
+                      ? "macOS Seatbelt (sandbox-exec)"
+                      : "Windows AppContainer / JobObject",
                 zeroEgressEnforced: true,
               },
               null,
-              2
+              2,
             ),
           },
         ],
       };
-    }
+    },
   );
 
   return server;
@@ -121,11 +125,13 @@ export async function runAgentShieldMcpStdio(): Promise<void> {
   const server = createAgentShieldMcpServer();
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error(`[AgentShield MCP Server] Active over stdio transport (v${AGENTSHIELD_VERSION || "0.2.2"})`);
+  console.error(
+    `[AgentShield MCP Server] Active over stdio transport (v${AGENTSHIELD_VERSION || "0.2.2"})`,
+  );
 }
 
 // Auto-run if executed directly as a script
-if (process.argv[1] && process.argv[1].endsWith("mcp-server.js")) {
+if (process.argv[1]?.endsWith("mcp-server.js")) {
   runAgentShieldMcpStdio().catch((err) => {
     console.error("[AgentShield MCP] Server failed:", err);
     process.exit(1);

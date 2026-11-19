@@ -97,9 +97,5 @@ test("Phase 8: consolidated examples (langgraph-starter & claude-code-starter) e
   const engine = new AgentShieldEngine();
   const scan = engine.scanAndRedact(rawPayload);
   assert.ok(scan.findings.length >= 1, "Expected AgentShieldEngine to intercept synthetic PAT");
-  assert.equal(
-    scan.sanitizedText.includes("ghp_"),
-    false,
-    "Synthetic PAT must be fully redacted",
-  );
+  assert.equal(scan.sanitizedText.includes("ghp_"), false, "Synthetic PAT must be fully redacted");
 });

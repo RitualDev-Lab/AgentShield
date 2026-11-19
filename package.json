@@ -15,14 +15,7 @@
     "./core-redactor": "./dist/core-redactor.js"
   },
   "icon": "assets/logo.png",
-  "files": [
-    "dist",
-    "README.md",
-    "LICENSE",
-    "SKILL.md",
-    "action.yml",
-    "assets/logo.png"
-  ],
+  "files": ["dist", "README.md", "LICENSE", "SKILL.md", "action.yml", "assets/logo.png"],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/RitualDev-Lab/AgentShield.git"

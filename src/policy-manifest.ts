@@ -199,8 +199,7 @@ export function parseRitualPolicyYaml(source: string): PolicyValidationResult {
   const errors: string[] = [];
   const warnings: string[] = [];
 
-  const version =
-    raw.version !== undefined && raw.version !== null ? String(raw.version) : "";
+  const version = raw.version !== undefined && raw.version !== null ? String(raw.version) : "";
   if (!version) {
     errors.push("Missing required top-level field: 'version' (expected '1' or '1.0').");
   } else if (version !== "1" && version !== "1.0") {
@@ -283,18 +282,12 @@ export function parseRitualPolicyYaml(source: string): PolicyValidationResult {
         dbRaw.requireChatOpsApproval ?? dbRaw.require_chatops_approval,
         true,
       ),
-      maxEstimatedCost: asNumber(
-        dbRaw.maxEstimatedCost ?? dbRaw.max_estimated_cost,
-        50000,
-      ),
+      maxEstimatedCost: asNumber(dbRaw.maxEstimatedCost ?? dbRaw.max_estimated_cost, 50000),
     },
     skillprism: {
       enabled: asBool(spRaw.enabled, true),
       listenPort: spPort,
-      maxActiveSkills: asNumber(
-        spRaw.maxActiveSkills ?? spRaw.max_active_skills,
-        8,
-      ),
+      maxActiveSkills: asNumber(spRaw.maxActiveSkills ?? spRaw.max_active_skills, 8),
       promptGuard: asBool(spRaw.promptGuard ?? spRaw.prompt_guard, true),
       redisSentinelFallback: asBool(
         spRaw.redisSentinelFallback ?? spRaw.redis_sentinel_fallback,
@@ -313,18 +306,12 @@ export function parseRitualPolicyYaml(source: string): PolicyValidationResult {
     );
   }
 
-  if (
-    !manifest.agentshield.enabled &&
-    !manifest.dbshield.enabled &&
-    !manifest.skillprism.enabled
-  ) {
+  if (!manifest.agentshield.enabled && !manifest.dbshield.enabled && !manifest.skillprism.enabled) {
     warnings.push("All 3 defense layers are disabled in ritual.policy.yaml.");
   }
 
   if (!manifest.airGapped) {
-    warnings.push(
-      "airGapped is false; outbound telemetry or cloud integrations may be permitted.",
-    );
+    warnings.push("airGapped is false; outbound telemetry or cloud integrations may be permitted.");
   }
 
   return {
@@ -372,10 +359,7 @@ export function resolveOrchestrationPlan(
       layer: "agentshield",
       packageName: "@ritualdev-lab/agentshield",
       command: "agentshield",
-      args: [
-        "doctor",
-        "--json",
-      ],
+      args: ["doctor", "--json"],
       env: {
         ...sharedEnv,
         AGENTSHIELD_MODE: manifest.agentshield.mode,
