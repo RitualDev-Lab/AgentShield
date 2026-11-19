@@ -11,7 +11,7 @@ use_cases:
   - AI Security Proxy & Redactor
   - CI/CD Security Compliance
 getting_started:
-  - "Scan text for secrets and credentials: agentshield_scan text: 'AKIAIOSFODNN7EXAMPLE'"
+  - "Scan text for secrets and credentials: agentshield_scan text: 'export API_KEY=test-sample-token'"
   - "Verify local cryptographic audit ledger: agentshield_verify_ledger"
   - "Inspect host OS sandbox readiness: agentshield_doctor"
   - "Tool: agentshield_scan: Scans prompt text or tool outputs for 60+ credential patterns and high-entropy secrets"
