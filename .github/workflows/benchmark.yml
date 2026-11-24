@@ -37,7 +37,7 @@ jobs:
         run: npx tsx benchmarks/run-10k-matrix.ts --iterations 10000 --out benchmarks/out --max-p99-ms 15
 
       - name: Upload JSON & CSV Benchmark Artifacts
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: agentshield-10k-benchmark-matrix
           path: |
