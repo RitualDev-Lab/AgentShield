@@ -1,6 +1,6 @@
 # 🦫 AgentShield Go SDK
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/RitualDev-Lab/agentshield/sdks/go.svg)](https://pkg.go.dev/github.com/RitualDev-Lab/agentshield/sdks/go)
+[![Go Reference](https://pkg.go.dev/badge/github.com/RitualDev-Lab/AgentShield/sdks/go.svg)](https://pkg.go.dev/github.com/RitualDev-Lab/AgentShield/sdks/go)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Official Go SDK for **[AgentShield](https://github.com/RitualDev-Lab/AgentShield)**: Zero-leak secret defense, in-memory surrogate token rehydration, and command sandboxing for Go AI applications and agent proxies.
@@ -10,7 +10,7 @@ Official Go SDK for **[AgentShield](https://github.com/RitualDev-Lab/AgentShield
 ## 📦 Installation
 
 ```bash
-go get github.com/RitualDev-Lab/agentshield/sdks/go
+go get github.com/RitualDev-Lab/AgentShield/sdks/go
 ```
 
 Requires `agentshield` CLI or `node` on system PATH.
@@ -29,7 +29,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/RitualDev-Lab/agentshield/sdks/go"
+	agentshield "github.com/RitualDev-Lab/AgentShield/sdks/go"
 )
 
 func main() {

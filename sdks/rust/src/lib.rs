@@ -193,3 +193,42 @@ impl Drop for AgentShieldClient {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn deserializes_redact_result() {
+        let payload = r#"{
+            "hasSecrets": true,
+            "sanitizedText": "key=[AGENT_SHIELD:OPENAI:abc]",
+            "findings": [{
+                "patternId": "openai-key",
+                "patternName": "OpenAI API Key",
+                "category": "AI",
+                "severity": "critical",
+                "raw": "sk-proj-test",
+                "redacted": "[AGENT_SHIELD:OPENAI:abc]"
+            }],
+            "redactedCount": 1
+        }"#;
+        let parsed: RedactResult = serde_json::from_str(payload).expect("valid redact payload");
+        assert!(parsed.has_secrets);
+        assert_eq!(parsed.redacted_count, 1);
+        assert_eq!(parsed.findings[0].pattern_id, "openai-key");
+    }
+
+    #[test]
+    fn serializes_json_rpc_request() {
+        let req = JsonRpcRequest {
+            jsonrpc: "2.0",
+            id: 7,
+            method: "shield.scan",
+            params: serde_json::json!({ "text": "hello" }),
+        };
+        let raw = serde_json::to_string(&req).expect("serialize request");
+        assert!(raw.contains("\"method\":\"shield.scan\""));
+        assert!(raw.contains("\"id\":7"));
+    }
+}
