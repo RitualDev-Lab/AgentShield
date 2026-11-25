@@ -16,8 +16,16 @@ keywords = ["security", "ai-agents", "secret-scanning", "redaction", "langchain"
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Security",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Typing :: Typed",
 ]
 dependencies = []
 
@@ -29,6 +37,18 @@ langchain = [
     "langchain-core>=1.8.3",
     "langgraph>=1.2.23"
 ]
+crewai = [
+    "crewai>=0.80.0"
+]
+llamaindex = [
+    "llama-index-core>=0.11.0"
+]
+litellm = [
+    "litellm>=1.40.0"
+]
+all = [
+    "agentshield-defense[langchain,crewai,llamaindex,litellm]"
+]
 
 [project.urls]
 Homepage = "https://agentshield.ritualdev.in/"
@@ -37,3 +57,6 @@ Issues = "https://github.com/RitualDev-Lab/AgentShield/issues"
 
 [tool.setuptools.packages.find]
 include = ["agentshield*"]
+
+[tool.setuptools.package-data]
+agentshield = ["py.typed"]
