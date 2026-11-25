@@ -73,6 +73,21 @@ npx @ritualdev-lab/agentshield init-cursor
 npx @ritualdev-lab/agentshield exec "cat .env"
 ```
 
+### Copy-Paste MCP Server Config (Claude Desktop, Cursor & Windsurf)
+
+Drop this into `claude_desktop_config.json`, `.cursor/mcp.json`, or `~/.codeium/windsurf/mcp_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "agentshield": {
+      "command": "npx",
+      "args": ["-y", "@ritualdev-lab/agentshield", "mcp"]
+    }
+  }
+}
+```
+
 ---
 
 ## 🚀 Key Defense Layers
