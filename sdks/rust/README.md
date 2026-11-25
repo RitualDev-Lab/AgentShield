@@ -1,6 +1,6 @@
-# 🦀 AgentShield Rust SDK
+# 🦀 AgentShield Rust SDK (`agentshield-defense`)
 
-[![Crates.io](https://img.shields.io/crates/v/agentshield.svg)](https://crates.io/crates/agentshield)
+[![Crates.io](https://img.shields.io/crates/v/agentshield-defense.svg)](https://crates.io/crates/agentshield-defense)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Official Rust client for **[AgentShield](https://github.com/RitualDev-Lab/AgentShield)**: Zero-leak secret defense, in-memory surrogate token rehydration, and shell command sandboxing.
@@ -13,7 +13,7 @@ Add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-agentshield = "0.1.4"
+agentshield-defense = "0.2.2"
 ```
 
 Requires `agentshield` CLI or `npx` on PATH.
@@ -23,7 +23,7 @@ Requires `agentshield` CLI or `npx` on PATH.
 ## 🚀 Usage
 
 ```rust
-use agentshield::AgentShieldClient;
+use agentshield_defense::AgentShieldClient;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let client = AgentShieldClient::new()?;

@@ -12,8 +12,10 @@ Works seamlessly with **LangChain**, **LangGraph**, **LlamaIndex**, **CrewAI**, 
 ## 📦 Installation
 
 ```bash
-pip install agentshield
+pip install agentshield-defense
 ```
+
+> Canonical standalone Python SDK repository: [`RitualDev-Lab/agentshield-python`](https://github.com/RitualDev-Lab/agentshield-python).
 
 AgentShield operates in two high-performance modes:
 1. **Pure Python In-Process Engine**: Zero external dependencies, pure standard library.

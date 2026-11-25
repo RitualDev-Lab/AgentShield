@@ -3,8 +3,8 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "agentshield"
-version = "0.1.5"
+name = "agentshield-defense"
+version = "0.2.2"
 description = "Zero-Leak Secret Defense & Shell Sandbox for Autonomous AI Agents in Python"
 readme = "README.md"
 requires-python = ">=3.9"
@@ -34,3 +34,6 @@ langchain = [
 Homepage = "https://agentshield.ritualdev.in/"
 Repository = "https://github.com/RitualDev-Lab/AgentShield"
 Issues = "https://github.com/RitualDev-Lab/AgentShield/issues"
+
+[tool.setuptools.packages.find]
+include = ["agentshield*"]
